@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,7 +59,7 @@ public class VKService {
             return getFriends(userId);
         }
         if (path.contains("/posts/")) {
-            String postId=path.split("/")[2];
+            String postId = path.split("/")[2];
             return getPost(userId, postId);
         }
         if (path.contains("posts")) {
@@ -79,7 +78,7 @@ public class VKService {
         VKontakteTemplate vk = createTemplate();
         VKObject user = vk.utilsOperations().resolveScreenName(userId);
         Post post = vk.wallOperations().getPost(user.getId(), postId);
-        if (post!=null) {
+        if (post != null) {
             reqStr.append(post.getText());
         }
         reqStr.append("</body>\n");
@@ -117,7 +116,7 @@ public class VKService {
             return getFriendsJson(userId);
         }
         if (path.contains("/posts/")) {
-            String postId=path.split("/")[2];
+            String postId = path.split("/")[2];
             return getPostJson(userId, postId);
         }
         if (path.contains("posts")) {

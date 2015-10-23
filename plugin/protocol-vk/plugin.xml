@@ -16,33 +16,33 @@
  limitations under the License.
 -->
 <plugin
-   id="protocol-vk"
-   name="vk.com Protocol Plug-in"
-   version="1.0.0"
-   provider-name="nutch.org">
+        id="protocol-vk"
+        name="vk.com Protocol Plug-in"
+        version="1.0.0"
+        provider-name="nutch.org">
 
-   <runtime>
-      <library name="protocol-vk.jar">
-         <export name="*"/>
-      </library>
-      <library name="spring-social-core-1.1.0.BUILD-SNAPSHOT.jar"/>
-      <library name="spring-social-vkontakte-1.1.0.BUILD-SNAPSHOT.jar"/>
-   </runtime>
+    <runtime>
+        <library name="protocol-vk.jar">
+            <export name="*"/>
+        </library>
+        <library name="spring-social-core-1.1.0.BUILD-SNAPSHOT.jar"/>
+        <library name="spring-social-vkontakte-1.1.0.BUILD-SNAPSHOT.jar"/>
+    </runtime>
 
-   <requires>
-      <import plugin="nutch-extensionpoints"/>
-      <import plugin="lib-http"/>
-   </requires>
+    <requires>
+        <import plugin="nutch-extensionpoints"/>
+        <import plugin="lib-http"/>
+    </requires>
 
-   <extension id="org.apache.nutch.protocol.vk"
-              name="HttpProtocol"
-              point="org.apache.nutch.protocol.Protocol">
+    <extension id="org.apache.nutch.protocol.vk"
+               name="HttpProtocol"
+               point="org.apache.nutch.protocol.Protocol">
 
-      <implementation id="org.apache.nutch.protocol.vk.Http"
-                      class="org.apache.nutch.protocol.vk.Http">
-        <parameter name="protocolName" value="http"/>
-      </implementation>
+        <implementation id="org.apache.nutch.protocol.vk.Http"
+                        class="org.apache.nutch.protocol.vk.Http">
+            <parameter name="protocolName" value="http"/>
+        </implementation>
 
-   </extension>
+    </extension>
 
 </plugin>
