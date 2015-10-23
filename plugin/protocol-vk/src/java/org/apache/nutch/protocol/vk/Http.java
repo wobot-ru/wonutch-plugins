@@ -5,9 +5,9 @@
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,43 +17,41 @@
 package org.apache.nutch.protocol.vk;
 
 // JDK imports
-import java.io.IOException;
-import java.net.URL;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.net.protocols.Response;
-import org.apache.nutch.protocol.http.api.HttpBase;
 import org.apache.nutch.protocol.ProtocolException;
+import org.apache.nutch.protocol.http.api.HttpBase;
 import org.apache.nutch.util.NutchConfiguration;
-
-import org.apache.nutch.protocol.vk.HttpResponse;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.URL;
+
 public class Http extends HttpBase {
+    public static final Logger LOG = LoggerFactory.getLogger(Http.class);
 
-  public static final Logger LOG = LoggerFactory.getLogger(Http.class);
+    public Http() {
+        super(LOG);
+    }
 
-  public Http() {
-    super(LOG);
-  }
+    @Override
+    public void setConf(Configuration conf) {
+        super.setConf(conf);
+    }
 
-  @Override
-  public void setConf(Configuration conf) {
-    super.setConf(conf);
-  }
+    public static void main(String[] args) throws Exception {
+        Http http = new Http();
+        http.setConf(NutchConfiguration.create());
+        main(http, args);
+    }
 
-  public static void main(String[] args) throws Exception {
-    Http http = new Http();
-    http.setConf(NutchConfiguration.create());
-    main(http, args);
-  }
-
-  @Override
-  protected Response getResponse(URL url, CrawlDatum datum, boolean redirect)
-      throws ProtocolException, IOException {
-    return new HttpResponse(this, url, datum);
-  }
+    @Override
+    protected Response getResponse(URL url, CrawlDatum datum, boolean redirect)
+            throws ProtocolException, IOException {
+        return new HttpResponse(this, url, datum);
+    }
 
 }
