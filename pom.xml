@@ -34,7 +34,7 @@
         <developer>
             <name>Leon Misakyan</name>
             <organization>Wobot</organization>
-            <email></email>
+            <email>l.misakyan@gmail.com</email>
         </developer>
     </developers>
 
@@ -138,6 +138,7 @@
                 </executions>
             </plugin>
         </plugins>
+        <finalName>${project.artifactId}</finalName>
     </build>
 
     <modules>
