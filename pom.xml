@@ -170,6 +170,6 @@
     </profiles>
 
     <modules>
-        <module>plugin/protocol-vk</module>
+        <module>plugins/protocol-vk</module>
     </modules>
 </project>
