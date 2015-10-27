@@ -34,7 +34,7 @@
         <repository>
             <id>spring</id>
             <name>Spring Snapshot Repository</name>
-            <url>http://repo.spring.io/snapshot/</url>
+            <url>http://repo.spring.io/libs-snapshot</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -59,6 +59,18 @@
             <groupId>org.apache.nutch</groupId>
             <artifactId>lib-http</artifactId>
             <version>1.10</version>
+        </dependency>
+        <!-- Apache Http Client -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
