@@ -6,6 +6,9 @@ import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.Content;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
+import org.springframework.social.vkontakte.api.impl.json.VKArray;
+import ru.wobot.vk.UrlCheck;
+import ru.wobot.vk.dto.FriendListDto;
 import ru.wobot.vk.dto.ProfileDto;
 
 import java.io.IOException;
@@ -38,7 +41,13 @@ public class VkResponse {
     private byte[] getData(URL url) throws UnsupportedEncodingException {
         String path = url.getPath().toLowerCase();
         String userId = url.getHost();
-        String json = GetProfileJson(userId);
+        String json = null;
+        if (UrlCheck.isProfile(url)) {
+            json = GetProfileJson(userId);
+        }
+        if (UrlCheck.isFriends(url)) {
+            json = GetFriendsJson(userId);
+        }
         if (json != null) {
             return json.getBytes(defaultCharEncoding);
         }
@@ -46,9 +55,15 @@ public class VkResponse {
     }
 
     private String GetProfileJson(String userId) {
-        VKontakteProfile user = Proxy.getInctance().usersOperations().getUser(userId);
-        ProfileDto dto=new ProfileDto();
-        dto.user=user;
+        ProfileDto dto = new ProfileDto();
+        dto.user = Proxy.getInctance().usersOperations().getUser(userId);
+        return gson.toJson(dto);
+    }
+
+    private String GetFriendsJson(String userId) {
+        FriendListDto dto = new FriendListDto();
+        VKArray<VKontakteProfile> vkArray = Proxy.getInctance().friendsOperations().get(userId);
+        dto.friends = vkArray.getItems();
         return gson.toJson(dto);
     }
 
