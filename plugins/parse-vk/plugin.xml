@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+        id="parse-vk"
+        name="VkParse"
+        version="1.0"
+        provider-name="wobot.com">
+
+    <runtime>
+        <library name="parse-vk.jar">
+            <export name="*"/>
+        </library>
+    </runtime>
+
+    <extension id="org.apache.nutch.parse.vk"
+               name="VkParser"
+               point="org.apache.nutch.parse.Parser">
+        <implementation id="org.apache.nutch.parse.vk.VkParser"
+                        class="org.apache.nutch.parse.vk.VkParser">
+            <parameter name="contentType" value="application/json"/>
+            <parameter name="pathSuffix" value=""/>
+        </implementation>
+    </extension>
+
+</plugin>
