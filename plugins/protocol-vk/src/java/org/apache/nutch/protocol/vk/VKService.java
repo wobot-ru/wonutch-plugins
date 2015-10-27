@@ -198,7 +198,7 @@ public class VKService {
     }
 
     private VKontakteTemplate createTemplate() {
-        try {
+/*        try {
             InputStream inputStream = proxy.openStream();
             try {
                 String data = IOUtils.toString(inputStream, "UTF-8");
@@ -210,7 +210,7 @@ public class VKService {
             }
         } catch (IOException e) {
 
-        }
-        return null;
+        }*/
+        return new VKontakteTemplate("2ff5fff8d49ffa2da2875c99faf61399f5480ee10a2d70dde44027b9b248eae6a014d7689f7d0f216ab00", "ZydztdkkmEDkvBNsulQt");
     }
 }
