@@ -20,7 +20,13 @@
 
     <repositories></repositories>
 
-    <dependencies></dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>ru.wobot</groupId>
+            <artifactId>lib-vk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
 
     <build>
         <sourceDirectory>src/java</sourceDirectory>

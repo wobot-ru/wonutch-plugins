@@ -6,8 +6,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
+import ru.wobot.vk.UrlCheck;
 
 import java.net.MalformedURLException;
+import java.net.URL;
 
 public class VkParser implements Parser {
 
@@ -28,67 +30,35 @@ public class VkParser implements Parser {
 
     @Override
     public ParseResult getParse(Content content) {
+        String urlString = content.getUrl();
         if (LOG.isInfoEnabled()) {
-            LOG.info("VkParser parse: " + content.getUrl());
+            LOG.info("VkParser parse: " + urlString);
         }
 
+        try {
+            URL url=new URL(content.getUrl());
+            if (UrlCheck.isProfile(url)){
+                return getProfileParse(url, content);
+            }
+            if (UrlCheck.isFriends(url)){
+                return getFriendsParse(url, content);
+            }
+        } catch (MalformedURLException e) {
+            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
+            e.printStackTrace();
+
+            return new ParseStatus(ParseStatus.FAILED, e.getMessage())
+                    .getEmptyParseResult(content.getUrl(), getConf());
+        }
+
+        return new ParseStatus(ParseStatus.FAILED, "FAILED PARSE")
+                .getEmptyParseResult(content.getUrl(), getConf());
+    }
+
+    private ParseResult getProfileParse(URL url, Content content) {
         Outlink[] newlinks;
         try {
             newlinks = new Outlink[]{
-                    new Outlink("http://durov/pages", "durov-post-groups"),
-                    new Outlink("http://durov/page/1000X00000000", "durov-post-groups"),
-                    new Outlink("http://durov/index", "durov-post-groups"),
-                    new Outlink("http://durov/i", "durov-index"),
-                    new Outlink("http://durov/i/1000X00000000", "durov-index"),
-                    new Outlink("http://durov/i/1000X00000001", "durov-index"),
-                    new Outlink("http://durov/i/1000X00000002", "durov-index"),
-                    new Outlink("http://durov/i/1000X00000003", "durov-index"),
-                    new Outlink("http://durov/i/type/1000X00000004", "durov-index by type"),
-                    new Outlink("http://durov/i/type/1000X00000005", "durov-index"),
-
-                    new Outlink("http://durov/post-groups", "durov-post-groups"),
-                    new Outlink("http://durov/post/by1000/top10", "durov-post-groups"),
-                    new Outlink("http://durov/post/x1000/top10", "durov-post-groups"),
-                    new Outlink("http://durov/post/1000*7i", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000x7", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000x00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000-00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000/00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/x1000-00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00007", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00008", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00009", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00010", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00011", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00012", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00013", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00014", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00015", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00016", "durov-post-groups"),
-                    new Outlink("http://durov/post-groups/1000X00017", "durov-post-groups"),
-                    new Outlink("http://durov/p-groups/1000X00017", "durov-post-groups"),
-                    new Outlink("http://durov/p-groups/1000X00018", "durov-post-groups"),
-                    new Outlink("http://durov/p-groups/1000X00019", "durov-post-groups"),
-                    new Outlink("http://durov/p-groups/1000X00020", "durov-post-groups"),
-           /*       new Outlink("http://durov/p-groups/1000X00021", "durov-post-groups"),
-                    new Outlink("http://durov/g-p/1000X00021", "durov-post-groups"),
-                    new Outlink("http://durov/g-p/1000X00022", "durov-post-groups"),
-                    new Outlink("http://durov/g-p/1000X00023", "durov-post-groups"),
-                    new Outlink("http://durov/g-p/1000X00024", "durov-post-groups"),
-                    new Outlink("http://durov/g-p/1000X00025", "durov-post-groups"),
-                    new Outlink("http://durov/group-page/1000X00025", "durov-post-groups"),
-                    new Outlink("http://durov/group-page/1000X00026", "durov-post-groups"),
-                    new Outlink("http://durov/group-page/1000X00028", "durov-post-groups"),
-                    new Outlink("http://durov/group-page/1000X00029", "durov-post-groups"),
-                    new Outlink("http://durov/group-p/1000X00030", "durov-post-groups"),
-                    new Outlink("http://durov/group-p/1000X00031", "durov-post-groups"),
-                    new Outlink("http://durov/group-p/1000X00032", "durov-post-groups"),
-                    new Outlink("http://durov/group-p/1000X00033", "durov-post-groups"),
-                    new Outlink("http://durov/page/1000X00033", "durov-post-groups"),
-                    new Outlink("http://durov/page/1000X00035", "durov-post-groups"),
-                    new Outlink("http://durov/page/1000X00036", "durov-post-groups"),
-                    new Outlink("http://durov/g/1000X00021", "durov-post-groups"),*/
                     new Outlink("http://durov/friends", "durov friends")
             };
         } catch (MalformedURLException e) {
@@ -100,12 +70,32 @@ public class VkParser implements Parser {
         metadata.set(Metadata.CHAR_ENCODING_FOR_CONVERSION, defaultCharEncoding);
 
         Metadata contentMetadata = content.getMetadata();
-        contentMetadata.add("name","pavel");
-        contentMetadata.add("name2","pavel2");
-        metadata.add("name","pavel");
-        metadata.add("name2","pavel2");
 
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, "ParseTitle", newlinks, contentMetadata, metadata);
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, "profile-page", newlinks, contentMetadata, metadata);
+        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(),
+                new ParseImpl("ParseText", parseData));
+        return parseResult;
+    }
+
+    private ParseResult getFriendsParse(URL url, Content content) {
+        Outlink[] newlinks;
+        try {
+            newlinks = new Outlink[]{
+                    new Outlink("http://polia", "polia"),
+                    new Outlink("http://mabrouk", "mabrouk"),
+                    new Outlink("http://id179155845", "id179155845")
+            };
+        } catch (MalformedURLException e) {
+            newlinks = new Outlink[0];
+            e.printStackTrace();
+        }
+        Metadata metadata = new Metadata();
+        metadata.set(Metadata.ORIGINAL_CHAR_ENCODING, defaultCharEncoding);
+        metadata.set(Metadata.CHAR_ENCODING_FOR_CONVERSION, defaultCharEncoding);
+
+        Metadata contentMetadata = content.getMetadata();
+
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, "friends-page", newlinks, contentMetadata, metadata);
         ParseResult parseResult = ParseResult.createParseResult(content.getUrl(),
                 new ParseImpl("ParseText", parseData));
         return parseResult;
