@@ -6,6 +6,7 @@ import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.Content;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
+import ru.wobot.vk.dto.ProfileDto;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

@@ -1,4 +1,4 @@
-package org.apache.nutch.protocol.vk;
+package ru.wobot.vk.dto;
 
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 
