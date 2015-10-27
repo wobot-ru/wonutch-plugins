@@ -172,5 +172,6 @@
     <modules>
         <module>plugins/protocol-vk</module>
         <module>plugins/parse-vk</module>
+        <module>plugins/lib-vk</module>
     </modules>
 </project>

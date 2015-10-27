@@ -3,12 +3,12 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>protocol-vk</artifactId>
+    <artifactId>vk-dto</artifactId>
     <packaging>jar</packaging>
 
-    <name>protocol-vk</name>
+    <name>vk-dto</name>
     <description>
-        Apache Nutch plugin for vk.com crawling
+        Apache Nutch vk-plugin's Data Transfer Objects
     </description>
 
     <parent>
@@ -22,19 +22,21 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.4</version>
+            <groupId>org.springframework.social</groupId>
+            <artifactId>spring-social-vkontakte</artifactId>
+            <version>1.1.0.BUILD-SNAPSHOT</version>
         </dependency>
+        <!-- Apache Http Client -->
         <dependency>
-            <groupId>org.apache.nutch</groupId>
-            <artifactId>lib-http</artifactId>
-            <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>ru.wobot</groupId>
-            <artifactId>lib-vk</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
