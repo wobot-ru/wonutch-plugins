@@ -6,7 +6,6 @@ import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.Content;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import org.springframework.social.vkontakte.api.impl.VKontakteTemplate;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -47,8 +46,9 @@ public class VkResponse {
 
     private String GetProfileJson(String userId) {
         VKontakteProfile user = Proxy.getInctance().usersOperations().getUser(userId);
-
-        return gson.toJson(user);
+        ProfileDto dto=new ProfileDto();
+        dto.user=user;
+        return gson.toJson(dto);
     }
 
     public Content toContent() throws UnsupportedEncodingException {
