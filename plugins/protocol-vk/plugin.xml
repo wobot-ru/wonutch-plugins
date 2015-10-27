@@ -43,8 +43,8 @@
                name="HttpProtocol"
                point="org.apache.nutch.protocol.Protocol">
 
-        <implementation id="org.apache.nutch.protocol.vk.Http"
-                        class="org.apache.nutch.protocol.vk.Http">
+        <implementation id="org.apache.nutch.protocol.vk.Vk"
+                        class="org.apache.nutch.protocol.vk.Vk">
             <parameter name="protocolName" value="http"/>
         </implementation>
 
