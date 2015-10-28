@@ -33,7 +33,7 @@ public class Service {
             LOG.trace("Starting fetching user profile: [" + userId + "]");
         }
 
-        VKontakteProfile user = Proxy.getInctance().usersOperations().getUsers(Arrays.asList(userId)).get(0);
+        VKontakteProfile user = Proxy.getInstance().usersOperations().getUsers(Arrays.asList(userId)).get(0);
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user profile [userId=" + user.getId() + "]");
@@ -50,13 +50,13 @@ public class Service {
             LOG.trace("Starting fetching user profile: [" + userId + "]");
         }
 
-        VKontakteProfile user = Proxy.getInctance().usersOperations().getUsers(Arrays.asList(userId)).get(0);
+        VKontakteProfile user = Proxy.getInstance().usersOperations().getUsers(Arrays.asList(userId)).get(0);
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user profile [userId=" + user.getId() + "]");
             LOG.trace("Starting fetching user friends: [" + userId + "]");
         }
 
-        VKArray<VKontakteProfile> friendArray = Proxy.getInctance().friendsOperations().get(user.getId());
+        VKArray<VKontakteProfile> friendArray = Proxy.getInstance().friendsOperations().get(user.getId());
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user friends: [friends.size=" + friendArray.getCount() + "]");
         }
