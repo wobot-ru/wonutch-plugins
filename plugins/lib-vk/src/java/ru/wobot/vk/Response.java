@@ -1,9 +1,9 @@
 package ru.wobot.vk;
 
-public class VkResponse {
+public class Response {
     public static final String mimeType = "application/json";
 
-    public VkResponse(String url, byte[] data, long fetchTime) {
+    public Response(String url, byte[] data, long fetchTime) {
         this.url = url;
         this.data = data;
         this.fetchTime = fetchTime;

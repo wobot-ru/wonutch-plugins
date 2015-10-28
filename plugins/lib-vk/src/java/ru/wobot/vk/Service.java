@@ -13,10 +13,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-public class VkService {
-    private static final Log LOG = LogFactory.getLog(VkService.class.getName());
+public class Service {
+    private static final Log LOG = LogFactory.getLog(Service.class.getName());
 
-    public static VkResponse request(String urlString) throws MalformedURLException, UnsupportedEncodingException {
+    public static Response request(String urlString) throws MalformedURLException, UnsupportedEncodingException {
         URL url = new URL(urlString);
         String userId = url.getHost();
         if (UrlCheck.isProfile(url)) {
@@ -28,7 +28,7 @@ public class VkService {
         throw new UnsupportedOperationException();
     }
 
-    private static VkResponse createProfileResponse(String userId, String urlString) throws UnsupportedEncodingException {
+    private static Response createProfileResponse(String userId, String urlString) throws UnsupportedEncodingException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user profile: [" + userId + "]");
         }
@@ -41,11 +41,11 @@ public class VkService {
 
         Gson gson = new Gson();
         String json = gson.toJson(user);
-        VkResponse vkResponse = new VkResponse(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return vkResponse;
+        Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        return response;
     }
 
-    private static VkResponse createFriendsResponse(String userId, String urlString) throws UnsupportedEncodingException {
+    private static Response createFriendsResponse(String userId, String urlString) throws UnsupportedEncodingException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user profile: [" + userId + "]");
         }
@@ -64,8 +64,8 @@ public class VkService {
         List<VKontakteProfile> friends = friendArray.getItems();
         Gson gson = new Gson();
         String json = gson.toJson(friends);
-        VkResponse vkResponse = new VkResponse(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return vkResponse;
+        Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        return response;
 
     }
 }
