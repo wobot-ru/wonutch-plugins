@@ -6,17 +6,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.vk.UrlCheck;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.util.Map;
 
 public class VkParser implements Parser {
 
-    private static final Log LOG = LogFactory.getLog(VkParser.class
-            .getName());
+    private static final Log LOG = LogFactory.getLog(VkParser.class.getName());
     private Configuration conf;
-    private String defaultCharEncoding;
 
     public Configuration getConf() {
         return this.conf;
@@ -24,25 +21,19 @@ public class VkParser implements Parser {
 
     public void setConf(Configuration conf) {
         this.conf = conf;
-        this.defaultCharEncoding = getConf().get(
-                "parser.character.encoding.default", "UTF-8");
     }
 
     @Override
-    public ParseResult getParse(Content content) {
+    public org.apache.nutch.parse.ParseResult getParse(Content content) {
         String urlString = content.getUrl();
         if (LOG.isInfoEnabled()) {
-            LOG.info("VkParser parse: " + urlString);
+            LOG.info("Start parse: " + urlString);
         }
 
         try {
-            URL url=new URL(content.getUrl());
-            if (UrlCheck.isProfile(url)){
-                return getProfileParse(url, content);
-            }
-            if (UrlCheck.isFriends(url)){
-                return getFriendsParse(url, content);
-            }
+            ru.wobot.vk.ParseResult parseResult = ru.wobot.vk.Parser.parse(urlString, content.getContent());
+            return convert(parseResult, content.getMetadata(), new Metadata());
+
         } catch (MalformedURLException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             e.printStackTrace();
@@ -50,54 +41,25 @@ public class VkParser implements Parser {
             return new ParseStatus(ParseStatus.FAILED, e.getMessage())
                     .getEmptyParseResult(content.getUrl(), getConf());
         }
-
-        return new ParseStatus(ParseStatus.FAILED, "FAILED PARSE")
-                .getEmptyParseResult(content.getUrl(), getConf());
     }
 
-    private ParseResult getProfileParse(URL url, Content content) {
-        Outlink[] newlinks;
-        try {
-            newlinks = new Outlink[]{
-                    new Outlink("http://durov/friends", "durov friends")
-            };
-        } catch (MalformedURLException e) {
-            newlinks = new Outlink[0];
-            e.printStackTrace();
+    private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata metadata) throws MalformedURLException {
+        Outlink[] outlinks = new Outlink[vk.links.size()];
+        int index = 0;
+        for (Map.Entry<String, String> mapEntry : vk.links.entrySet()) {
+            outlinks[index] = new Outlink(mapEntry.getKey(), mapEntry.getValue());
+            index++;
         }
-        Metadata metadata = new Metadata();
-        metadata.set(Metadata.ORIGINAL_CHAR_ENCODING, defaultCharEncoding);
-        metadata.set(Metadata.CHAR_ENCODING_FOR_CONVERSION, defaultCharEncoding);
 
-        Metadata contentMetadata = content.getMetadata();
-
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, "profile-page", newlinks, contentMetadata, metadata);
-        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(),
-                new ParseImpl("ParseText", parseData));
-        return parseResult;
-    }
-
-    private ParseResult getFriendsParse(URL url, Content content) {
-        Outlink[] newlinks;
-        try {
-            newlinks = new Outlink[]{
-                    new Outlink("http://polia", "polia"),
-                    new Outlink("http://mabrouk", "mabrouk"),
-                    new Outlink("http://id179155845", "id179155845")
-            };
-        } catch (MalformedURLException e) {
-            newlinks = new Outlink[0];
-            e.printStackTrace();
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, metadata);
+        ParseResult parseResult = ParseResult.createParseResult(vk.url, new ParseImpl(vk.content, parseData));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size="+ vk.links.size()+"]");
+            LOG.trace("Finish parse content [" + vk.url + "] : [" + vk.title + "] : [content='" + vk.content + "']");
         }
-        Metadata metadata = new Metadata();
-        metadata.set(Metadata.ORIGINAL_CHAR_ENCODING, defaultCharEncoding);
-        metadata.set(Metadata.CHAR_ENCODING_FOR_CONVERSION, defaultCharEncoding);
-
-        Metadata contentMetadata = content.getMetadata();
-
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, "friends-page", newlinks, contentMetadata, metadata);
-        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(),
-                new ParseImpl("ParseText", parseData));
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Finish parse: " + vk.url);
+        }
         return parseResult;
     }
 }

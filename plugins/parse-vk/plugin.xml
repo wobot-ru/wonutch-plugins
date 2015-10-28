@@ -3,14 +3,18 @@
         id="parse-vk"
         name="VkParse"
         version="1.0"
-        provider-name="wobot.com">
+        provider-name="wobot.ru">
 
     <runtime>
         <library name="parse-vk.jar">
             <export name="*"/>
         </library>
-        <library name="lib-vk-1.0.0.jar"/>
     </runtime>
+
+    <requires>
+        <import plugin="nutch-extensionpoints"/>
+        <import plugin="lib-vk"/>
+    </requires>
 
     <extension id="org.apache.nutch.parse.vk"
                name="VkParser"
