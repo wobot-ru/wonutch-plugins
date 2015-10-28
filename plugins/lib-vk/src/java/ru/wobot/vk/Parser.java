@@ -2,8 +2,6 @@ package ru.wobot.vk;
 
 import com.google.gson.Gson;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import ru.wobot.vk.dto.FriendListDto;
-import ru.wobot.vk.dto.ProfileDto;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -32,16 +30,16 @@ public class Parser {
             }
         };
         Gson gson = new Gson();
-        ProfileDto dto = gson.fromJson(content, ProfileDto.class);
-        String title = getFullName(dto.user);
+        VKontakteProfile user = gson.fromJson(content, VKontakteProfile.class);
+        String title = getFullName(user);
         return new ParseResult(urlString, title, content, links);
     }
 
     private static ParseResult createFriendsParse(String userId, String urlString, String content) {
         Gson gson = new Gson();
-        FriendListDto dto = gson.fromJson(content, FriendListDto.class);
-        HashMap<String, String> links = new HashMap<>(dto.friends.size());
-        for (VKontakteProfile friend : dto.friends) {
+        VKontakteProfile[] friends = gson.fromJson(content, VKontakteProfile[].class);
+        HashMap<String, String> links = new HashMap<>(friends.length);
+        for (VKontakteProfile friend : friends) {
             String friendHref = "http://" + friend.getScreenName();
             links.put(friendHref, getFullName(friend));
         }
