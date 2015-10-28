@@ -25,6 +25,7 @@
             <groupId>ru.wobot</groupId>
             <artifactId>lib-vk</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
