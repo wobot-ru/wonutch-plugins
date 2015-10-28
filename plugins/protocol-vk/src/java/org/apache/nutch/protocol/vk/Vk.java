@@ -8,12 +8,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.*;
-import ru.wobot.vk.VkResponse;
-import ru.wobot.vk.VkService;
-
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
+import ru.wobot.vk.Response;
+import ru.wobot.vk.Service;
 
 public class Vk implements Protocol {
     private static final Log LOG = LogFactory.getLog(Vk.class.getName());
@@ -27,8 +23,8 @@ public class Vk implements Protocol {
             LOG.info("Start fetching: " + urlString);
         }
         try {
-            VkResponse vkResponse = VkService.request(urlString);
-            return new ProtocolOutput(convertToContent(vkResponse));
+            Response response = Service.request(urlString);
+            return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             //todo: refactor this!
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
@@ -52,7 +48,7 @@ public class Vk implements Protocol {
         this.conf = conf;
     }
 
-    private Content convertToContent(VkResponse response) {
+    private Content convertToContent(Response response) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.fetchTime + "]");
         }
