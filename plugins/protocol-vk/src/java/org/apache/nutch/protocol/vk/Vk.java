@@ -6,19 +6,17 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
-import org.apache.nutch.protocol.Protocol;
-import org.apache.nutch.protocol.ProtocolOutput;
-import org.apache.nutch.protocol.ProtocolStatus;
-import org.apache.nutch.protocol.RobotRulesParser;
+import org.apache.nutch.metadata.Metadata;
+import org.apache.nutch.protocol.*;
+import ru.wobot.vk.VkResponse;
+import ru.wobot.vk.VkService;
 
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by Kviz on 10/27/2015.
- */
 public class Vk implements Protocol {
-    private static final Log LOG = LogFactory.getLog(Vk.class
-            .getName());
+    private static final Log LOG = LogFactory.getLog(Vk.class.getName());
     private Configuration conf;
 
     @Override
@@ -26,14 +24,13 @@ public class Vk implements Protocol {
         String urlString = url.toString();
 
         if (LOG.isInfoEnabled()) {
-            LOG.info("Vkjs start");
+            LOG.info("Start fetching: " + urlString);
         }
-        VkResponse response;
         try {
-            URL u = new URL(urlString);
-            response = new VkResponse(u, datum, this, getConf());
-            return new ProtocolOutput(response.toContent());
+            VkResponse vkResponse = VkService.request(urlString);
+            return new ProtocolOutput(convertToContent(vkResponse));
         } catch (Exception e) {
+            //todo: refactor this!
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             e.printStackTrace();
             return new ProtocolOutput(null, new ProtocolStatus(e));
@@ -53,5 +50,15 @@ public class Vk implements Protocol {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
+    }
+
+    private Content convertToContent(VkResponse response) {
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.fetchTime + "]");
+        }
+
+        Metadata metadata = new Metadata();
+        metadata.add("nutch.fetch.time", Long.toString(response.fetchTime));
+        return new Content(response.url, response.url, response.data, response.mimeType, metadata, this.conf);
     }
 }
