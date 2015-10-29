@@ -12,7 +12,7 @@ public enum Proxy {
     };
     private static int index = 0;
 
-    public static VKontakteTemplate getInstance() {
+    public synchronized static VKontakteTemplate getInstance() {
         index = (index + 1) % templates.length;
         return templates[index];
     }
