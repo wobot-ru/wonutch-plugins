@@ -2,12 +2,14 @@ package ru.wobot.vk;
 
 import com.google.gson.Gson;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
+import ru.wobot.vk.dto.PostIndex;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
+import java.util.stream.Collectors;
 
 public class Parser {
     public static ParseResult parse(String urlString, byte[] data) throws MalformedURLException {
@@ -31,8 +33,7 @@ public class Parser {
     }
 
     private static ParseResult createProfileParse(String userId, String urlString, String content) {
-        Gson gson = new Gson();
-        VKontakteProfile profile = gson.fromJson(content, VKontakteProfile.class);
+        VKontakteProfile profile = fromJson(content, VKontakteProfile.class);
 
         HashMap<String, String> links = new HashMap<String, String>(2) {
             {
@@ -45,8 +46,7 @@ public class Parser {
     }
 
     private static ParseResult createFriendsParse(String userId, String urlString, String content) {
-        Gson gson = new Gson();
-        String[] friendIds = gson.fromJson(content, String[].class);
+        String[] friendIds = fromJson(content, String[].class);
         HashMap<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
             String friendHref = "http://" + friendId;
@@ -57,8 +57,7 @@ public class Parser {
     }
 
     private static ParseResult createPostsIndexParse(String userId, String urlString, String content) {
-        Gson gson = new Gson();
-        int postsCount = gson.fromJson(content, int.class);
+        int postsCount = fromJson(content, int.class);
 
         int indexPageCount = postsCount / 100;
         HashMap<String, String> links = new HashMap<>(indexPageCount);
@@ -74,12 +73,27 @@ public class Parser {
 
     private static ParseResult createPostsIndexPageParse(URL url, String content) {
         String userId = url.getHost();
-        HashMap<String, String> links = new HashMap<>();
+        String urlPrefix = "http://" + userId + "/posts/";
+        PostIndex postIndex = fromJson(content, PostIndex.class);
+
+        HashMap<String, String> links = Arrays.stream(postIndex.postIds)
+                .mapToObj(postId -> String.valueOf(postId))
+                .collect(Collectors.toMap(
+                        postId -> urlPrefix + postId,
+                        postId -> postId,
+                        (v1, v2) -> v1,
+                        HashMap::new));
+
         return new ParseResult(url.toString(), userId, content, links);
     }
 
     private static String getFullName(VKontakteProfile user) {
         String name = user.getFirstName() + " " + user.getLastName();
         return name;
+    }
+
+    private static <T> T fromJson(String json, Class<T> classOfT) {
+        Gson gson = new Gson();
+        return gson.fromJson(json, classOfT);
     }
 }
