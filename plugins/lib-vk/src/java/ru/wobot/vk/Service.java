@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
+import ru.wobot.vk.dto.PostIndex;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,7 +14,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class Service {
     public static final int POSTS_LIMIT = 100;
@@ -66,7 +67,14 @@ public class Service {
             LOG.trace("Finished fetching user[id=" + userId + "]|.friends[count=" + friends.getCount() + "]!");
         }
 
-        List<String> ids = friends.getItems().stream().map(x -> x.getScreenName()).collect(Collectors.toList());
+        String[] ids = friends
+                .getItems()
+                .stream()
+                .map(x -> x.getScreenName())
+                .filter(Objects::nonNull)
+                .sorted()
+                .toArray(String[]::new);
+
         Response response = new Response(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
         return response;
 
@@ -82,14 +90,24 @@ public class Service {
     // http://user/index-posts/x100/0000000001
     private static Response createPostsIndexPageResponse(URL url) {
         VKontakteProfile user = getUserProfile(url.getHost());
+
         String path = url.getPath();
         String pageStr = path.substring(path.lastIndexOf('/') + 1);
         int page = Integer.parseInt(pageStr);
 
         int totalPosts = getPostCountForUser(user.getId());
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
-        VKArray<Post> posts = Proxy.getInstance().wallOperations().getPostsForUser(user.getId(), offset, POSTS_LIMIT);
-        Response response = new Response(url.toString(), toJson(posts.getItems()).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+
+        long[] ids = Proxy.getInstance().wallOperations()
+                .getPostsForUser(user.getId(), offset, POSTS_LIMIT)
+                .getItems()
+                .stream()
+                .mapToLong(x -> x.getId())
+                .sorted()
+                .toArray();
+
+        PostIndex postIndex = new PostIndex(ids, totalPosts);
+        Response response = new Response(url.toString(), toJson(postIndex).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
         return response;
     }
 
