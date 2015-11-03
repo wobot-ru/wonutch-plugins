@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Service {
     public static final int POSTS_LIMIT = 100;
@@ -23,7 +24,6 @@ public class Service {
             LOG.trace("Starting fetching user[id=" + userId + "].posts.count:");
         }
         VKArray<Post> posts = Proxy.getInstance().wallOperations().getPostsForUser(userId, 0, 1);
-
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userId + "].posts.count=" + posts.getCount() + "!");
         }
@@ -57,43 +57,39 @@ public class Service {
 
     private static Response createFriendsResponse(String userId, String urlString) throws UnsupportedEncodingException {
         VKontakteProfile user = getUserProfile(userId);
+
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userId + "].friends:");
         }
-
-        VKArray<VKontakteProfile> friendArray = Proxy.getInstance().friendsOperations().get(user.getId());
+        VKArray<VKontakteProfile> friends = Proxy.getInstance().friendsOperations().get(user.getId());
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Finished fetching user[id=" + userId + "]|.friends[count=" + friendArray.getCount() + "]!");
+            LOG.trace("Finished fetching user[id=" + userId + "]|.friends[count=" + friends.getCount() + "]!");
         }
 
-        List<VKontakteProfile> friends = friendArray.getItems();
-        String json = toJson(friends);
-        Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        List<String> ids = friends.getItems().stream().map(x -> x.getScreenName()).collect(Collectors.toList());
+        Response response = new Response(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
         return response;
 
     }
 
     private static Response createPostsIndexResponse(String userId, String urlString) {
         VKontakteProfile user = getUserProfile(userId);
-        int postsCount = getPostCountForUser(user.getId());
-
-        String json = toJson(postsCount);
+        String json = toJson(getPostCountForUser(user.getId()));
         Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
         return response;
     }
 
     // http://user/index-posts/x100/0000000001
     private static Response createPostsIndexPageResponse(URL url) {
+        VKontakteProfile user = getUserProfile(url.getHost());
         String path = url.getPath();
         String pageStr = path.substring(path.lastIndexOf('/') + 1);
         int page = Integer.parseInt(pageStr);
-        VKontakteProfile user = getUserProfile(url.getHost());
+
         int totalPosts = getPostCountForUser(user.getId());
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
         VKArray<Post> posts = Proxy.getInstance().wallOperations().getPostsForUser(user.getId(), offset, POSTS_LIMIT);
-        List<Post> postList = posts.getItems();
-        String json = toJson(postList);
-        Response response = new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        Response response = new Response(url.toString(), toJson(posts.getItems()).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
         return response;
     }
 
@@ -102,12 +98,10 @@ public class Service {
             LOG.trace("Starting fetching user[id=" + userId + "]:");
         }
         List<VKontakteProfile> profileList = Proxy.getInstance().usersOperations().getUsers(Arrays.asList(userId));
-        VKontakteProfile profile = profileList.get(0);
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userId + "]!");
         }
-
-        return profile;
+        return profileList.get(0);
     }
 
     private static String toJson(Object obj) {

@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 
 public class Parser {
     public static ParseResult parse(String urlString, byte[] data) throws MalformedURLException {
@@ -45,11 +46,11 @@ public class Parser {
 
     private static ParseResult createFriendsParse(String userId, String urlString, String content) {
         Gson gson = new Gson();
-        VKontakteProfile[] friends = gson.fromJson(content, VKontakteProfile[].class);
-        HashMap<String, String> links = new HashMap<>(friends.length);
-        for (VKontakteProfile friend : friends) {
-            String friendHref = "http://" + friend.getScreenName();
-            links.put(friendHref, getFullName(friend));
+        String[] friendIds = gson.fromJson(content, String[].class);
+        HashMap<String, String> links = new HashMap<>(friendIds.length);
+        for (String friendId : friendIds) {
+            String friendHref = "http://" + friendId;
+            links.put(friendHref, friendId);
         }
         String title = userId + "-friends";
         return new ParseResult(urlString, title, content, links);
