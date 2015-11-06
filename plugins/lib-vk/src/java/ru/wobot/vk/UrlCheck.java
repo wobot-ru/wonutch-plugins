@@ -5,6 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UrlCheck {
+    private static final Pattern posts = Pattern.compile("/posts/\\d+");
     private static final Pattern postsIndexPage = Pattern.compile("/index-posts/x100/\\d+");
 
     public static boolean isProfile(URL url) {
@@ -25,6 +26,12 @@ public class UrlCheck {
     public static boolean isPostsIndexPage(URL url) {
         String path = url.getPath().toLowerCase();
         Matcher matcher = postsIndexPage.matcher(path);
+        return matcher.matches();
+    }
+
+    public static boolean isPost(URL url) {
+        String path = url.getPath().toLowerCase();
+        Matcher matcher = posts.matcher(path);
         return matcher.matches();
     }
 }
