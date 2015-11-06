@@ -1,6 +1,8 @@
 package ru.wobot.vk;
 
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import ru.wobot.vk.dto.PostIndex;
 
@@ -29,7 +31,15 @@ public class Parser {
         if (UrlCheck.isPostsIndexPage(url)) {
             return createPostsIndexPageParse(url, content);
         }
+        if (UrlCheck.isPost(url)) {
+            return createPostParse(url, content);
+        }
         throw new UnsupportedOperationException();
+    }
+
+    private static ParseResult createPostParse(URL url, String content) {
+        Post post = fromJson(content, Post.class);
+        return new ParseResult(url.toString(), post.getText(), content);
     }
 
     private static ParseResult createProfileParse(String userId, String urlString, String content) {
