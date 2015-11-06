@@ -46,14 +46,16 @@ public class Service {
         if (UrlCheck.isPostsIndexPage(url)) {
             return createPostsIndexPageResponse(url);
         }
+        if (UrlCheck.isPost(url)) {
+            return createPostResponse(url);
+        }
         throw new UnsupportedOperationException();
     }
 
     private static Response createProfileResponse(String userId, String urlString) throws IOException {
         VKontakteProfile user = getUserProfile(userId);
         String json = toJson(user);
-        Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return response;
+        return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private static Response createFriendsResponse(String userId, String urlString) throws UnsupportedEncodingException {
@@ -75,16 +77,14 @@ public class Service {
                 .sorted()
                 .toArray(String[]::new);
 
-        Response response = new Response(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return response;
+        return new Response(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
 
     }
 
     private static Response createPostsIndexResponse(String userId, String urlString) {
         VKontakteProfile user = getUserProfile(userId);
         String json = toJson(getPostCountForUser(user.getId()));
-        Response response = new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return response;
+        return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     // http://user/index-posts/x100/0000000001
@@ -106,9 +106,18 @@ public class Service {
                 .sorted()
                 .toArray();
 
-        PostIndex postIndex = new PostIndex(ids, totalPosts);
-        Response response = new Response(url.toString(), toJson(postIndex).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
-        return response;
+        String json = toJson(new PostIndex(ids, totalPosts));
+        return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+    }
+
+    private static Response createPostResponse(URL url) {
+        VKontakteProfile user = getUserProfile(url.getHost());
+
+        String path = url.getPath();
+        String posId = path.substring(path.lastIndexOf('/') + 1);
+        Post post = Proxy.getInstance().wallOperations().getPost(user.getId(), posId);
+        String json = toJson(post);
+        return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private static VKontakteProfile getUserProfile(String userId) {
