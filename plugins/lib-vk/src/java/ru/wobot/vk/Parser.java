@@ -1,10 +1,9 @@
 package ru.wobot.vk;
 
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import ru.wobot.vk.dto.PostIndex;
+import ru.wobot.vk.serialize.Builder;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -103,7 +102,6 @@ public class Parser {
     }
 
     private static <T> T fromJson(String json, Class<T> classOfT) {
-        Gson gson = new Gson();
-        return gson.fromJson(json, classOfT);
+        return Builder.getGson().fromJson(json, classOfT);
     }
 }
