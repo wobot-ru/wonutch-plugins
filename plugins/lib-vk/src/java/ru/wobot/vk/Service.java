@@ -1,12 +1,12 @@
 package ru.wobot.vk;
 
-import com.google.gson.Gson;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import ru.wobot.vk.dto.PostIndex;
+import ru.wobot.vk.serialize.Builder;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -73,7 +73,7 @@ public class Service {
                 .getItems()
                 .stream()
                 .map(x -> x.getScreenName())
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull) //todo: выработать стратегию работы у удалёнными/заблокированными пользователями
                 .sorted()
                 .toArray(String[]::new);
 
@@ -132,8 +132,7 @@ public class Service {
     }
 
     private static String toJson(Object obj) {
-        Gson gson = new Gson();
-        String json = gson.toJson(obj);
+        String json = Builder.getGson().toJson(obj);
         return json;
     }
 }
