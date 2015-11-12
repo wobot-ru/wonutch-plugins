@@ -64,6 +64,7 @@ public class Service {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userId + "].friends:");
         }
+        //todo: reduce the amount of loaded fields. load only required!
         VKArray<VKontakteProfile> friends = Proxy.getInstance().friendsOperations().get(user.getId());
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userId + "]|.friends[count=" + friends.getCount() + "]!");
