@@ -47,11 +47,11 @@
     <import plugin="nutch-extensionpoints" />
   </requires>
 
-  <extension id="org.apache.nutch.indexer.elastic"
-    name="Elasticsearch Index Writer"
+  <extension id="org.apache.nutch.indexer.multielastic"
+    name="Elasticsearch Index Writer supports multiple document for indexing"
     point="org.apache.nutch.indexer.IndexWriter">
-    <implementation id="ElasticIndexWriter"
-      class="org.apache.nutch.indexwriter.multielastic.ElasticIndexWriter" />
+    <implementation id="MultiElasticIndexWriter"
+      class="org.apache.nutch.indexwriter.multielastic.MultiElasticIndexWriter" />
   </extension>
 
 </plugin>

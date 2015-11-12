@@ -48,8 +48,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  */
-public class ElasticIndexWriter implements IndexWriter {
-  public static Logger LOG = LoggerFactory.getLogger(ElasticIndexWriter.class);
+public class MultiElasticIndexWriter implements IndexWriter {
+  public static Logger LOG = LoggerFactory.getLogger(MultiElasticIndexWriter.class);
 
   private static final int DEFAULT_MAX_BULK_DOCS = 250;
   private static final int DEFAULT_MAX_BULK_LENGTH = 2500500;
@@ -241,7 +241,7 @@ public class ElasticIndexWriter implements IndexWriter {
 
   @Override
   public String describe() {
-    StringBuffer sb = new StringBuffer("ElasticIndexWriter\n");
+    StringBuffer sb = new StringBuffer("MultiElasticIndexWriter\n");
     sb.append("\t").append(ElasticConstants.CLUSTER)
         .append(" : elastic prefix cluster\n");
     sb.append("\t").append(ElasticConstants.HOST).append(" : hostname\n");
