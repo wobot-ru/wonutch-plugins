@@ -160,6 +160,14 @@
         <finalName>${project.artifactId}</finalName>
     </build>
 
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-release</name>
+            <url>http://localhost:8081/artifactory/libs-release-local</url>
+        </repository>
+    </distributionManagement>
+
     <profiles>
         <profile>
             <id>otherOutputDir</id>
