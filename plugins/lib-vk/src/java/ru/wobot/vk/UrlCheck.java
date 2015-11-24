@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 public class UrlCheck {
     private static final Pattern posts = Pattern.compile("/posts/\\d+");
     private static final Pattern postsIndexPage = Pattern.compile("/index-posts/x100/\\d+");
+    private static final Pattern commentPage = Pattern.compile("/posts/\\d+/x100/\\d+");
 
     public static boolean isProfile(URL url) {
         String path = url.getPath();
@@ -32,6 +33,12 @@ public class UrlCheck {
     public static boolean isPost(URL url) {
         String path = url.getPath().toLowerCase();
         Matcher matcher = posts.matcher(path);
+        return matcher.matches();
+    }
+
+    public static boolean isCommentPage(URL url) {
+        String path = url.getPath().toLowerCase();
+        Matcher matcher = commentPage.matcher(path);
         return matcher.matches();
     }
 }
