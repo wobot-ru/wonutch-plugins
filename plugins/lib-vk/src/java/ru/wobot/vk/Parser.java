@@ -31,14 +31,36 @@ public class Parser {
             return createPostsIndexPageParse(url, content);
         }
         if (UrlCheck.isPost(url)) {
-            return createPostParse(url, content);
+            return createPostParse(urlString, content);
+        }
+        if (UrlCheck.isCommentPage(url)) {
+            return createCommentPageParse(url, content);
         }
         throw new UnsupportedOperationException();
     }
 
-    private static ParseResult createPostParse(URL url, String content) {
+    private static ParseResult createCommentPageParse(URL url, String content) {
+        String userDomain = url.getHost();
+        String path = url.getPath();
+        String[] split = path.split("/");
+        int postId = Integer.parseInt(split[2]);
+        int page = Integer.parseInt(split[4]);
+
+        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, content);
+    }
+
+    private static ParseResult createPostParse(String urlString, String content) {
         Post post = fromJson(content, Post.class);
-        return new ParseResult(url.toString(), post.getText(), content);
+
+        int indexPageCount = post.getComments().getCount() / 100;
+        HashMap<String, String> links = new HashMap<>(indexPageCount);
+        for (long i = 0; i <= indexPageCount; i++) {
+            String blockNumber = String.format("%06d", i);
+            // generate link <a href='http://user/posts/x100/000001'>post-index-x100-page-1</a>
+            links.put(urlString + "/x100/" + blockNumber, "post-index-x100-page-" + i);
+        }
+
+        return new ParseResult(urlString, post.getText(), content, links);
     }
 
     private static ParseResult createProfileParse(String userId, String urlString, String content) {
@@ -71,8 +93,8 @@ public class Parser {
         int indexPageCount = postsCount / 100;
         HashMap<String, String> links = new HashMap<>(indexPageCount);
         for (long i = 0; i <= indexPageCount; i++) {
-            String blockNumber = String.format("%010d", i);
-            // generate link <a href='http://user/index-posts/x100/0000000001'>user-index-posts-x100-page-1</a>
+            String blockNumber = String.format("%08d", i);
+            // generate link <a href='http://user/index-posts/x100/00000001'>user-index-posts-x100-page-1</a>
             links.put(urlString + "/x100/" + blockNumber, userId + "-index-posts-x100-page-" + i);
         }
 
