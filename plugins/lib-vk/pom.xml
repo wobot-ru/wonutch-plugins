@@ -18,32 +18,6 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <repositories>
-        <!-- Fugru repository, contains spring-social-vkontakte -->
-        <repository>
-            <id>fugru</id>
-            <name>Fugru Maven Snapshot Repository</name>
-            <url>http://fugru.com/archiva/repository/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>spring</id>
-            <name>Spring Snapshot Repository</name>
-            <url>http://repo.spring.io/libs-snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
