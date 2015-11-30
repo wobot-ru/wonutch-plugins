@@ -18,6 +18,19 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
+    <repositories>
+        <repository>
+            <id>snapshots</id>
+            <url>http://localhost:8081/artifactory/libs-snapshot</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>com.google.code.gson</groupId>
