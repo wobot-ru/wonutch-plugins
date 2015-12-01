@@ -164,7 +164,7 @@
         <repository>
             <id>central</id>
             <name>libs-release-local</name>
-            <url>http://localhost:8081/artifactory/libs-release-local</url>
+            <url>http://artifactory.wobot.local/artifactory/libs-release-local</url>
         </repository>
     </distributionManagement>
 
