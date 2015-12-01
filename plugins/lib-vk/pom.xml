@@ -21,7 +21,7 @@
     <repositories>
         <repository>
             <id>snapshots</id>
-            <url>http://localhost:8081/artifactory/libs-snapshot</url>
+            <url>http://artifactory.wobot.local/artifactory/libs-snapshot</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
