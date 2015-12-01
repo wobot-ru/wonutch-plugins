@@ -1,7 +1,10 @@
 package ru.wobot.vk;
 
+import org.springframework.social.vkontakte.api.Comment;
+import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
+import ru.wobot.vk.dto.Page;
 import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 
@@ -45,7 +48,16 @@ public class Parser {
         int postId = Integer.parseInt(split[2]);
         int page = Integer.parseInt(split[4]);
 
-        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, content);
+        //todo: теряется totalCount определится, насколько это нам важно
+        CommentsResponse response = fromJson(content, CommentsResponse.class);
+        Page[] pages = new Page[response.getComments().size()];
+        int i = 0;
+        for (Comment comment : response.getComments()) {
+            String commentUrl = "http://" + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
+            Page commentPage = new Page(commentUrl, toJson(comment));
+            pages[i++] = commentPage;
+        }
+        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, toJson(pages), true);
     }
 
     private static ParseResult createPostParse(String urlString, String content) {
@@ -121,5 +133,9 @@ public class Parser {
 
     private static <T> T fromJson(String json, Class<T> classOfT) {
         return Builder.getGson().fromJson(json, classOfT);
+    }
+    private static String toJson(Object obj) {
+        String json = Builder.getGson().toJson(obj);
+        return json;
     }
 }

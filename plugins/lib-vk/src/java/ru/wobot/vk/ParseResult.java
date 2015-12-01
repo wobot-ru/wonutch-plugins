@@ -8,7 +8,7 @@ public class ParseResult {
     public String title;
     public String content;
     public Map<String, String> links = new HashMap<>();
-
+    public boolean isMultiPage;
     public ParseResult(String url, String title, String content, Map<String, String> links) {
         this.url = url;
         this.title = title;
@@ -16,7 +16,8 @@ public class ParseResult {
         this.links = links;
     }
 
-    public ParseResult(String url, String title, String content) {
+    public ParseResult(String url, String title, String content, boolean isMultiPage) {
         this(url, title, content, new HashMap<String, String>());
+        this.isMultiPage = isMultiPage;
     }
 }

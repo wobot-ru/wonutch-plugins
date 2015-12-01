@@ -43,7 +43,10 @@ public class VkParser implements Parser {
         }
     }
 
-    private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata metadata) throws MalformedURLException {
+    private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+        if (vk.isMultiPage){
+            parseMetadata.add(MultiConstants.MULTI_DOC, "true");
+        }
         Outlink[] outlinks = new Outlink[vk.links.size()];
         int index = 0;
         for (Map.Entry<String, String> mapEntry : vk.links.entrySet()) {
@@ -51,7 +54,7 @@ public class VkParser implements Parser {
             index++;
         }
 
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, metadata);
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, parseMetadata);
         ParseResult parseResult = ParseResult.createParseResult(vk.url, new ParseImpl(vk.content, parseData));
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size="+ vk.links.size()+"]");
