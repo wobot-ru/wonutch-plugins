@@ -4,14 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>ru.wobot</groupId>
+    <parent>
+        <groupId>ru.wobot</groupId>
+        <artifactId>nutch-deploy</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
     <artifactId>wonutch</artifactId>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>wonutch</name>
     <description>
-        Parent module for Wobot Apache Nutch custom modules
+        Parent module for Apache Nutch plugins, developed by Wobot
     </description>
     <url>https://github.com/wobot-ru/wonutch</url>
 
@@ -21,7 +25,7 @@
     </organization>
 
     <scm>
-        <url>https://github.com/wobot-ru/wonutch</url>
+        <url>https://github.com/wobot-ru/wonutch.git</url>
     </scm>
 
     <developers>

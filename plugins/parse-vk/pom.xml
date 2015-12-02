@@ -8,7 +8,7 @@
 
     <name>parse-vk</name>
     <description>
-        Apache Nutch plugin for VK parsing
+        Apache Nutch plugin for VK data parsing
     </description>
 
     <parent>
@@ -25,6 +25,7 @@
             <groupId>ru.wobot</groupId>
             <artifactId>lib-vk</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
