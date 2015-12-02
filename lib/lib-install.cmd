@@ -1,1 +1,0 @@
-mvn install:install-file -Dfile=lib-http.jar -DgroupId=org.apache.nutch -DartifactId=lib-http -Dversion=1.10 -Dpackaging=jar -DgeneratePom=true
