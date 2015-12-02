@@ -13,7 +13,7 @@
     <description>
         Parent module for Apache Nutch plugins, developed by Wobot
     </description>
-    <url>https://github.com/wobot-ru/wonutch</url>
+    <url>https://github.com/wobot-ru/wonutch-plugins</url>
 
     <organization>
         <name>Wobot</name>
@@ -21,7 +21,7 @@
     </organization>
 
     <scm>
-        <url>https://github.com/wobot-ru/wonutch.git</url>
+        <url>git@github.com:wobot-ru/wonutch-plugins.git</url>
     </scm>
 
     <developers>
@@ -29,7 +29,7 @@
         <developer>
             <name>Konstantin Zinovkin</name>
             <organization>Wobot</organization>
-            <email/>
+            <email>kviz@outlook.com</email>
         </developer>
         <developer>
             <name>Leon Misakyan</name>
