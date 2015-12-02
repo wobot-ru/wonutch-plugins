@@ -13,7 +13,7 @@
 
     <parent>
         <groupId>ru.wobot</groupId>
-        <artifactId>wonutch</artifactId>
+        <artifactId>wonutch-plugins</artifactId>
         <version>1.0.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
