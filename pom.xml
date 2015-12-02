@@ -4,13 +4,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>ru.wobot</groupId>
-        <artifactId>nutch-deploy</artifactId>
-        <version>1.0.0</version>
-    </parent>
-
+    <groupId>ru.wobot</groupId>
     <artifactId>wonutch</artifactId>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>wonutch</name>
@@ -33,7 +29,7 @@
         <developer>
             <name>Konstantin Zinovkin</name>
             <organization>Wobot</organization>
-            <email></email>
+            <email/>
         </developer>
         <developer>
             <name>Leon Misakyan</name>
