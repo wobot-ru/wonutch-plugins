@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.wobot</groupId>
-    <artifactId>wonutch</artifactId>
+    <artifactId>wonutch-plugins</artifactId>
     <version>1.0.0</version>
     <packaging>pom</packaging>
 
-    <name>wonutch</name>
+    <name>wonutch-plugins</name>
     <description>
         Parent module for Apache Nutch plugins, developed by Wobot
     </description>
