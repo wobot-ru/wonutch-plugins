@@ -8,20 +8,6 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
 
-    <!--moduleSets>
-        <moduleSet>
-            <useAllReactorProjects>true</useAllReactorProjects>
-            <includes>
-                <include>ru.wobot:protocol-vk</include>
-            </includes>
-            <binaries>
-                <outputDirectory>/</outputDirectory>
-                <unpack>false</unpack>
-                <outputFileNameMapping>${module.artifactId}</outputFileNameMapping>
-            </binaries>
-        </moduleSet>
-    </moduleSets-->
-
     <dependencySets>
         <dependencySet>
             <outputDirectory>/</outputDirectory>

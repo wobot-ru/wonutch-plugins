@@ -12,13 +12,13 @@
         <library name="gson-2.4.jar">
             <export name="*"/>
         </library>
-        <library name="spring-social-core-1.1.0.BUILD-20140630.081822-755.jar">
+        <!--library name="spring-social-core-1.1.0.BUILD-20140630.081822-755.jar">
             <export name="*"/>
-        </library>
+        </library-->
         <library name="spring-social-vkontakte-1.1.0.BUILD-SNAPSHOT.jar">
             <export name="*"/>
         </library>
-        <library name="spring-web-4.0.3.RELEASE.jar">
+        <!--library name="spring-web-4.0.3.RELEASE.jar">
             <export name="*"/>
         </library>
 
@@ -27,7 +27,7 @@
         </library>
         <library name="spring-beans-4.0.3.RELEASE.jar">
             <export name="*"/>
-        </library>
+        </library-->
     </runtime>
 
 </plugin>
