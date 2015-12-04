@@ -8,9 +8,8 @@ import ru.wobot.vk.serialize.Builder;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 public class Parser {
     public static ParseResult parse(String urlString, byte[] data) throws MalformedURLException {
@@ -63,7 +62,7 @@ public class Parser {
         return new ParseResult(urlString, post.getText(), content, links);
     }
 
-    private static ParseResult createProfileParse(String userId, String urlString, String content) {
+    private static ParseResult createProfileParse(final String userId, final String urlString, String content) {
         VKontakteProfile profile = fromJson(content, VKontakteProfile.class);
 
         HashMap<String, String> links = new HashMap<String, String>(2) {
@@ -107,13 +106,10 @@ public class Parser {
         String urlPrefix = "http://" + userId + "/posts/";
         PostIndex postIndex = fromJson(content, PostIndex.class);
 
-        HashMap<String, String> links = Arrays.stream(postIndex.postIds)
-                .mapToObj(postId -> String.valueOf(postId))
-                .collect(Collectors.toMap(
-                        postId -> urlPrefix + postId,
-                        postId -> postId,
-                        (v1, v2) -> v1,
-                        HashMap::new));
+        Map<String, String> links = new HashMap<>(postIndex.postIds.length);
+        for (long id : postIndex.postIds) {
+            links.put(urlPrefix + id, String.valueOf(id));
+        }
 
         return new ParseResult(url.toString(), userId, content, links);
     }
