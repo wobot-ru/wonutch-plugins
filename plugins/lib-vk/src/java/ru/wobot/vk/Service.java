@@ -15,9 +15,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Service {
     public static final int POSTS_LIMIT = 100;
@@ -80,7 +78,7 @@ public class Service {
                 .build();
 
         CommentsResponse comments = Proxy.getInstance().wallOperations().getComments(query);
-       return comments;
+        return comments;
     }
 
     private static Response createProfileResponse(String userDomain, String urlString) throws IOException {
@@ -101,13 +99,13 @@ public class Service {
             LOG.trace("Finished fetching user[id=" + userDomain + "]|.friends[count=" + friends.getCount() + "]!");
         }
 
-        String[] ids = friends
-                .getItems()
-                .stream()
-                .map(x -> x.getScreenName())
-                .filter(Objects::nonNull) //todo: выработать стратегию работы у удалёнными/заблокированными пользователями
-                .sorted()
-                .toArray(String[]::new);
+        List<String> ids = new ArrayList<>(friends.getItems().size());
+        for (VKontakteProfile p : friends.getItems()) {
+            String sn = p.getScreenName();
+            if (sn != null && !sn.isEmpty())
+                ids.add(sn);
+        }
+        Collections.sort(ids);
 
         return new Response(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
 
@@ -130,13 +128,15 @@ public class Service {
         int totalPosts = getPostCountForUser(user.getId());
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
 
-        long[] ids = Proxy.getInstance().wallOperations()
+
+        List<Post> posts = Proxy.getInstance().wallOperations()
                 .getPostsForUser(user.getId(), offset, POSTS_LIMIT)
-                .getItems()
-                .stream()
-                .mapToLong(x -> x.getId())
-                .sorted()
-                .toArray();
+                .getItems();
+        long[] ids = new long[posts.size()];
+        for (int i = 0; i < ids.length; i++)
+            ids[i] = posts.get(i).getId();
+
+        Arrays.sort(ids);
 
         String json = toJson(new PostIndex(ids, totalPosts));
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
