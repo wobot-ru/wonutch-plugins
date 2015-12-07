@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.nutch.indexer.IndexWriter;
 import org.apache.nutch.indexer.NutchDocument;
+import org.apache.nutch.parse.vk.MultiConstants;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -38,6 +39,7 @@ import org.elasticsearch.action.delete.DeleteRequestBuilder;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.collect.HppcMaps;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
@@ -45,6 +47,7 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.wobot.vk.dto.Page;
 
 /**
  */
@@ -152,6 +155,35 @@ public class MultiElasticIndexWriter implements IndexWriter {
     indexedDocs++;
     bulkDocs++;
 
+    flushIfNecessary(id);
+
+    if ("true".equals(doc.getDocumentMeta().get(MultiConstants.MULTI_DOC))) {
+      String content = (String) source.get("content");
+      Page[] pages = fromJson(content, Page[].class);
+      for (Page page : pages) {
+        id = page.url;
+        source.put("url", page.url);
+        source.put("content", page.content);
+        source.put("title", page.title);
+        source.put("digest", page.digest);
+
+        for (Map.Entry<String, Object> field : source.entrySet()) {
+          bulkLength += field.getValue().toString().length();
+        }
+        request = client.prepareIndex(defaultIndex, type, id);
+        request.setSource(source);
+
+        // Add this indexing request to a bulk request
+        bulk.add(request);
+        indexedDocs++;
+        bulkDocs++;
+
+        flushIfNecessary(id);
+      }
+    }
+  }
+
+  private void flushIfNecessary(String id) throws IOException {
     if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
       LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
           + bulkLength + ", total docs = " + indexedDocs
@@ -160,6 +192,10 @@ public class MultiElasticIndexWriter implements IndexWriter {
       createNewBulk = true;
       commit();
     }
+  }
+
+  private static <T> T fromJson(String json, Class<T> classOfT) {
+    return ru.wobot.vk.serialize.Builder.getGson().fromJson(json, classOfT);
   }
 
   @Override
