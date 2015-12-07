@@ -11,6 +11,7 @@ import org.apache.nutch.indexer.IndexingFilter;
 import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Parse;
+import ru.wobot.MultiConstants;
 
 public class VkIndexingFilter implements IndexingFilter {
     private static final Log LOG = LogFactory.getLog(VkIndexingFilter.class.getName());

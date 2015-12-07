@@ -4,8 +4,8 @@ import org.springframework.social.vkontakte.api.Comment;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import ru.wobot.vk.dto.Page;
 import ru.wobot.vk.dto.PostIndex;
+import ru.wobot.vk.dto.Page;
 import ru.wobot.vk.serialize.Builder;
 
 import java.net.MalformedURLException;

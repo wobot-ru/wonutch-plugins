@@ -6,6 +6,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
+import ru.wobot.MultiConstants;
 
 import java.net.MalformedURLException;
 import java.util.Map;
