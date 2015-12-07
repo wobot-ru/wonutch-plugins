@@ -54,7 +54,7 @@ public class Parser {
         int i = 0;
         for (Comment comment : response.getComments()) {
             String commentUrl = "http://" + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
-            Page commentPage = new Page(commentUrl, toJson(comment));
+            Page commentPage = new Page(commentUrl, comment.getText(), toJson(comment));
             pages[i++] = commentPage;
         }
         return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, toJson(pages), true);
