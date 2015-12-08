@@ -6,7 +6,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.MultiConstants;
+import org.apache.nutch.multielastic.MultiElasticConstants;
 
 import java.net.MalformedURLException;
 import java.util.Map;
@@ -46,7 +46,7 @@ public class VkParser implements Parser {
 
     private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
         if (vk.isMultiPage){
-            parseMetadata.add(MultiConstants.MULTI_DOC, "true");
+            parseMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }
         Outlink[] outlinks = new Outlink[vk.links.size()];
         int index = 0;

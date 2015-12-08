@@ -11,7 +11,7 @@ import org.apache.nutch.indexer.IndexingFilter;
 import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Parse;
-import ru.wobot.MultiConstants;
+import org.apache.nutch.multielastic.MultiElasticConstants;
 
 public class VkIndexingFilter implements IndexingFilter {
     private static final Log LOG = LogFactory.getLog(VkIndexingFilter.class.getName());
@@ -26,9 +26,9 @@ public class VkIndexingFilter implements IndexingFilter {
         LOG.info("VkIndexingFilter: filter(\"" + url.toString() + "\")");
 
         Metadata metadata = parse.getData().getParseMeta();
-        if ("true".equals(metadata.get(MultiConstants.MULTI_DOC))) {
+        if ("true".equals(metadata.get(MultiElasticConstants.MULTI_DOC))) {
             LOG.debug(url.toString() + " is MULTI_DOC");
-            doc.getDocumentMeta().set(MultiConstants.MULTI_DOC, metadata.get(MultiConstants.MULTI_DOC));
+            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, metadata.get(MultiElasticConstants.MULTI_DOC));
         }
         return doc;
     }
