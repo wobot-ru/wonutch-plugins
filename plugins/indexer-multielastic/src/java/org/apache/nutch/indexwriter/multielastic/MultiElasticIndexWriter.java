@@ -29,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.nutch.indexer.IndexWriter;
 import org.apache.nutch.indexer.NutchDocument;
+import org.apache.nutch.multielastic.MultiElasticConstants;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -45,7 +46,6 @@ import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.wobot.MultiConstants;
 import ru.wobot.vk.dto.Page;
 
 /**
@@ -156,7 +156,7 @@ public class MultiElasticIndexWriter implements IndexWriter {
 
     flushIfNecessary(id);
 
-    if ("true".equals(doc.getDocumentMeta().get(MultiConstants.MULTI_DOC))) {
+    if ("true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_DOC))) {
       String content = (String) source.get("content");
       Page[] pages = fromJson(content, Page[].class);
       for (Page page : pages) {
