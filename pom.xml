@@ -50,6 +50,7 @@
         <hadoop.version>2.7.1</hadoop.version>
         <nutch.version>1.10</nutch.version>
         <elastic.version>1.4.1</elastic.version>
+        <httpclient.version>4.3.6</httpclient.version>
     </properties>
 
     <dependencies>
@@ -99,6 +100,13 @@
 
     <build>
         <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <argLine>-Dfile.encoding=UTF-8</argLine>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
