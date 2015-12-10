@@ -32,7 +32,7 @@ public class VKService {
 
     public List<VKontakteProfile> getUsers(List<String> userIds) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/users.get")
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/users.get")
                 .setParameter("fields", "sex,bdate,city,country,photo_50,photo_100,photo_200_orig,photo_200,photo_400_orig,photo_max,photo_max_orig,photo_id,online,online_mobile,domain,has_mobile,contacts,connections,site,education,universities,schools,can_post,can_see_all_posts,can_see_audio,can_write_private_message,status,last_seen,relation,relatives,counters,screen_name,maiden_name,timezone,occupation,activities,interests,music,movies,tv,books,games,about,quotes,personal,friend_status,military,career")
                 .setParameter("v", "5.40");
 
@@ -54,7 +54,7 @@ public class VKService {
 
     public VKArray<VKontakteProfile> getFriends(Long userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/friends.get")
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId.toString())
                 .setParameter("fields", "ckname,domain,sex,bdate,city,country,timezone,photo_50,photo_100,photo_200_orig,has_mobile,contacts,education,online,relation,last_seen,status,can_write_private_message,can_see_all_posts,can_post,universities")
                 .setParameter("v", "5.40");
@@ -68,7 +68,7 @@ public class VKService {
 
     public Post getPost(Long userId, String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/wall.getById")
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
                 .setParameter("v", "5.40");
 
@@ -82,7 +82,7 @@ public class VKService {
 
     public VKArray<Post> getPostsForUser(Long userId, int offset, int limit) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/wall.get")
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId.toString())
                 .setParameter("v", "5.40");
 
@@ -104,7 +104,7 @@ public class VKService {
 
     public CommentsResponse getComments(CommentsQuery query) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/wall.getComments")
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getComments")
                 .setParameter("v", String.valueOf(ApiVersion.VERSION_5_33));
 
         if (query.owner instanceof CommunityWall) {
@@ -166,7 +166,7 @@ public class VKService {
     }
 
     protected String readStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
         StringBuilder result = new StringBuilder();
         String line;
         while ((line = reader.readLine()) != null) {

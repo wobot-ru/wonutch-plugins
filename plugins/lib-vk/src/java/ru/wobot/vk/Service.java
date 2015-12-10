@@ -102,9 +102,10 @@ public class Service {
 
         List<String> ids = new ArrayList<>(friends.getItems().size());
         for (VKontakteProfile p : friends.getItems()) {
-            String sn = p.getScreenName();
-            if (sn != null && !sn.isEmpty())
-                ids.add(sn);
+            String friendName = p.getDomain();
+            if (friendName == null && !friendName.isEmpty())
+                friendName = "id" + p.getId();
+            ids.add(friendName);
         }
         Collections.sort(ids);
 
