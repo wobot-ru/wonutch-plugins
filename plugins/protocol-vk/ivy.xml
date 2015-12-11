@@ -36,6 +36,9 @@
   </publications>
 
   <dependencies>
+      <dependency org="com.google.code.gson" name="gson" rev="2.4" />
+      <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.6" />
+      <dependency org="org.springframework.social" name="spring-social-vkontakte" rev="1.1.0.BUILD-SNAPSHOT" />
   </dependencies>
   
 </ivy-module>

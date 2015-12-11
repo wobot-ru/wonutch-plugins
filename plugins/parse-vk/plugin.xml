@@ -9,6 +9,28 @@
         <library name="parse-vk.jar">
             <export name="*"/>
         </library>
+        <library name="aopalliance-1.0.jar"/>
+        <library name="commons-codec-1.6.jar"/>
+        <library name="commons-logging-1.2.jar"/>
+        <library name="gson-2.4.jar"/>
+        <library name="httpclient-4.3.6.jar"/>
+        <library name="httpcore-4.3.3.jar"/>
+        <library name="jackson-annotations-2.5.3.jar"/>
+        <library name="jackson-core-2.5.3.jar"/>
+        <library name="jackson-databind-2.5.3.jar"/>
+        <library name="javax.inject-1.jar"/>
+        <library name="lib-vk.jar"/>
+        <library name="spring-aop-4.1.8.RELEASE.jar"/>
+        <library name="spring-beans-4.1.8.RELEASE.jar"/>
+        <library name="spring-context-4.1.8.RELEASE.jar"/>
+        <library name="spring-core-4.1.8.RELEASE.jar"/>
+        <library name="spring-expression-4.1.8.RELEASE.jar"/>
+        <library name="spring-social-config-1.1.4.RELEASE.jar"/>
+        <library name="spring-social-core-1.1.4.RELEASE.jar"/>
+        <library name="spring-social-vkontakte-1.1.0.BUILD-SNAPSHOT.jar"/>
+        <library name="spring-social-web-1.1.4.RELEASE.jar"/>
+        <library name="spring-web-4.1.8.RELEASE.jar"/>
+        <library name="spring-webmvc-4.1.8.RELEASE.jar"/>
     </runtime>
 
     <requires>

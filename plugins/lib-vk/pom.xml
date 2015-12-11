@@ -20,6 +20,7 @@
 
     <properties>
         <gson.version>2.4</gson.version>
+        <httpclient.version>4.3.6</httpclient.version>
     </properties>
 
     <repositories>
@@ -40,6 +41,17 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.social</groupId>

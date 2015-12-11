@@ -20,19 +20,24 @@ import java.util.*;
 public class Service {
     public static final int POSTS_LIMIT = 100;
     private static final Log LOG = LogFactory.getLog(Service.class.getName());
+    private final ApiBindingRepository proxy;
 
-    public static int getPostCountForUser(long userId) {
+    public Service(ApiBindingRepository proxy) {
+        this.proxy = proxy;
+    }
+
+    public int getPostCountForUser(long userId) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userId + "].posts.count:");
         }
-        VKArray<Post> posts = Proxy.getInstance().wallOperations().getPostsForUser(userId, 0, 1);
+        VKArray<Post> posts = proxy.getInstance().wallOperations().getPostsForUser(userId, 0, 1);
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userId + "].posts.count=" + posts.getCount() + "!");
         }
         return posts.getCount();
     }
 
-    public static Response request(String urlString) throws IOException {
+    public Response request(String urlString) throws IOException {
         URL url = new URL(urlString);
         String userDomain = url.getHost();
         if (UrlCheck.isProfile(url)) {
@@ -56,7 +61,7 @@ public class Service {
         throw new UnsupportedOperationException();
     }
 
-    private static Response createCommentPageResponse(URL url) {
+    private Response createCommentPageResponse(URL url) {
         String userDomain = url.getHost();
         VKontakteProfile user = getUserProfile(userDomain);
         String path = url.getPath();
@@ -69,7 +74,7 @@ public class Service {
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
-    private static CommentsResponse getCommentResponse(long userId, int postId, int page) {
+    private CommentsResponse getCommentResponse(long userId, int postId, int page) {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(userId), postId)
                 .needLikes(true)
@@ -77,24 +82,24 @@ public class Service {
                 .offset(page * POSTS_LIMIT)
                 .build();
 
-        CommentsResponse comments = Proxy.getInstance().wallOperations().getComments(query);
+        CommentsResponse comments = proxy.getInstance().wallOperations().getComments(query);
         return comments;
     }
 
-    private static Response createProfileResponse(String userDomain, String urlString) throws IOException {
+    private Response createProfileResponse(String userDomain, String urlString) throws IOException {
         VKontakteProfile user = getUserProfile(userDomain);
         String json = toJson(user);
         return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
-    private static Response createFriendsResponse(String userDomain, String urlString) throws UnsupportedEncodingException {
+    private Response createFriendsResponse(String userDomain, String urlString) throws UnsupportedEncodingException {
         VKontakteProfile user = getUserProfile(userDomain);
 
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userDomain + "].friends:");
         }
         //todo: reduce the amount of loaded fields. load only required!
-        VKArray<VKontakteProfile> friends = Proxy.getInstance().friendsOperations().get(user.getId());
+        VKArray<VKontakteProfile> friends = proxy.getInstance().friendsOperations().get(user.getId());
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userDomain + "]|.friends[count=" + friends.getCount() + "]!");
         }
@@ -111,14 +116,14 @@ public class Service {
 
     }
 
-    private static Response createPostsIndexResponse(String userDomain, String urlString) {
+    private Response createPostsIndexResponse(String userDomain, String urlString) {
         VKontakteProfile user = getUserProfile(userDomain);
         String json = toJson(getPostCountForUser(user.getId()));
         return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     // http://user/index-posts/x100/0000000001
-    private static Response createPostsIndexPageResponse(URL url) {
+    private Response createPostsIndexPageResponse(URL url) {
         VKontakteProfile user = getUserProfile(url.getHost());
 
         String path = url.getPath();
@@ -129,7 +134,7 @@ public class Service {
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
 
 
-        List<Post> posts = Proxy.getInstance().wallOperations()
+        List<Post> posts = proxy.getInstance().wallOperations()
                 .getPostsForUser(user.getId(), offset, POSTS_LIMIT)
                 .getItems();
         long[] ids = new long[posts.size()];
@@ -142,28 +147,28 @@ public class Service {
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
-    private static Response createPostResponse(URL url) {
+    private Response createPostResponse(URL url) {
         VKontakteProfile user = getUserProfile(url.getHost());
 
         String path = url.getPath();
         String posId = path.substring(path.lastIndexOf('/') + 1);
-        Post post = Proxy.getInstance().wallOperations().getPost(user.getId(), posId);
+        Post post = proxy.getInstance().wallOperations().getPost(user.getId(), posId);
         String json = toJson(post);
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
-    private static VKontakteProfile getUserProfile(String userDomain) {
+    private VKontakteProfile getUserProfile(String userDomain) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userDomain + "]:");
         }
-        List<VKontakteProfile> profileList = Proxy.getInstance().usersOperations().getUsers(Arrays.asList(userDomain));
+        List<VKontakteProfile> profileList = proxy.getInstance().usersOperations().getUsers(Arrays.asList(userDomain));
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userDomain + "]!");
         }
         return profileList.get(0);
     }
 
-    private static String toJson(Object obj) {
+    private String toJson(Object obj) {
         String json = Builder.getGson().toJson(obj);
         return json;
     }

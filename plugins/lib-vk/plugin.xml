@@ -9,13 +9,20 @@
         <library name="lib-vk.jar">
             <export name="*"/>
         </library>
-        <library name="gson-2.4.jar">
-            <export name="*"/>
-        </library>
         <library name="spring-social-vkontakte-1.1.0.BUILD-SNAPSHOT.jar">
             <export name="*"/>
         </library>
-        <library name="spring-social-core-1.1.4.RELEASE.jar">
+        <library name="gson-2.4.jar">
+            <export name="*"/>
+        </library>
+        <library name="httpclient-4.3.6.jar">
+            <export name="*"/>
+        </library>
+    </runtime>
+
+    <requires>
+
+        <!--library name="spring-social-core-1.1.4.RELEASE.jar">
             <export name="*"/>
         </library>
         <library name="spring-web-4.1.8.RELEASE.jar">
@@ -26,7 +33,7 @@
         </library>
         <library name="spring-beans-4.1.8.RELEASE.jar">
             <export name="*"/>
-        </library>
-    </runtime>
+        </library-->
+    </requires>
 
 </plugin>
