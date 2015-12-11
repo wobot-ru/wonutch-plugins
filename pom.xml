@@ -50,7 +50,7 @@
         <hadoop.version>2.7.1</hadoop.version>
         <nutch.version>1.10</nutch.version>
         <elastic.version>1.4.1</elastic.version>
-        <httpclient.version>4.3.6</httpclient.version>
+        <httpclient.version>4.2.5</httpclient.version>
     </properties>
 
     <dependencies>

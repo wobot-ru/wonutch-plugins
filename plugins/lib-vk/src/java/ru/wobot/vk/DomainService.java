@@ -12,14 +12,15 @@ import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class Service {
+public class DomainService {
 
     public static final int POSTS_LIMIT = 100;
-    private static final Log LOG = LogFactory.getLog(Service.class.getName());
+    private static final Log LOG = LogFactory.getLog(DomainService.class.getName());
     private static final VKService VKService =new VKService();
 
     public static int getPostCountForUser(long userId) throws IOException {
@@ -33,27 +34,33 @@ public class Service {
         return posts.getCount();
     }
 
-    public static Response request(String urlString) throws IOException {
+    public static Response request(String urlString) throws MalformedURLException {
         URL url = new URL(urlString);
         String userDomain = url.getHost();
-        if (UrlCheck.isProfile(url)) {
-            return createProfileResponse(userDomain, urlString);
+        try {
+            if (UrlCheck.isProfile(url)) {
+                return createProfileResponse(userDomain, urlString);
+            }
+            if (UrlCheck.isFriends(url)) {
+                return createFriendsResponse(userDomain, urlString);
+            }
+            if (UrlCheck.isPostsIndex(url)) {
+                return createPostsIndexResponse(userDomain, urlString);
+            }
+            if (UrlCheck.isPostsIndexPage(url)) {
+                return createPostsIndexPageResponse(url);
+            }
+            if (UrlCheck.isPost(url)) {
+                return createPostResponse(url);
+            }
+            if (UrlCheck.isCommentPage(url)) {
+                return createCommentPageResponse(url);
+            }
+        } catch (IOException e) {
+            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
+            e.printStackTrace();
         }
-        if (UrlCheck.isFriends(url)) {
-            return createFriendsResponse(userDomain, urlString);
-        }
-        if (UrlCheck.isPostsIndex(url)) {
-            return createPostsIndexResponse(userDomain, urlString);
-        }
-        if (UrlCheck.isPostsIndexPage(url)) {
-            return createPostsIndexPageResponse(url);
-        }
-        if (UrlCheck.isPost(url)) {
-            return createPostResponse(url);
-        }
-        if (UrlCheck.isCommentPage(url)) {
-            return createCommentPageResponse(url);
-        }
+
         throw new UnsupportedOperationException();
     }
 

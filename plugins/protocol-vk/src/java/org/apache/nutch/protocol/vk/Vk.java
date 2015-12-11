@@ -9,7 +9,7 @@ import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.*;
 import ru.wobot.vk.Response;
-import ru.wobot.vk.Service;
+import ru.wobot.vk.DomainService;
 
 public class Vk implements Protocol {
     private static final Log LOG = LogFactory.getLog(Vk.class.getName());
@@ -23,7 +23,7 @@ public class Vk implements Protocol {
             LOG.info("Start fetching: " + urlString);
         }
         try {
-            Response response = Service.request(urlString);
+            Response response = DomainService.request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             //todo: refactor this!
