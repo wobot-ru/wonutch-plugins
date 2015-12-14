@@ -21,7 +21,7 @@ public class DomainService {
 
     public static final int POSTS_LIMIT = 100;
     private static final Log LOG = LogFactory.getLog(DomainService.class.getName());
-    private static final VKService VKService =new VKService();
+    private static final VKService VKService = new VKService();
 
     public static int getPostCountForUser(long userId) throws IOException {
         if (LOG.isTraceEnabled()) {
@@ -109,10 +109,9 @@ public class DomainService {
 
         List<String> ids = new ArrayList<>(friends.getItems().size());
         for (VKontakteProfile p : friends.getItems()) {
-            String friendName = p.getDomain();
-            if (friendName == null && !friendName.isEmpty())
-                friendName = "id" + p.getId();
-            ids.add(friendName);
+            String domain = p.getDomain();
+            if (domain != null && !domain.isEmpty())
+                ids.add("id" + p.getId());
         }
         Collections.sort(ids);
 
