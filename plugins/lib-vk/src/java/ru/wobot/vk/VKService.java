@@ -97,6 +97,7 @@ public class VKService {
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         String responseStr = readStreamToString(con.getInputStream());
         VKGenericResponse vkResponse = objectMapper.readValue(responseStr, VKGenericResponse.class);
+        checkForError(vkResponse);
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
         return posts;
 
@@ -189,5 +190,14 @@ public class VKService {
             elements.add(objectMapper.convertValue(items.get(i), itemClass));
         }
         return elements;
+    }
+
+    // throw exception if VKontakte response contains error
+    // TODO: consider to throw specific exceptions for each error code.
+    //       like for error code 113 that would be let's say InvalidUserIdVKException
+    protected <T extends VKResponse> void checkForError(T toCheck) {
+        if(toCheck.getError() != null) {
+            throw new VKontakteErrorException(toCheck.getError());
+        }
     }
 }

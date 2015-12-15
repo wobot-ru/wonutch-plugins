@@ -276,7 +276,7 @@ public class MultiElastic2IndexWriter implements IndexWriter {
 
     @Override
     public String describe() {
-        StringBuffer sb = new StringBuffer("MultiElasticIndexWriter\n");
+        StringBuffer sb = new StringBuffer("MultiElastic2IndexWriter 2.x\n");
         sb.append("\t").append(ElasticConstants.CLUSTER)
                 .append(" : elastic prefix cluster\n");
         sb.append("\t").append(ElasticConstants.HOST).append(" : hostname\n");
