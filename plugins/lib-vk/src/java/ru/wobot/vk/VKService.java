@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.social.vkontakte.api.*;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
@@ -176,9 +177,15 @@ public class VKService {
     }
 
     protected String readUrlToString(String urlStr) throws IOException {
-        URL url = new URL(urlStr);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        return readStreamToString(con.getInputStream());
+        InputStream is = null;
+        try {
+            URL url = new URL(urlStr);
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
+            is = con.getInputStream();
+            return readStreamToString(is);
+        } finally {
+            IOUtils.closeQuietly(is);
+        }
     }
 
     protected String readStreamToString(InputStream inputStream) throws IOException {
