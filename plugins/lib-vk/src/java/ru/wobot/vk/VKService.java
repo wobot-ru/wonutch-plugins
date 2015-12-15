@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("Duplicates")
 public class VKService {
     private ObjectMapper objectMapper;
 
@@ -45,10 +45,9 @@ public class VKService {
             uriBuilder.setParameter("user_ids", sb.toString());
         }
 
-        URL url = new URL(uriBuilder.toString());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        String responseStr = readStreamToString(con.getInputStream());
+        String responseStr = readUrlToString(uriBuilder.toString());
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
+        checkForError(profiles);
         return profiles.getProfiles();
     }
 
@@ -59,10 +58,7 @@ public class VKService {
                 .setParameter("fields", "ckname,domain,sex,bdate,city,country,timezone,photo_50,photo_100,photo_200_orig,has_mobile,contacts,education,online,relation,last_seen,status,can_write_private_message,can_see_all_posts,can_post,universities")
                 .setParameter("v", "5.40");
 
-        URL url = new URL(uriBuilder.toString());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        String responseStr = readStreamToString(con.getInputStream());
-        VKGenericResponse vkResponse = objectMapper.readValue(responseStr, VKGenericResponse.class);
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         return deserializeVK50ItemsResponse(vkResponse, VKontakteProfile.class);
     }
 
@@ -72,10 +68,7 @@ public class VKService {
                 .setParameter("posts", userId + "_" + postId)
                 .setParameter("v", "5.40");
 
-        URL url = new URL(uriBuilder.toString());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        String responseStr = readStreamToString(con.getInputStream());
-        VKGenericResponse vkResponse = objectMapper.readValue(responseStr, VKGenericResponse.class);
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         Post post = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Post.class);
         return post;
     }
@@ -93,11 +86,7 @@ public class VKService {
             uriBuilder.setParameter("count", String.valueOf(limit));
         }
 
-        URL url = new URL(uriBuilder.toString());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        String responseStr = readStreamToString(con.getInputStream());
-        VKGenericResponse vkResponse = objectMapper.readValue(responseStr, VKGenericResponse.class);
-        checkForError(vkResponse);
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
         return posts;
 
@@ -147,10 +136,7 @@ public class VKService {
             uriBuilder.setParameter("extended", "1");
         }
 
-        URL url = new URL(uriBuilder.toString());
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-        String responseStr = readStreamToString(con.getInputStream());
-        VKGenericResponse vkResponse = objectMapper.readValue(responseStr, VKGenericResponse.class);
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         List<Comment> comments = deserializeVK50ItemsResponse(vkResponse, Comment.class).getItems();
         List<VKontakteProfile> profiles = null;
         List<Group> groups = null;
@@ -166,22 +152,12 @@ public class VKService {
         return new CommentsResponse(comments, count, realOffset, profiles, groups);
     }
 
-    protected String readStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-        StringBuilder result = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            result.append(line);
-        }
-        return result.toString();
-    }
-
     protected <T> VKArray<T> deserializeVK50ItemsResponse(VKGenericResponse response, Class<T> itemClass) {
         JsonNode jsonNode = response.getResponse();
         JsonNode itemsNode = jsonNode.get("items");
         org.springframework.util.Assert.isTrue(itemsNode.isArray());
         int count = jsonNode.get("count").asInt();
-        return new VKArray<T>(count, deserializeItems((ArrayNode) itemsNode, itemClass));
+        return new VKArray<>(count, deserializeItems((ArrayNode) itemsNode, itemClass));
     }
 
     protected <T> List<T> deserializeItems(ArrayNode items, Class<T> itemClass) {
@@ -192,11 +168,34 @@ public class VKService {
         return elements;
     }
 
+    protected VKGenericResponse getGenericResponse(String url) throws IOException {
+        String responseStr = readUrlToString(url);
+        VKGenericResponse response = objectMapper.readValue(responseStr, VKGenericResponse.class);
+        checkForError(response);
+        return response;
+    }
+
+    protected String readUrlToString(String urlStr) throws IOException {
+        URL url = new URL(urlStr);
+        HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        return readStreamToString(con.getInputStream());
+    }
+
+    protected String readStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        StringBuilder result = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            result.append(line);
+        }
+        return result.toString();
+    }
+
     // throw exception if VKontakte response contains error
     // TODO: consider to throw specific exceptions for each error code.
     //       like for error code 113 that would be let's say InvalidUserIdVKException
     protected <T extends VKResponse> void checkForError(T toCheck) {
-        if(toCheck.getError() != null) {
+        if (toCheck.getError() != null) {
             throw new VKontakteErrorException(toCheck.getError());
         }
     }
