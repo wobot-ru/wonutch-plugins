@@ -200,6 +200,7 @@
         <module>plugins/parse-vk</module>
         <module>plugins/lib-vk</module>
         <module>plugins/indexer-multielastic</module>
+        <module>plugins/indexer-multielastic2</module>
         <module>distribution</module>
     </modules>
 </project>
