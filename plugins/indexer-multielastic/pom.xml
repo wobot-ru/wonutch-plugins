@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
-            <version>${elastic.version}</version>
+            <version>${es1.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
