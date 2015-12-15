@@ -34,31 +34,26 @@ public class DomainService {
         return posts.getCount();
     }
 
-    public static Response request(String urlString) throws MalformedURLException {
+    public static Response request(String urlString) throws IOException {
         URL url = new URL(urlString);
         String userDomain = url.getHost();
-        try {
-            if (UrlCheck.isProfile(url)) {
-                return createProfileResponse(userDomain, urlString);
-            }
-            if (UrlCheck.isFriends(url)) {
-                return createFriendsResponse(userDomain, urlString);
-            }
-            if (UrlCheck.isPostsIndex(url)) {
-                return createPostsIndexResponse(userDomain, urlString);
-            }
-            if (UrlCheck.isPostsIndexPage(url)) {
-                return createPostsIndexPageResponse(url);
-            }
-            if (UrlCheck.isPost(url)) {
-                return createPostResponse(url);
-            }
-            if (UrlCheck.isCommentPage(url)) {
-                return createCommentPageResponse(url);
-            }
-        } catch (IOException e) {
-            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
-            e.printStackTrace();
+        if (UrlCheck.isProfile(url)) {
+            return createProfileResponse(userDomain, urlString);
+        }
+        if (UrlCheck.isFriends(url)) {
+            return createFriendsResponse(userDomain, urlString);
+        }
+        if (UrlCheck.isPostsIndex(url)) {
+            return createPostsIndexResponse(userDomain, urlString);
+        }
+        if (UrlCheck.isPostsIndexPage(url)) {
+            return createPostsIndexPageResponse(url);
+        }
+        if (UrlCheck.isPost(url)) {
+            return createPostResponse(url);
+        }
+        if (UrlCheck.isCommentPage(url)) {
+            return createCommentPageResponse(url);
         }
 
         throw new UnsupportedOperationException();
