@@ -199,11 +199,12 @@
     </profiles>
 
     <modules>
-        <module>plugins/protocol-vk</module>
-        <module>plugins/parse-vk</module>
-        <module>plugins/lib-vk</module>
+        <module>plugins/index-multipage</module>
         <module>plugins/indexer-multielastic</module>
         <module>plugins/indexer-multielastic2</module>
+        <module>plugins/lib-vk</module>
+        <module>plugins/parse-vk</module>
+        <module>plugins/protocol-vk</module>
         <module>distribution</module>
     </modules>
 </project>

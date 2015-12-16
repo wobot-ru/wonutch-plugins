@@ -1,4 +1,4 @@
-package org.apache.nutch.parse.vk;
+package org.apache.nutch.indexer.multipage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,11 +10,11 @@ import org.apache.nutch.indexer.IndexingException;
 import org.apache.nutch.indexer.IndexingFilter;
 import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.parse.Parse;
 import org.apache.nutch.multielastic.MultiElasticConstants;
+import org.apache.nutch.parse.Parse;
 
-public class VkIndexingFilter implements IndexingFilter {
-    private static final Log LOG = LogFactory.getLog(VkIndexingFilter.class.getName());
+public class MultiPageIndexingFilter implements IndexingFilter {
+    private static final Log LOG = LogFactory.getLog(MultiPageIndexingFilter.class.getName());
 
     private Configuration conf;
 

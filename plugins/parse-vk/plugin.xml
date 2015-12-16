@@ -25,11 +25,4 @@
             <parameter name="pathSuffix" value=""/>
         </implementation>
     </extension>
-    <extension id="org.apache.nutch.indexer.multipage"
-               name="MultiPage Indexing Filter"
-               point="org.apache.nutch.indexer.IndexingFilter">
-        <implementation id="VkIndexingFilter"
-                        class="org.apache.nutch.parse.vk.VkIndexingFilter"/>
-    </extension>
-
 </plugin>
