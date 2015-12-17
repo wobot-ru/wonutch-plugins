@@ -20,20 +20,24 @@
 
     <dependencies>
         <dependency>
+            <groupId>ru.wobot</groupId>
+            <artifactId>multipage</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
             <version>${es1.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
             <version>${hadoop.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>ru.wobot</groupId>
-            <artifactId>lib-vk</artifactId>
-            <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

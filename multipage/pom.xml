@@ -3,28 +3,22 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>index-multipage</artifactId>
+    <artifactId>multipage</artifactId>
     <packaging>jar</packaging>
 
-    <name>index-multipage</name>
+    <name>multipage</name>
     <description>
-        Apache Nutch indexing plugin that add a flag that used by the multielastic plugin to store one page as many
-        documents.
+        Library used by nutch plugins for supporting multipage indexation.
     </description>
 
     <parent>
         <groupId>ru.wobot</groupId>
         <artifactId>wonutch-plugins</artifactId>
         <version>0.0.1</version>
-        <relativePath>../../pom.xml</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
-        <dependency>
-            <groupId>ru.wobot</groupId>
-            <artifactId>multipage</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
 
     <build>

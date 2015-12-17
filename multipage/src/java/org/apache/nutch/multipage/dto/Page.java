@@ -1,4 +1,4 @@
-package ru.wobot.vk.dto;
+package org.apache.nutch.multipage.dto;
 
 import org.apache.commons.codec.digest.DigestUtils;
 

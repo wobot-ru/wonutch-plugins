@@ -25,12 +25,13 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.nutch.indexer.IndexWriter;
 import org.apache.nutch.indexer.NutchDocument;
-import org.apache.nutch.multielastic.MultiElasticConstants;
+import org.apache.nutch.multipage.MultiElasticConstants;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -46,7 +47,7 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.wobot.vk.dto.Page;
+import org.apache.nutch.multipage.dto.Page;
 
 
 @SuppressWarnings("Duplicates")
@@ -194,7 +195,9 @@ public class MultiElastic2IndexWriter implements IndexWriter {
     }
 
     private static <T> T fromJson(String json, Class<T> classOfT) {
-        return ru.wobot.vk.serialize.Builder.getGson().fromJson(json, classOfT);
+        return new GsonBuilder()
+                .create()
+                .fromJson(json, classOfT);
     }
 
     @Override

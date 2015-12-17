@@ -10,7 +10,7 @@ import org.apache.nutch.indexer.IndexingException;
 import org.apache.nutch.indexer.IndexingFilter;
 import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.multielastic.MultiElasticConstants;
+import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.Parse;
 
 public class MultiPageIndexingFilter implements IndexingFilter {
