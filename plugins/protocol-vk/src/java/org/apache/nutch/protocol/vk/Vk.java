@@ -8,8 +8,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.*;
-import ru.wobot.vk.Response;
 import ru.wobot.vk.DomainService;
+import ru.wobot.vk.Response;
 
 public class Vk implements Protocol {
     private static final Log LOG = LogFactory.getLog(Vk.class.getName());
@@ -22,12 +22,12 @@ public class Vk implements Protocol {
         if (LOG.isInfoEnabled()) {
             LOG.info("Start fetching: " + urlString);
         }
+
         try {
             Response response = DomainService.request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
-            Exception ec = new Exception("Fetching URL '" + urlString + "' failed.", e);
-            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(ec));
+            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return new ProtocolOutput(null, new ProtocolStatus(e));
         }
     }
@@ -54,6 +54,6 @@ public class Vk implements Protocol {
 
         Metadata metadata = new Metadata();
         metadata.add("nutch.fetch.time", Long.toString(response.fetchTime));
-        return new Content(response.url, response.url, response.data, response.mimeType, metadata, this.conf);
+        return new Content(response.url, response.url, response.data, Response.mimeType, metadata, this.conf);
     }
 }
