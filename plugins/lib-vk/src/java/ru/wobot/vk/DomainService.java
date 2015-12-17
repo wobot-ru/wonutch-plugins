@@ -12,10 +12,12 @@ import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DomainService {
 
