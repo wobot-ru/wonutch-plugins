@@ -30,7 +30,6 @@
                point="org.apache.nutch.indexer.IndexingFilter">
         <implementation id="VkIndexingFilter"
                         class="org.apache.nutch.parse.vk.VkIndexingFilter"/>
-
     </extension>
 
 </plugin>

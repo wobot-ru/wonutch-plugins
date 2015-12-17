@@ -9,7 +9,8 @@
         <library name="protocol-vk.jar">
             <export name="*"/>
         </library>
-   </runtime>
+        
+    </runtime>
 
     <requires>
         <import plugin="nutch-extensionpoints"/>
@@ -24,7 +25,6 @@
                         class="org.apache.nutch.protocol.vk.Vk">
             <parameter name="protocolName" value="http"/>
         </implementation>
-
     </extension>
 
 </plugin>
