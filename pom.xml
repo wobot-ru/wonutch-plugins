@@ -21,7 +21,10 @@
     </organization>
 
     <scm>
-        <url>git@github.com:wobot-ru/wonutch-plugins.git</url>
+        <url>https://github.com/wobot-ru/wonutch-plugins</url>
+        <connection>scm:git:git@github.com:wobot-ru/wonutch-plugins.git</connection>
+        <developerConnection>scm:git:git@github.com:wobot-ru/wonutch-plugins.git</developerConnection>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>
@@ -54,6 +57,7 @@
         <es2.version>2.1.0</es2.version>
         <httpclient.version>4.2.5</httpclient.version>
         <jackson.version>2.5.3</jackson.version>
+        <ssvk.version>1.1.0.RELEASE</ssvk.version>
     </properties>
 
     <dependencies>
@@ -177,6 +181,16 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <tagNameFormat>release-@{project.version}</tagNameFormat>
+                    <preparationGoals>clean test</preparationGoals>
+                </configuration>
+            </plugin>
         </plugins>
         <finalName>${project.artifactId}</finalName>
     </build>
@@ -187,16 +201,12 @@
             <name>libs-release-local</name>
             <url>http://artifactory.wobot.local/artifactory/libs-release-local</url>
         </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>libs-snapshot-local</name>
+            <url>http://artifactory.wobot.local/artifactory/libs-snapshot-local</url>
+        </snapshotRepository>
     </distributionManagement>
-
-    <profiles>
-        <profile>
-            <id>otherOutputDir</id>
-            <build>
-                <directory>${NUTCH_HOME}/tmp</directory>
-            </build>
-        </profile>
-    </profiles>
 
     <modules>
         <module>plugins/index-multipage</module>

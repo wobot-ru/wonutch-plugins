@@ -45,7 +45,7 @@
         <dependency>
             <groupId>org.springframework.social</groupId>
             <artifactId>spring-social-vkontakte</artifactId>
-            <version>1.1.0.BUILD-SNAPSHOT</version>
+            <version>${ssvk.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
