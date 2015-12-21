@@ -4,7 +4,7 @@
 
     <groupId>ru.wobot</groupId>
     <artifactId>wonutch-plugins</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>wonutch-plugins</name>
@@ -22,7 +22,7 @@
         <url>https://github.com/wobot-ru/wonutch-plugins</url>
         <connection>scm:git:git@github.com:wobot-ru/wonutch-plugins.git</connection>
         <developerConnection>scm:git:git@github.com:wobot-ru/wonutch-plugins.git</developerConnection>
-        <tag>release-0.1.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <developers>

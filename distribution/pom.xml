@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.wobot</groupId>
     <artifactId>distribution</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
 
     <description>
         Module to carry assembly descriptor for plugin artifacts
