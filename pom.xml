@@ -206,6 +206,7 @@
         <module>plugins/parse-vk</module>
         <module>plugins/protocol-vk</module>
         <module>multipage</module>
+        <module>smm-core</module>
         <module>distribution</module>
     </modules>
 </project>
