@@ -5,6 +5,7 @@ import org.springframework.social.vkontakte.api.Comment;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
+import ru.wobot.smm.core.SMProfile;
 import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 
@@ -84,7 +85,7 @@ public class Parser {
             }
         };
 
-        return new ParseResult(urlString, getFullName(profile), content, links);
+        return new ParseResult(urlString, profile.getFirstName() + " " + profile.getLastName(), content, links);
     }
 
     private static ParseResult createFriendsParse(String userId, String urlString, String content) {
@@ -119,21 +120,17 @@ public class Parser {
         PostIndex postIndex = fromJson(content, PostIndex.class);
 
         Map<String, String> links = new HashMap<>(postIndex.postIds.length);
-        for (long id : postIndex.postIds) {
-            links.put(urlPrefix + id, String.valueOf(id));
+        for (String id : postIndex.postIds) {
+            links.put(urlPrefix + id, id);
         }
 
         return new ParseResult(url.toString(), userId, content, links);
     }
 
-    private static String getFullName(VKontakteProfile user) {
-        String name = user.getFirstName() + " " + user.getLastName();
-        return name;
-    }
-
     private static <T> T fromJson(String json, Class<T> classOfT) {
         return Builder.getGson().fromJson(json, classOfT);
     }
+
     private static String toJson(Object obj) {
         String json = Builder.getGson().toJson(obj);
         return json;

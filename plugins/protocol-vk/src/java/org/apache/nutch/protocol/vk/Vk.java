@@ -24,7 +24,7 @@ public class Vk implements Protocol {
         }
 
         try {
-            Response response = DomainService.request(urlString);
+            Response response = new DomainService().request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
