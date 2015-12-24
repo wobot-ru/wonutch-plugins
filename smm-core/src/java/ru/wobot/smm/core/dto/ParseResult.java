@@ -1,4 +1,4 @@
-package ru.wobot.vk;
+package ru.wobot.smm.core.dto;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +9,7 @@ public class ParseResult {
     public String content;
     public Map<String, String> links = new HashMap<>();
     public boolean isMultiPage;
+
     public ParseResult(String url, String title, String content, Map<String, String> links) {
         this.url = url;
         this.title = title;

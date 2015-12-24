@@ -1,4 +1,4 @@
-package ru.wobot.smm.core;
+package ru.wobot.smm.core.dto;
 
 
 public class SMProfile {

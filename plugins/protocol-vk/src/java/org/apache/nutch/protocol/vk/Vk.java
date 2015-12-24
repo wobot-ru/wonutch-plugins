@@ -8,8 +8,9 @@ import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.*;
-import ru.wobot.vk.DomainService;
-import ru.wobot.vk.Response;
+import ru.wobot.smm.core.DomainService;
+import ru.wobot.smm.core.dto.Response;
+import ru.wobot.vk.VKService;
 
 public class Vk implements Protocol {
     private static final Log LOG = LogFactory.getLog(Vk.class.getName());
@@ -24,7 +25,8 @@ public class Vk implements Protocol {
         }
 
         try {
-            Response response = new DomainService().request(urlString);
+            //todo: в зависимости от схемы урла подставлять нужную реализацию SMService
+            Response response = new DomainService(new VKService()).request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));

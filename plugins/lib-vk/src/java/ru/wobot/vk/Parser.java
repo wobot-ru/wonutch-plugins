@@ -5,8 +5,9 @@ import org.springframework.social.vkontakte.api.Comment;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import ru.wobot.smm.core.SMProfile;
-import ru.wobot.vk.dto.PostIndex;
+import ru.wobot.smm.core.dto.ParseResult;
+import ru.wobot.smm.core.UrlCheck;
+import ru.wobot.smm.core.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 
 import java.net.MalformedURLException;

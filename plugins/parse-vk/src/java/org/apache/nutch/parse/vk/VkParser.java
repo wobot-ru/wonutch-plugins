@@ -6,6 +6,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.*;
+import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.protocol.Content;
 
 import java.net.MalformedURLException;
@@ -32,7 +33,7 @@ public class VkParser implements Parser {
         }
 
         try {
-            ru.wobot.vk.ParseResult parseResult = ru.wobot.vk.Parser.parse(urlString, content.getContent());
+            ru.wobot.smm.core.dto.ParseResult parseResult = ru.wobot.vk.Parser.parse(urlString, content.getContent());
             return convert(parseResult, content.getMetadata(), new Metadata());
 
         } catch (MalformedURLException e) {
@@ -44,8 +45,8 @@ public class VkParser implements Parser {
         }
     }
 
-    private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
-        if (vk.isMultiPage){
+    private ParseResult convert(ru.wobot.smm.core.dto.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+        if (vk.isMultiPage) {
             parseMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }
         Outlink[] outlinks = new Outlink[vk.links.size()];
@@ -58,7 +59,7 @@ public class VkParser implements Parser {
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, parseMetadata);
         ParseResult parseResult = ParseResult.createParseResult(vk.url, new ParseImpl(vk.content, parseData));
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size="+ vk.links.size()+"]");
+            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size=" + vk.links.size() + "]");
             LOG.trace("Finish parse content [" + vk.url + "] : [" + vk.title + "] : [content='" + vk.content + "']");
         }
         if (LOG.isInfoEnabled()) {

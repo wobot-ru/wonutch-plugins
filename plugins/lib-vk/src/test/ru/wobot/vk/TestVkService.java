@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
-import ru.wobot.smm.core.SMProfile;
+import ru.wobot.smm.core.dto.SMProfile;
 
 import java.io.IOException;
 import java.util.Arrays;

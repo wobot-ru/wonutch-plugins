@@ -12,7 +12,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
-import ru.wobot.smm.core.SMProfile;
+import ru.wobot.smm.core.dto.SMProfile;
 import ru.wobot.smm.core.SMService;
 import ru.wobot.vk.serialize.Builder;
 
@@ -117,7 +117,8 @@ public class VKService implements SMService {
                 .setParameter("v", "5.40");
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
-        return vkResponse.getResponse().get(0).toString();
+        Post post = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Post.class);
+        return toJson(post);
     }
 
     @Override

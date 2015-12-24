@@ -1,4 +1,4 @@
-package ru.wobot.vk.dto;
+package ru.wobot.smm.core.dto;
 
 public class PostIndex {
     public String[] postIds;

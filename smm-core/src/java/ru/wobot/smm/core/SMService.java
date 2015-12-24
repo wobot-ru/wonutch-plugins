@@ -1,5 +1,7 @@
 package ru.wobot.smm.core;
 
+import ru.wobot.smm.core.dto.SMProfile;
+
 import java.io.IOException;
 import java.util.List;
 

@@ -1,27 +1,36 @@
-package ru.wobot.vk;
+package ru.wobot.smm.core;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import ru.wobot.smm.core.SMProfile;
-import ru.wobot.vk.dto.PostIndex;
-import ru.wobot.vk.serialize.Builder;
+import ru.wobot.smm.core.dto.PostIndex;
+import ru.wobot.smm.core.dto.Response;
+import ru.wobot.smm.core.dto.SMProfile;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 public class DomainService {
 
     public static final int POSTS_LIMIT = 100;
     private static final Log LOG = LogFactory.getLog(DomainService.class.getName());
-    private static final VKService VKService = new VKService();
+    private static final Gson Gson = new GsonBuilder().create();
+    private final SMService smService;
+
+    public DomainService(SMService smService) {
+        this.smService = smService;
+    }
 
     public int getPostCountForUser(String userId) throws IOException {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userId + "].posts.count:");
         }
-        int postsCount = VKService.getPostCount(userId);
+        int postsCount = smService.getPostCount(userId);
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userId + "].posts.count=" + postsCount + "!");
         }
@@ -61,13 +70,13 @@ public class DomainService {
         String postId = split[2];
         int page = Integer.parseInt(split[4]);
 
-        String json = VKService.getPostCommentData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
+        String json = smService.getPostCommentData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private Response createProfileResponse(String userDomain, String urlString) throws IOException {
         SMProfile user = getUserProfile(userDomain);
-        String json = VKService.getProfileData(user.getId());
+        String json = smService.getProfileData(user.getId());
         return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
@@ -77,7 +86,7 @@ public class DomainService {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Starting fetching user[id=" + userDomain + "].friends:");
         }
-        List<String> ids = VKService.getFriendIds(user.getId());
+        List<String> ids = smService.getFriendIds(user.getId());
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userDomain + "]|.friends[count=" + ids.size() + "]!");
         }
@@ -103,7 +112,7 @@ public class DomainService {
         int totalPosts = getPostCountForUser(user.getId());
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
 
-        List<String> ids = VKService.getPostIds(user.getId(), offset, POSTS_LIMIT);
+        List<String> ids = smService.getPostIds(user.getId(), offset, POSTS_LIMIT);
         Collections.sort(ids);
         String json = toJson(new PostIndex(ids.toArray(new String[ids.size()]), totalPosts));
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
@@ -114,7 +123,7 @@ public class DomainService {
 
         String path = url.getPath();
         String posId = path.substring(path.lastIndexOf('/') + 1);
-        String json = VKService.getPostData(user.getId(), posId);
+        String json = smService.getPostData(user.getId(), posId);
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
@@ -123,7 +132,7 @@ public class DomainService {
             LOG.trace("Starting fetching user[id=" + userDomain + "]:");
         }
 
-        List<SMProfile> profileList = VKService.getProfiles(Arrays.asList(userDomain));
+        List<SMProfile> profileList = smService.getProfiles(Arrays.asList(userDomain));
         if (LOG.isTraceEnabled()) {
             LOG.trace("Finished fetching user[id=" + userDomain + "]!");
         }
@@ -131,7 +140,6 @@ public class DomainService {
     }
 
     private String toJson(Object obj) {
-        String json = Builder.getGson().toJson(obj);
-        return json;
+        return Gson.toJson(obj);
     }
 }

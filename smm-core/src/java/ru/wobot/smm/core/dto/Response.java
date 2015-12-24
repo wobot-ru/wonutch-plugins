@@ -1,4 +1,4 @@
-package ru.wobot.vk;
+package ru.wobot.smm.core.dto;
 
 public class Response {
     public static final String mimeType = "application/json";
