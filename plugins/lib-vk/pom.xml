@@ -32,12 +32,17 @@
     <dependencies>
         <dependency>
             <groupId>ru.wobot</groupId>
-            <artifactId>multipage</artifactId>
+            <artifactId>smm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.wobot</groupId>
-            <artifactId>smm-core</artifactId>
+            <artifactId>smm-protocols</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ru.wobot</groupId>
+            <artifactId>multipage</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

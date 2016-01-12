@@ -8,6 +8,7 @@ import org.springframework.social.vkontakte.api.VKontakteProfile;
 import ru.wobot.smm.core.dto.ParseResult;
 import ru.wobot.smm.core.UrlCheck;
 import ru.wobot.smm.core.dto.PostIndex;
+import ru.wobot.smm.protocols.UrlSchemaConstants;
 import ru.wobot.vk.serialize.Builder;
 
 import java.net.MalformedURLException;
@@ -55,7 +56,7 @@ public class Parser {
         Page[] pages = new Page[response.getComments().size()];
         int i = 0;
         for (Comment comment : response.getComments()) {
-            String commentUrl = "http://" + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
+            String commentUrl = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
             Page commentPage = new Page(commentUrl, comment.getText(), toJson(comment));
             pages[i++] = commentPage;
         }
@@ -93,7 +94,7 @@ public class Parser {
         String[] friendIds = fromJson(content, String[].class);
         HashMap<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
-            String friendHref = "http://" + friendId;
+            String friendHref = UrlSchemaConstants.VKONTAKTE + friendId;
             links.put(friendHref, friendId);
         }
         String title = userId + "-friends";
@@ -107,7 +108,7 @@ public class Parser {
         HashMap<String, String> links = new HashMap<>(indexPageCount);
         for (long i = 0; i <= indexPageCount; i++) {
             String blockNumber = String.format("%08d", i);
-            // generate link <a href='http://user/index-posts/x100/00000001'>user-index-posts-x100-page-1</a>
+            // generate link <a href='vk://user/index-posts/x100/00000001'>user-index-posts-x100-page-1</a>
             links.put(urlString + "/x100/" + blockNumber, userId + "-index-posts-x100-page-" + i);
         }
 
@@ -117,7 +118,7 @@ public class Parser {
 
     private static ParseResult createPostsIndexPageParse(URL url, String content) {
         String userId = url.getHost();
-        String urlPrefix = "http://" + userId + "/posts/";
+        String urlPrefix = UrlSchemaConstants.VKONTAKTE + userId + "/posts/";
         PostIndex postIndex = fromJson(content, PostIndex.class);
 
         Map<String, String> links = new HashMap<>(postIndex.postIds.length);
