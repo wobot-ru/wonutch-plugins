@@ -1,4 +1,4 @@
-package org.apache.nutch.protocol.vk;
+package org.apache.nutch.protocol;
 
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.commons.logging.Log;
@@ -7,26 +7,24 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.protocol.*;
 import ru.wobot.smm.core.DomainService;
+import ru.wobot.smm.core.SMService;
 import ru.wobot.smm.core.dto.Response;
-import ru.wobot.vk.VKService;
 
-public class Vk implements Protocol {
-    private static final Log LOG = LogFactory.getLog(Vk.class.getName());
+public abstract class SMProtocol implements Protocol {
+    private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
+    protected DomainService domainService;
     private Configuration conf;
 
     @Override
     public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
         String urlString = url.toString();
-
         if (LOG.isInfoEnabled()) {
             LOG.info("Start fetching: " + urlString);
         }
 
         try {
-            //todo: в зависимости от схемы урла подставлять нужную реализацию SMService
-            Response response = new DomainService(new VKService()).request(urlString);
+            Response response = domainService.request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
@@ -47,9 +45,10 @@ public class Vk implements Protocol {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
+        domainService = new DomainService(createSMService());
     }
 
-    private Content convertToContent(Response response) {
+    protected Content convertToContent(Response response) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.fetchTime + "]");
         }
@@ -58,4 +57,6 @@ public class Vk implements Protocol {
         metadata.add("nutch.fetch.time", Long.toString(response.fetchTime));
         return new Content(response.url, response.url, response.data, Response.mimeType, metadata, this.conf);
     }
+
+    abstract SMService createSMService();
 }

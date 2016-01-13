@@ -9,7 +9,6 @@
         <library name="protocol-vk.jar">
             <export name="*"/>
         </library>
-        
     </runtime>
 
     <requires>
@@ -21,10 +20,13 @@
                name="HttpProtocol"
                point="org.apache.nutch.protocol.Protocol">
 
-        <implementation id="org.apache.nutch.protocol.vk.Vk"
-                        class="org.apache.nutch.protocol.vk.Vk">
+        <implementation id="org.apache.nutch.protocol.vk"
+                        class="org.apache.nutch.protocol.Vk">
             <parameter name="protocolName" value="vk"/>
         </implementation>
+        <implementation id="org.apache.nutch.protocol.fb"
+                        class="org.apache.nutch.protocol.Fb">
+            <parameter name="protocolName" value="fb"/>
+        </implementation>
     </extension>
-
 </plugin>

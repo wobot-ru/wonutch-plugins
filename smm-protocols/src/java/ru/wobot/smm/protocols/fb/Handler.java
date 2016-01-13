@@ -1,4 +1,4 @@
-package ru.wobot.smm.protocols.vk;
+package ru.wobot.smm.protocols.fb;
 
 import java.io.IOException;
 import java.net.URL;
