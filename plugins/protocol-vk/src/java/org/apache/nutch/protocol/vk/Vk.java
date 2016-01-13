@@ -8,15 +8,15 @@ import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.protocol.*;
-import ru.wobot.vk.ApiBindingRepository;
-import ru.wobot.vk.Proxy;
+import ru.wobot.vk.CredentialRepository;
+import ru.wobot.smm.core.Proxy;
 import ru.wobot.vk.Response;
 import ru.wobot.vk.Service;
 
 public class Vk implements Protocol {
     private static final Log LOG = LogFactory.getLog(Vk.class.getName());
     private Configuration conf;
-    private ApiBindingRepository proxy = Proxy.INSTANCE;
+    private CredentialRepository proxy = Proxy.INSTANCE;
 
     @Override
     public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
@@ -31,9 +31,7 @@ public class Vk implements Protocol {
             Response response = service.request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
-            //todo: refactor this!
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
-            e.printStackTrace();
             return new ProtocolOutput(null, new ProtocolStatus(e));
         }
     }

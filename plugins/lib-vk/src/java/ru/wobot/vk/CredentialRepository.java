@@ -1,13 +1,14 @@
 package ru.wobot.vk;
 
 import org.apache.hadoop.conf.Configuration;
-import org.springframework.social.vkontakte.api.impl.VKontakteTemplate;
+import ru.wobot.smm.core.Credential;
 
 /**
  * Created by Leon Misakyan on 04.12.2015.
  * Represents repository, maintaining pool of API bindings, authorized on behalf of a specific user
  */
-public interface ApiBindingRepository {
-    VKontakteTemplate getInstance();
+public interface CredentialRepository {
     void setConf(Configuration conf);
+
+    Credential getInstance();
 }
