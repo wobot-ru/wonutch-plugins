@@ -44,6 +44,7 @@ public class SMParser implements Parser {
         }
 
         try {
+            //todo: Should be implemented the parser for other social media.
             ru.wobot.sm.core.dto.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
