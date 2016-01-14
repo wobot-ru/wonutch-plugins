@@ -1,7 +1,6 @@
 package ru.wobot.smm.core;
 
 import org.apache.hadoop.conf.Configuration;
-import ru.wobot.smm.core.Credential;
 
 /**
  * Created by Leon Misakyan on 04.12.2015.
