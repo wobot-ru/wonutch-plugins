@@ -1,4 +1,4 @@
-package ru.wobot.vk;
+package ru.wobot.smm.core;
 
 import org.apache.hadoop.conf.Configuration;
 import ru.wobot.smm.core.Credential;

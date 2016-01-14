@@ -3,7 +3,6 @@ package ru.wobot.smm.core;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import ru.wobot.vk.CredentialRepository;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,8 +18,8 @@ import java.util.concurrent.TimeUnit;
 public enum Proxy implements CredentialRepository {
     INSTANCE;
 
-    private static final String REQUESTS_PERSECOND = "vk.requests.persecond";
-    private static final String ACCOUNTS_FILE = "vk.accounts";
+    private static final String REQUESTS_PERSECOND = "smm.requests.persecond";
+    private static final String ACCOUNTS_FILE = "smm.accounts";
     private static final Log LOG = LogFactory.getLog(Proxy.class.getName());
     private final BlockingQueue<DelayedCredential> credentials = new DelayQueue<>();
     private Configuration conf;

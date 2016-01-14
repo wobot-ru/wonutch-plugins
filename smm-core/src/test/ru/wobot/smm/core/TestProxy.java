@@ -32,12 +32,12 @@ public class TestProxy {
     private Configuration conf = new Configuration();
 
     {
-        conf.setStrings("vk.accounts", "vk-accounts.txt");
+        conf.setStrings("smm.accounts", "vk-accounts.txt");
         proxy.setConf(conf);
     }
 
     public void setup(int maxRequests) {
-        conf.setInt("vk.requests.persecond", maxRequests);
+        conf.setInt("smm.requests.persecond", maxRequests);
         proxy.resetQueue();
     }
 

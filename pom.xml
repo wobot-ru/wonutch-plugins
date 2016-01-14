@@ -56,6 +56,7 @@
         <httpclient.version>4.2.5</httpclient.version>
         <jackson.version>2.5.3</jackson.version>
         <ssvk.version>1.1.0.RELEASE</ssvk.version>
+        <jodatime.version>2.9.1</jodatime.version>
     </properties>
 
     <dependencies>

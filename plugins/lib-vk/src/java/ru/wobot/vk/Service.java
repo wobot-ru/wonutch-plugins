@@ -10,6 +10,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.smm.core.Credential;
+import ru.wobot.smm.core.CredentialRepository;
 import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
 

@@ -65,11 +65,5 @@
     <build>
         <sourceDirectory>src/java</sourceDirectory>
         <testSourceDirectory>src/test</testSourceDirectory>
-        <testResources>
-            <testResource>
-                <directory>src/testresources</directory>
-            </testResource>
-        </testResources>
-
     </build>
 </project>
