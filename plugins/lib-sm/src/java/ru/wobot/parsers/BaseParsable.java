@@ -1,7 +1,7 @@
 package ru.wobot.parsers;
 
-import ru.wobot.smm.core.Parsable;
-import ru.wobot.vk.serialize.Serializer;
+import ru.wobot.sm.core.Parsable;
+import ru.wobot.sm.serialize.Serializer;
 
 
 public abstract class BaseParsable extends Parsable {

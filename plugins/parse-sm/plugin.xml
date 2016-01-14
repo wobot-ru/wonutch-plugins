@@ -16,11 +16,11 @@
         <import plugin="lib-sm"/>
     </requires>
 
-    <extension id="org.apache.nutch.parse.vk"
+    <extension id="org.apache.nutch.parse.sm"
                name="VkParser"
                point="org.apache.nutch.parse.Parser">
-        <implementation id="org.apache.nutch.parse.vk.VkParser"
-                        class="org.apache.nutch.parse.vk.VkParser">
+        <implementation id="org.apache.nutch.parse.sm.VkParser"
+                        class="org.apache.nutch.parse.sm.VkParser">
             <parameter name="contentType" value="application/json"/>
             <parameter name="pathSuffix" value=""/>
         </implementation>

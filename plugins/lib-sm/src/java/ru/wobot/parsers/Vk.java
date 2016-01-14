@@ -5,9 +5,9 @@ import org.springframework.social.vkontakte.api.Comment;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import ru.wobot.smm.core.dto.ParseResult;
-import ru.wobot.smm.core.dto.PostIndex;
-import ru.wobot.smm.core.UrlSchemaConstants;
+import ru.wobot.sm.core.dto.ParseResult;
+import ru.wobot.sm.core.dto.PostIndex;
+import ru.wobot.sm.core.UrlSchemaConstants;
 
 import java.net.URL;
 import java.util.HashMap;
