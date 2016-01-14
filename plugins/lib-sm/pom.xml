@@ -32,12 +32,12 @@
     <dependencies>
         <dependency>
             <groupId>ru.wobot</groupId>
-            <artifactId>smm-core</artifactId>
+            <artifactId>sm-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>ru.wobot</groupId>
-            <artifactId>smm-protocols</artifactId>
+            <artifactId>sm-protocols</artifactId>
             <version>${project.version}</version>
             <scope>runtime</scope>
         </dependency>

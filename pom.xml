@@ -215,8 +215,8 @@
         <module>plugins/parse-sm</module>
         <module>plugins/protocol-sm</module>
         <module>multipage</module>
-        <module>smm-core</module>
-        <module>smm-protocols</module>
+        <module>sm-core</module>
+        <module>sm-protocols</module>
         <module>distribution</module>
     </modules>
 </project>

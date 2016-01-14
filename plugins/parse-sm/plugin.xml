@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
         id="parse-sm"
-        name="VkParse"
+        name="Nutch plugin for parsing social media content"
         version="1.0"
         provider-name="wobot.ru">
 

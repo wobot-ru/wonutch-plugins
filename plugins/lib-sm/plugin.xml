@@ -33,7 +33,7 @@
         <library name="multipage-0.2.0-SNAPSHOT.jar">
             <export name="*"/>
         </library>
-        <library name="smm-core-0.2.0-SNAPSHOT.jar">
+        <library name="sm-core-0.2.0-SNAPSHOT.jar">
             <export name="*"/>
         </library>
     </runtime>
