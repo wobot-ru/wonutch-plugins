@@ -7,14 +7,18 @@ import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
+import ru.wobot.parsers.Vk;
+import ru.wobot.smm.core.Parsable;
 
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class VkParser implements Parser {
-
     private static final Log LOG = LogFactory.getLog(VkParser.class.getName());
     private Configuration conf;
+    private Parsable parser;
 
     public Configuration getConf() {
         return this.conf;
@@ -22,6 +26,9 @@ public class VkParser implements Parser {
 
     public void setConf(Configuration conf) {
         this.conf = conf;
+        if (parser == null) {
+            parser = new Vk();
+        }
     }
 
     @Override
@@ -32,22 +39,21 @@ public class VkParser implements Parser {
         }
 
         try {
-            ru.wobot.vk.ParseResult parseResult = ru.wobot.vk.Parser.parse(urlString, content.getContent());
+            ru.wobot.smm.core.dto.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
         } catch (MalformedURLException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
-            e.printStackTrace();
-
             return new ParseStatus(ParseStatus.FAILED, e.getMessage())
                     .getEmptyParseResult(content.getUrl(), getConf());
         }
     }
 
-    private ParseResult convert(ru.wobot.vk.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
-        if (vk.isMultiPage){
+    protected ParseResult convert(ru.wobot.smm.core.dto.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+        if (vk.isMultiPage) {
             parseMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }
+
         Outlink[] outlinks = new Outlink[vk.links.size()];
         int index = 0;
         for (Map.Entry<String, String> mapEntry : vk.links.entrySet()) {
@@ -57,8 +63,9 @@ public class VkParser implements Parser {
 
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, parseMetadata);
         ParseResult parseResult = ParseResult.createParseResult(vk.url, new ParseImpl(vk.content, parseData));
+
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size="+ vk.links.size()+"]");
+            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size=" + vk.links.size() + "]");
             LOG.trace("Finish parse content [" + vk.url + "] : [" + vk.title + "] : [content='" + vk.content + "']");
         }
         if (LOG.isInfoEnabled()) {

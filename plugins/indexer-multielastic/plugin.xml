@@ -41,12 +41,11 @@
     <library name="antlr-runtime-3.5.jar"/>
     <library name="asm-4.1"/>
     <library name="asm-commons-4.1.jar"/>
-    <library name="gson-2.4.jar"/>
-    <library name="multipage-0.0.1.jar"/>
   </runtime>
 
   <requires>
     <import plugin="nutch-extensionpoints" />
+    <import plugin="lib-vk"/>
   </requires>
 
   <extension id="org.apache.nutch.indexer.multielastic"
