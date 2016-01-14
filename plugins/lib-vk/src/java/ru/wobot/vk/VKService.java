@@ -15,6 +15,7 @@ import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.smm.core.dto.SMProfile;
 import ru.wobot.smm.core.SMService;
 import ru.wobot.vk.serialize.Builder;
+import ru.wobot.vk.serialize.Serializer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -212,8 +213,7 @@ public class VKService implements SMService {
     }
 
     protected static String toJson(Object obj) {
-        String json = Builder.getGson().toJson(obj);
-        return json;
+        return Serializer.getInstance().toJson(obj);
     }
 
     protected <T> VKArray<T> deserializeVK50ItemsResponse(VKGenericResponse response, Class<T> itemClass) {

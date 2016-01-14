@@ -13,6 +13,7 @@ import ru.wobot.smm.core.Credential;
 import ru.wobot.smm.core.CredentialRepository;
 import ru.wobot.vk.dto.PostIndex;
 import ru.wobot.vk.serialize.Builder;
+import ru.wobot.vk.serialize.Serializer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -190,7 +191,6 @@ public class Service {
     }
 
     private String toJson(Object obj) {
-        String json = Builder.getGson().toJson(obj);
-        return json;
+        return Serializer.getInstance().toJson(obj);
     }
 }
