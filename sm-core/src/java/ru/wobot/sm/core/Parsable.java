@@ -2,11 +2,10 @@ package ru.wobot.sm.core;
 
 import ru.wobot.sm.core.dto.ParseResult;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 public abstract class Parsable {
-    public ParseResult parse(URL url, String content) throws MalformedURLException {
+    public ParseResult parse(URL url, String content) {
         if (UrlCheck.isProfile(url)) {
             return parseProfile(url, content);
         }
