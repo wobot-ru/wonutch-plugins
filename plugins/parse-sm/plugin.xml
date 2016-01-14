@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
-        id="parse-vk"
+        id="parse-sm"
         name="VkParse"
         version="1.0"
         provider-name="wobot.ru">
 
     <runtime>
-        <library name="parse-vk.jar">
+        <library name="parse-sm.jar">
             <export name="*"/>
         </library>
     </runtime>
 
     <requires>
         <import plugin="nutch-extensionpoints"/>
-        <import plugin="lib-vk"/>
+        <import plugin="lib-sm"/>
     </requires>
 
     <extension id="org.apache.nutch.parse.vk"

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
-        id="protocol-vk"
+        id="protocol-sm"
         name="vk.com Protocol Plug-in"
         version="1.0.0"
         provider-name="wobot.ru">
 
     <runtime>
-        <library name="protocol-vk.jar">
+        <library name="protocol-sm.jar">
             <export name="*"/>
         </library>
     </runtime>
 
     <requires>
         <import plugin="nutch-extensionpoints"/>
-        <import plugin="lib-vk"/>
+        <import plugin="lib-sm"/>
     </requires>
 
     <extension id="org.apache.nutch.protocol.vk"

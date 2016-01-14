@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>parse-vk</artifactId>
+    <artifactId>parse-sm</artifactId>
     <packaging>jar</packaging>
 
-    <name>parse-vk</name>
+    <name>parse-sm</name>
     <description>
         Apache Nutch plugin for VK data parsing
     </description>
@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>ru.wobot</groupId>
-            <artifactId>lib-vk</artifactId>
+            <artifactId>lib-sm</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>

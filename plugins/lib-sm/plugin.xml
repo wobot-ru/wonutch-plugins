@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <plugin
-        id="lib-vk"
-        name="vk.com Framework"
+        id="lib-sm"
+        name="Social media Framework"
         version="1.0.0"
         provider-name="wobot.ru">
 
     <runtime>
-        <library name="lib-vk.jar">
+        <library name="lib-sm.jar">
             <export name="*"/>
         </library>
         <library name="gson-2.4.jar">
