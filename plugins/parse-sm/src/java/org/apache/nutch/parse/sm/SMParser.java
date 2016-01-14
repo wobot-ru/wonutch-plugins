@@ -16,8 +16,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class VkParser implements Parser {
-    private static final Log LOG = LogFactory.getLog(VkParser.class.getName());
+public class SMParser implements Parser {
+    private static final Log LOG = LogFactory.getLog(SMParser.class.getName());
     private Configuration conf;
     private Parsable parser;
 

@@ -19,8 +19,8 @@
     <extension id="org.apache.nutch.parse.sm"
                name="VkParser"
                point="org.apache.nutch.parse.Parser">
-        <implementation id="org.apache.nutch.parse.sm.VkParser"
-                        class="org.apache.nutch.parse.sm.VkParser">
+        <implementation id="org.apache.nutch.parse.sm.SMParser"
+                        class="org.apache.nutch.parse.sm.SMParser">
             <parameter name="contentType" value="application/json"/>
             <parameter name="pathSuffix" value=""/>
         </implementation>
