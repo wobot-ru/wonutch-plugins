@@ -132,7 +132,7 @@ public class MultiElastic2IndexWriter implements IndexWriter {
             type = "doc";
         IndexRequestBuilder request = client.prepareIndex(defaultIndex, type, id);
 
-        Map<String, Object> source = new HashMap<String, Object>();
+        Map<String, Object> source = new HashMap<>();
 
         // Loop through all fields of this doc
         for (String fieldName : doc.getFieldNames()) {

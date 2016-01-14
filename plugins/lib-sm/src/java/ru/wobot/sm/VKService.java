@@ -53,7 +53,7 @@ public class VKService implements SMService {
     public List<String> getFriendIds(String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
-                .setParameter("user_id", userId.toString())
+                .setParameter("user_id", userId)
                 .setParameter("fields", "domain")
                 .setParameter("v", "5.40");
 
@@ -71,7 +71,7 @@ public class VKService implements SMService {
     public int getPostCount(String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
-                .setParameter("owner_id", userId.toString())
+                .setParameter("owner_id", userId)
                 .setParameter("v", "5.40");
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
@@ -83,7 +83,7 @@ public class VKService implements SMService {
     public List<String> getPostIds(String userId, int offset, int limit) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
-                .setParameter("owner_id", userId.toString())
+                .setParameter("owner_id", userId)
                 .setParameter("v", "5.40");
 
         if (offset >= 0) {
@@ -224,7 +224,7 @@ public class VKService implements SMService {
     }
 
     protected <T> List<T> deserializeItems(ArrayNode items, Class<T> itemClass) {
-        List<T> elements = new ArrayList<T>();
+        List<T> elements = new ArrayList<>();
         for (int i = 0; i < items.size(); i++) {
             elements.add(objectMapper.convertValue(items.get(i), itemClass));
         }

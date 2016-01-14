@@ -7,9 +7,8 @@ import org.springframework.social.vkontakte.api.attachment.Attachment;
 public class Builder {
     public static Gson createGson() {
         //todo: remove repeated initialisation
-        Gson gson = new GsonBuilder().registerTypeAdapter(Attachment.class,
+        return new GsonBuilder().registerTypeAdapter(Attachment.class,
                 new PropertyBasedInterfaceMarshal())
                 .create();
-        return gson;
     }
 }
