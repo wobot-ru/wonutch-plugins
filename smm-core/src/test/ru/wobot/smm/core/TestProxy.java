@@ -32,13 +32,12 @@ public class TestProxy {
     private Configuration conf = new Configuration();
 
     {
-        conf.setStrings("smm.accounts", "vk-accounts.txt");
         proxy.setConf(conf);
     }
 
-    public void setup(int maxRequests) {
+    public void setup(int maxRequests, Collection<String> credentialsSource) {
         conf.setInt("smm.requests.persecond", maxRequests);
-        proxy.resetQueue();
+        proxy.setCredentialsSource(credentialsSource);
     }
 
     @After
@@ -50,7 +49,9 @@ public class TestProxy {
     @Test
     public void shouldReturnCredentialFromQueue() {
         // given
-        setup(1);
+        Collection<String> s = new ArrayList<>();
+        s.add("first,1");
+        setup(1, s);
 
         //when
         Credential c = proxy.getInstance();
@@ -62,7 +63,10 @@ public class TestProxy {
     @Test
     public void shouldReturnNextCredential() {
         // given
-        setup(2);
+        Collection<String> s = new ArrayList<>();
+        s.add("first,1");
+        s.add("second,2");
+        setup(2, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -81,7 +85,10 @@ public class TestProxy {
     @Test
     public void shouldReturnSameCredentialIfMaxRequestsNotReached() {
         // given
-        setup(2);
+        Collection<String> s = new ArrayList<>();
+        s.add("first,1");
+        s.add("second,2");
+        setup(2, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -102,7 +109,10 @@ public class TestProxy {
     @Test(expected = TooManyRequestsException.class)
     public void shouldFailIfNextCredentialInSameSecond() {
         // given
-        setup(1);
+        Collection<String> s = new ArrayList<>();
+        s.add("first,1");
+        s.add("second,2");
+        setup(1, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -120,7 +130,10 @@ public class TestProxy {
     @Test(expected = TooManyRequestsException.class)
     public void shouldFailIfNextCredentialUsedInSameSecondAfterTimeout() {
         // given
-        setup(1);
+        Collection<String> s = new ArrayList<>();
+        s.add("first,1");
+        s.add("second,2");
+        setup(1, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -151,8 +164,7 @@ public class TestProxy {
         Collection<String> s = new ArrayList<>();
         s.add("first,1");
         s.add("second,2");
-        proxy.setCredentialsSource(s);
-        setup(2);
+        setup(2, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -178,8 +190,7 @@ public class TestProxy {
         s.add("first,1");
         s.add("second,2");
         s.add("third,3");
-        proxy.setCredentialsSource(s);
-        setup(2);
+        setup(2, s);
 
         //when
         long curTime = DateTimeUtils.currentTimeMillis();
@@ -203,8 +214,7 @@ public class TestProxy {
         Collection<String> s = new ArrayList<>(2);
         s.add("first,1");
         s.add("second,2");
-        proxy.setCredentialsSource(s);
-        setup(2);
+        setup(2, s);
 
         //when
         Credential c = proxy.getInstance(); // no Credentials

@@ -26,7 +26,8 @@ public enum Proxy implements CredentialRepository {
     private Collection<String> credentialsSource;
 
     public void setCredentialsSource(Collection<String> credentialsSource) {
-        this.credentialsSource = credentialsSource;
+        this.credentialsSource = Objects.requireNonNull(credentialsSource);
+        resetQueue();
     }
 
     private Collection<String> getTokensFromStream(InputStream input) throws IOException {
@@ -42,7 +43,7 @@ public enum Proxy implements CredentialRepository {
         return result;
     }
 
-    public void resetQueue() {
+    private void resetQueue() {
         Objects.requireNonNull(conf);
 
         if (credentials.size() != 0)
@@ -55,7 +56,7 @@ public enum Proxy implements CredentialRepository {
 
         int num = accounts / partitions;
         int reminder = accounts % partitions;
-        int startIndex = 1; // 1 based index
+        int startIndex; // 1 based index
         if (partitionNum + 1 <= reminder) {
             startIndex = (partitionNum * (num + 1)) + 1;
             num++;
@@ -80,16 +81,17 @@ public enum Proxy implements CredentialRepository {
     }
 
     public void setConf(Configuration conf) {
-        this.conf = conf;
+        this.conf = Objects.requireNonNull(conf);
         synchronized (this) {
             if (this.credentialsSource == null) {
                 try {
-                    setCredentialsSource(getTokensFromStream(this.getClass().getClassLoader()
-                            .getResourceAsStream(conf.getStrings(ACCOUNTS_FILE)[0])));
+                    String[] s = conf.getStrings(ACCOUNTS_FILE);
+                    if (s != null)
+                        setCredentialsSource(getTokensFromStream(this.getClass().getClassLoader()
+                                .getResourceAsStream(s[0])));
                 } catch (IOException e) {
                     LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
                 }
-                resetQueue();
             }
         }
     }
