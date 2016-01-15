@@ -38,7 +38,7 @@
     <dependencies>
         <dependency org="org.elasticsearch" name="elasticsearch" rev="2.1.0"
                     conf="*->default"/>
-        <dependency org="ru.wobot" name="multipage" rev="0.0.1"/>
+        <dependency org="ru.wobot" name="multipage" rev="0.2.0-SNAPSHOT"/>
     </dependencies>
 
 </ivy-module>

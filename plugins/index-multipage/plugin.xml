@@ -13,7 +13,7 @@
 
     <requires>
         <import plugin="nutch-extensionpoints"/>
-        <import plugin="lib-vk"/>
+        <import plugin="lib-sm"/>
     </requires>
 
     <extension id="org.apache.nutch.indexer.multipage"

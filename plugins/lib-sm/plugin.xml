@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+        id="lib-sm"
+        name="Social media Framework"
+        version="1.0.0"
+        provider-name="wobot.ru">
+
+    <runtime>
+        <library name="lib-sm.jar">
+            <export name="*"/>
+        </library>
+        <library name="gson-2.4.jar">
+            <export name="*"/>
+        </library>
+        <library name="spring-social-vkontakte-1.1.0.RELEASE.jar">
+            <export name="*"/>
+        </library>
+        <library name="spring-social-core-1.1.4.RELEASE.jar">
+            <export name="*"/>
+        </library>
+        <library name="spring-core-4.1.8.RELEASE.jar">
+            <export name="*"/>
+        </library>
+        <library name="httpclient-4.2.5.jar">
+            <export name="*"/>
+        </library>
+        <library name="httpcore-4.2.4.jar">
+            <export name="*"/>
+        </library>
+        <library name="jackson-databind-2.5.3.jar">
+            <export name="*"/>
+        </library>
+        <library name="multipage-0.2.0-SNAPSHOT.jar">
+            <export name="*"/>
+        </library>
+        <library name="sm-core-0.2.0-SNAPSHOT.jar">
+            <export name="*"/>
+        </library>
+    </runtime>
+
+</plugin>

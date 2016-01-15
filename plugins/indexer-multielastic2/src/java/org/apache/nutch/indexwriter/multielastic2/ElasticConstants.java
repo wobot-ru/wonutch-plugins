@@ -17,12 +17,12 @@
 package org.apache.nutch.indexwriter.multielastic2;
 
 public interface ElasticConstants {
-  public static final String ELASTIC_PREFIX = "elastic.";
+    String ELASTIC_PREFIX = "elastic.";
 
-  public static final String HOST = ELASTIC_PREFIX + "host";
-  public static final String PORT = ELASTIC_PREFIX + "port";
-  public static final String CLUSTER = ELASTIC_PREFIX + "cluster";
-  public static final String INDEX = ELASTIC_PREFIX + "index";
-  public static final String MAX_BULK_DOCS = ELASTIC_PREFIX + "max.bulk.docs";
-  public static final String MAX_BULK_LENGTH = ELASTIC_PREFIX + "max.bulk.size";
+    String HOST = ELASTIC_PREFIX + "host";
+    String PORT = ELASTIC_PREFIX + "port";
+    String CLUSTER = ELASTIC_PREFIX + "cluster";
+    String INDEX = ELASTIC_PREFIX + "index";
+    String MAX_BULK_DOCS = ELASTIC_PREFIX + "max.bulk.docs";
+    String MAX_BULK_LENGTH = ELASTIC_PREFIX + "max.bulk.size";
 }
