@@ -1,4 +1,4 @@
-package ru.wobot.sm.core.dto;
+package ru.wobot.sm.core.domain;
 
 import java.util.HashMap;
 import java.util.Map;

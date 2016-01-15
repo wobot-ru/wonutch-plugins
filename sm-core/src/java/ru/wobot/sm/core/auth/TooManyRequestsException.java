@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 /**
  * Created by lmisakyan on 25.12.2015.

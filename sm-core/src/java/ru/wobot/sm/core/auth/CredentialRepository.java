@@ -1,6 +1,7 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 import org.apache.hadoop.conf.Configuration;
+import ru.wobot.sm.core.auth.Credential;
 
 /**
  * Created by Leon Misakyan on 04.12.2015.

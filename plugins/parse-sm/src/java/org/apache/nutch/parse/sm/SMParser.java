@@ -5,25 +5,19 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
-import org.apache.nutch.parse.Parser;
-import org.apache.nutch.parse.ParseData;
-import org.apache.nutch.parse.ParseStatus;
-import org.apache.nutch.parse.ParseImpl;
-import org.apache.nutch.parse.ParseResult;
-import org.apache.nutch.parse.Outlink;
+import org.apache.nutch.parse.*;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.parsers.Vk;
-import ru.wobot.sm.core.Parsable;
+import ru.wobot.sm.parsers.Vk;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class SMParser implements Parser {
+public class SMParser implements org.apache.nutch.parse.Parser {
     private static final Log LOG = LogFactory.getLog(SMParser.class.getName());
     private Configuration conf;
-    private Parsable parser;
+    private ru.wobot.sm.core.parse.Parser parser;
 
     public Configuration getConf() {
         return this.conf;
@@ -45,7 +39,7 @@ public class SMParser implements Parser {
 
         try {
             //todo: Should be implemented the parser for other social media.
-            ru.wobot.sm.core.dto.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
+            ru.wobot.sm.core.domain.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
         } catch (MalformedURLException e) {
@@ -55,7 +49,7 @@ public class SMParser implements Parser {
         }
     }
 
-    protected ParseResult convert(ru.wobot.sm.core.dto.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+    protected ParseResult convert(ru.wobot.sm.core.domain.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
         if (vk.isMultiPage) {
             parseMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }

@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 public interface Credential {
     String getAccessToken();

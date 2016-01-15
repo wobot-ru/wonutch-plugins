@@ -1,25 +1,27 @@
-package ru.wobot.parsers;
+package ru.wobot.sm.parsers;
 
 import org.apache.nutch.multipage.dto.Page;
 import org.springframework.social.vkontakte.api.Comment;
 import org.springframework.social.vkontakte.api.CommentsResponse;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
-import ru.wobot.sm.core.dto.ParseResult;
-import ru.wobot.sm.core.dto.PostIndex;
-import ru.wobot.sm.core.UrlSchemaConstants;
+import ru.wobot.sm.core.parse.AbstractParser;
+import ru.wobot.sm.core.domain.ParseResult;
+import ru.wobot.sm.core.domain.PostIndex;
+import ru.wobot.sm.core.url.UrlSchemaConstants;
+import ru.wobot.sm.serialize.Serializer;
 
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Vk extends BaseParsable {
+public class Vk extends AbstractParser {
     @Override
     protected ParseResult parseProfile(URL url, String content) {
         final String urlString = url.toString();
         final String userDomain = url.getHost();
 
-        VKontakteProfile profile = fromJson(content, VKontakteProfile.class);
+        VKontakteProfile profile = Serializer.getInstance().fromJson(content, VKontakteProfile.class);
 
         HashMap<String, String> links = new HashMap<String, String>(3) {
             {
@@ -40,7 +42,7 @@ public class Vk extends BaseParsable {
     protected ParseResult parseFriends(URL url, String content) {
         String userDomain = url.getHost();
 
-        String[] friendIds = fromJson(content, String[].class);
+        String[] friendIds = Serializer.getInstance().fromJson(content, String[].class);
 
         HashMap<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
@@ -55,7 +57,7 @@ public class Vk extends BaseParsable {
         String userDomain = url.getHost();
         String urlString = url.toString();
 
-        int postsCount = fromJson(content, int.class);
+        int postsCount = Serializer.getInstance().fromJson(content, int.class);
         int indexPageCount = postsCount / 100;
 
         HashMap<String, String> links = new HashMap<>(indexPageCount);
@@ -72,7 +74,7 @@ public class Vk extends BaseParsable {
         String userDomain = url.getHost();
         String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
 
-        PostIndex postIndex = fromJson(content, PostIndex.class);
+        PostIndex postIndex = Serializer.getInstance().fromJson(content, PostIndex.class);
 
         Map<String, String> links = new HashMap<>(postIndex.postIds.length);
         for (String id : postIndex.postIds) {
@@ -85,7 +87,7 @@ public class Vk extends BaseParsable {
     protected ParseResult parsePost(URL url, String content) {
         String urlString = url.toString();
 
-        Post post = fromJson(content, Post.class);
+        Post post = Serializer.getInstance().fromJson(content, Post.class);
         int indexPageCount = post.getComments().getCount() / 100;
 
         HashMap<String, String> links = new HashMap<>(indexPageCount);
@@ -106,15 +108,15 @@ public class Vk extends BaseParsable {
         int page = Integer.parseInt(split[4]);
 
         //todo: теряется totalCount определится, насколько это нам важно
-        CommentsResponse response = fromJson(content, CommentsResponse.class);
+        CommentsResponse response = Serializer.getInstance().fromJson(content, CommentsResponse.class);
 
         Page[] pages = new Page[response.getComments().size()];
         int i = 0;
         for (Comment comment : response.getComments()) {
             String commentUrl = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
-            Page commentPage = new Page(commentUrl, comment.getText(), toJson(comment));
+            Page commentPage = new Page(commentUrl, comment.getText(), Serializer.getInstance().toJson(comment));
             pages[i++] = commentPage;
         }
-        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, toJson(pages), true);
+        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(pages), true);
     }
 }

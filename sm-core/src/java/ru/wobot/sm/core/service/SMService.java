@@ -1,6 +1,6 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.service;
 
-import ru.wobot.sm.core.dto.SMProfile;
+import ru.wobot.sm.core.domain.SMProfile;
 
 import java.io.IOException;
 import java.util.List;

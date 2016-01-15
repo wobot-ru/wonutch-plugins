@@ -17,7 +17,7 @@
     </requires>
 
     <extension id="org.apache.nutch.parse.sm"
-               name="VkParser"
+               name="SMParser"
                point="org.apache.nutch.parse.Parser">
         <implementation id="org.apache.nutch.parse.sm.SMParser"
                         class="org.apache.nutch.parse.sm.SMParser">

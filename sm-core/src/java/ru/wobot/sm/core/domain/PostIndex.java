@@ -1,4 +1,4 @@
-package ru.wobot.sm.core.dto;
+package ru.wobot.sm.core.domain;
 
 public class PostIndex {
     public String[] postIds;

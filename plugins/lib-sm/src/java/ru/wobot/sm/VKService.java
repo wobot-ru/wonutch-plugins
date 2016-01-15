@@ -12,8 +12,8 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
-import ru.wobot.sm.core.dto.SMProfile;
-import ru.wobot.sm.core.SMService;
+import ru.wobot.sm.core.domain.SMProfile;
+import ru.wobot.sm.core.service.SMService;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.io.BufferedReader;

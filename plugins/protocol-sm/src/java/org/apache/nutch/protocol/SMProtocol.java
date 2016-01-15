@@ -7,9 +7,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
-import ru.wobot.sm.core.DomainService;
-import ru.wobot.sm.core.SMService;
-import ru.wobot.sm.core.dto.Response;
+import ru.wobot.sm.core.service.DomainService;
+import ru.wobot.sm.core.service.SMService;
+import ru.wobot.sm.core.domain.Response;
 
 public abstract class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());

@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.url;
 
 public interface UrlSchemaConstants {
     String VKONTAKTE = "vk://";

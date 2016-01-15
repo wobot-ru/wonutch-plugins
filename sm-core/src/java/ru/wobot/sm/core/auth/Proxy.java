@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -17,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 
 public enum Proxy implements CredentialRepository {
     INSTANCE;
-    //todo: rename "smm" to "sm"
-    private static final String REQUESTS_PERSECOND = "smm.requests.persecond";
-    private static final String ACCOUNTS_FILE = "smm.accounts";
+
+    private static final String REQUESTS_PERSECOND = "sm.requests.persecond";
+    private static final String ACCOUNTS_FILE = "sm.accounts";
     private static final Log LOG = LogFactory.getLog(Proxy.class.getName());
     private final BlockingQueue<DelayedCredential> credentials = new DelayQueue<>();
     private Configuration conf;
@@ -82,6 +82,7 @@ public enum Proxy implements CredentialRepository {
 
     public void setConf(Configuration conf) {
         this.conf = Objects.requireNonNull(conf);
+        //TODO: consider other publication idioms for performance (DCL, Static init etc)
         synchronized (this) {
             if (this.credentialsSource == null) {
                 try {

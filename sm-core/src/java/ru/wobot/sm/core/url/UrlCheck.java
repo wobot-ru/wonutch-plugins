@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.url;
 
 import java.net.URL;
 import java.util.regex.Matcher;

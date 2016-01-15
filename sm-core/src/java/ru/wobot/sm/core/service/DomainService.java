@@ -1,12 +1,13 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import ru.wobot.sm.core.dto.PostIndex;
-import ru.wobot.sm.core.dto.Response;
-import ru.wobot.sm.core.dto.SMProfile;
+import ru.wobot.sm.core.url.UrlCheck;
+import ru.wobot.sm.core.domain.PostIndex;
+import ru.wobot.sm.core.domain.Response;
+import ru.wobot.sm.core.domain.SMProfile;
 
 import java.io.IOException;
 import java.net.URL;

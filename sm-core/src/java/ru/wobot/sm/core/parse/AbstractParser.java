@@ -1,10 +1,12 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.parse;
 
-import ru.wobot.sm.core.dto.ParseResult;
+import ru.wobot.sm.core.domain.ParseResult;
+import ru.wobot.sm.core.url.UrlCheck;
 
 import java.net.URL;
 
-public abstract class Parsable {
+public abstract class AbstractParser implements Parser {
+    @Override
     public ParseResult parse(URL url, String content) {
         if (UrlCheck.isProfile(url)) {
             return parseProfile(url, content);
