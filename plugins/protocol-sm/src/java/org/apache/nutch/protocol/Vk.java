@@ -5,7 +5,7 @@ import ru.wobot.sm.VKService;
 
 public class Vk extends SMProtocol {
     @Override
-    SMService createSMService() {
+    public SMService createSMService() {
         return new VKService();
     }
 }

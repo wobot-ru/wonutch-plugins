@@ -58,5 +58,5 @@ public abstract class SMProtocol implements Protocol {
         return new Content(response.url, response.url, response.data, Response.MIME_TYPE, metadata, this.conf);
     }
 
-    abstract SMService createSMService();
+    protected abstract SMService createSMService();
 }
