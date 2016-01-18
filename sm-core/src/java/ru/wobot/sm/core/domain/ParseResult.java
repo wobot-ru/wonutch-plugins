@@ -2,6 +2,7 @@ package ru.wobot.sm.core.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ParseResult {
     public final String url;
@@ -14,8 +15,7 @@ public class ParseResult {
         this.url = url;
         this.title = title;
         this.content = content;
-        this.links = links;
-        this.isMultiPage = false;
+        this.links = Objects.requireNonNull(links, "links argument must not be null.");
     }
 
     public ParseResult(String url, String title, String content, boolean isMultiPage) {
