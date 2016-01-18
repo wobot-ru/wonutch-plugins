@@ -5,9 +5,6 @@ import org.joda.time.DateTimeUtils;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Leon Misakyan on 26.12.2015.
- */
 public class DelayedCredential implements Delayed, Credential {
     private final String accessToken;
     private final String clientSecret;

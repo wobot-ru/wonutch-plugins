@@ -7,9 +7,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
+import ru.wobot.sm.core.domain.Response;
 import ru.wobot.sm.core.service.DomainService;
 import ru.wobot.sm.core.service.SMService;
-import ru.wobot.sm.core.domain.Response;
 
 public abstract class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
@@ -55,7 +55,7 @@ public abstract class SMProtocol implements Protocol {
 
         Metadata metadata = new Metadata();
         metadata.add("nutch.fetch.time", Long.toString(response.fetchTime));
-        return new Content(response.url, response.url, response.data, Response.mimeType, metadata, this.conf);
+        return new Content(response.url, response.url, response.data, Response.MIME_TYPE, metadata, this.conf);
     }
 
     abstract SMService createSMService();

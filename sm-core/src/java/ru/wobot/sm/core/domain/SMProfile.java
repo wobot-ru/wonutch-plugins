@@ -1,6 +1,5 @@
 package ru.wobot.sm.core.domain;
 
-
 public class SMProfile {
     private final String userId;
     private final String domain;

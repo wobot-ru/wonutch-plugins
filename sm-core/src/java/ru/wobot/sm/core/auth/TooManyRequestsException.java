@@ -1,8 +1,5 @@
 package ru.wobot.sm.core.auth;
 
-/**
- * Created by lmisakyan on 25.12.2015.
- */
 public class TooManyRequestsException extends RuntimeException {
     private final long delay;
 

@@ -1,7 +1,7 @@
 package ru.wobot.sm.core.domain;
 
 public class Response {
-    public static final String mimeType = "application/json";
+    public static final String MIME_TYPE = "application/json";
 
     public Response(String url, byte[] data, long fetchTime) {
         this.url = url;
