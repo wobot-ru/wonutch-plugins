@@ -44,7 +44,7 @@ public class Vk extends AbstractParser {
 
         String[] friendIds = Serializer.getInstance().fromJson(content, String[].class);
 
-        HashMap<String, String> links = new HashMap<>(friendIds.length);
+        Map<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
             String friendHref = UrlSchemaConstants.VKONTAKTE + friendId;
             links.put(friendHref, friendId);

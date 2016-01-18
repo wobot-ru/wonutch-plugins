@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ParseResult {
-    public String url;
-    public String title;
-    public String content;
-    public Map<String, String> links = new HashMap<>();
+    public final String url;
+    public final String title;
+    public final String content;
+    public final Map<String, String> links;
     public boolean isMultiPage;
 
     public ParseResult(String url, String title, String content, Map<String, String> links) {
@@ -15,6 +15,7 @@ public class ParseResult {
         this.title = title;
         this.content = content;
         this.links = links;
+        this.isMultiPage = false;
     }
 
     public ParseResult(String url, String title, String content, boolean isMultiPage) {
