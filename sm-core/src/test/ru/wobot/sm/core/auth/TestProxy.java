@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.log4j.ConsoleAppender;

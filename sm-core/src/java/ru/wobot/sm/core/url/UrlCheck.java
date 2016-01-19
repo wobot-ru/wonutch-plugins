@@ -11,7 +11,7 @@ public class UrlCheck {
 
     public static boolean isProfile(URL url) {
         String path = url.getPath();
-        return path.equals("") || path.equals("/");
+        return path.isEmpty() || path.equals("/");
     }
 
     public static boolean isFriends(URL url) {

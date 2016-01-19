@@ -1,8 +1,6 @@
-package ru.wobot.sm;
-
+package ru.wobot.sm.core.url;
 
 import org.junit.Test;
-import ru.wobot.sm.core.url.UrlCheck;
 
 import java.net.MalformedURLException;
 import java.net.URL;

@@ -1,4 +1,4 @@
-package ru.wobot.sm.core;
+package ru.wobot.sm.core.auth;
 
 import org.joda.time.DateTimeUtils;
 import org.junit.Test;

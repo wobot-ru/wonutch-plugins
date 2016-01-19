@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class VKService implements SMService {
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     public VKService() {
         objectMapper = new ObjectMapper();
