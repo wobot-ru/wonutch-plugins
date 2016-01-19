@@ -49,27 +49,27 @@ public class SMParser implements org.apache.nutch.parse.Parser {
         }
     }
 
-    protected ParseResult convert(ru.wobot.sm.core.domain.ParseResult vk, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
-        if (vk.isMultiPage) {
-            parseMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
+    protected ParseResult convert(ru.wobot.sm.core.domain.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+        if (parsedDto.isMultiPage) {
+            contentMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }
 
-        Outlink[] outlinks = new Outlink[vk.links.size()];
+        Outlink[] outlinks = new Outlink[parsedDto.links.size()];
         int index = 0;
-        for (Map.Entry<String, String> mapEntry : vk.links.entrySet()) {
+        for (Map.Entry<String, String> mapEntry : parsedDto.links.entrySet()) {
             outlinks[index] = new Outlink(mapEntry.getKey(), mapEntry.getValue());
             index++;
         }
 
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, vk.title, outlinks, contentMetadata, parseMetadata);
-        ParseResult parseResult = ParseResult.createParseResult(vk.url, new ParseImpl(vk.content, parseData));
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, parsedDto.title, outlinks, contentMetadata, parseMetadata);
+        ParseResult parseResult = ParseResult.createParseResult(parsedDto.url, new ParseImpl(parsedDto.content, parseData));
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Finish parse links [" + vk.url + "] : [" + vk.title + "] : [link.size=" + vk.links.size() + "]");
-            LOG.trace("Finish parse content [" + vk.url + "] : [" + vk.title + "] : [content='" + vk.content + "']");
+            LOG.trace("Finish parse links [" + parsedDto.url + "] : [" + parsedDto.title + "] : [link.size=" + parsedDto.links.size() + "]");
+            LOG.trace("Finish parse content [" + parsedDto.url + "] : [" + parsedDto.title + "] : [content='" + parsedDto.content + "']");
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("Finish parse: " + vk.url);
+            LOG.info("Finish parse: " + parsedDto.url);
         }
         return parseResult;
     }

@@ -25,10 +25,10 @@ public class MultiPageIndexingFilter implements IndexingFilter {
         }
         LOG.info("VkIndexingFilter: filter(\"" + url.toString() + "\")");
 
-        Metadata metadata = parse.getData().getParseMeta();
-        if ("true".equals(metadata.get(MultiElasticConstants.MULTI_DOC))) {
+        Metadata contentMeta = parse.getData().getContentMeta();
+        if ("true".equals(contentMeta.get(MultiElasticConstants.MULTI_DOC))) {
             LOG.debug(url.toString() + " is MULTI_DOC");
-            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, metadata.get(MultiElasticConstants.MULTI_DOC));
+            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, contentMeta.get(MultiElasticConstants.MULTI_DOC));
         }
         return doc;
     }
