@@ -61,6 +61,13 @@ public class SMParser implements org.apache.nutch.parse.Parser {
             index++;
         }
 
+        for (Map.Entry<String, String> entry : parsedDto.parseMeta.entrySet()) {
+            parseMetadata.add(entry.getKey(), entry.getValue());
+        }
+        for (Map.Entry<String, String> entry : parsedDto.contentMeta.entrySet()) {
+            contentMetadata.add(entry.getKey(), entry.getValue());
+        }
+
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, parsedDto.title, outlinks, contentMetadata, parseMetadata);
         ParseResult parseResult = ParseResult.createParseResult(parsedDto.url, new ParseImpl(parsedDto.content, parseData));
 
