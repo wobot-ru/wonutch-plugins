@@ -56,7 +56,6 @@
         <httpclient.version>4.2.5</httpclient.version>
         <jackson.version>2.5.3</jackson.version>
         <ssvk.version>1.1.0.RELEASE</ssvk.version>
-        <jodatime.version>2.9.1</jodatime.version>
     </properties>
 
     <dependencies>
@@ -106,13 +105,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=UTF-8 -Djava.protocol.handler.pkgs=ru.wobot.sm.protocols</argLine>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -214,9 +206,7 @@
         <module>plugins/lib-sm</module>
         <module>plugins/parse-sm</module>
         <module>plugins/protocol-sm</module>
-        <module>multipage</module>
-        <module>sm-core</module>
-        <module>sm-protocols</module>
         <module>distribution</module>
+        <module>core-libs</module>
     </modules>
 </project>
