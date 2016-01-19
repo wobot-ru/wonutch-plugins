@@ -62,7 +62,7 @@ public class VKService implements SMService {
         List<String> ids = new ArrayList<>(friends.getItems().size());
         for (VKontakteProfile p : friends.getItems()) {
             //todo: определиться, что мы храним "id" или "screenName a.k.a. domain"
-            ids.add(p.getDomain());
+            ids.add("id" + p.getId());
         }
         return ids;
     }

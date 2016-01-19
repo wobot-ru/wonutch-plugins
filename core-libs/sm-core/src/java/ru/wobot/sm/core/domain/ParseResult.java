@@ -9,17 +9,21 @@ public class ParseResult {
     public final String title;
     public final String content;
     public final Map<String, String> links;
+    public final Map<String, String> parseMeta;
+    public final Map<String, String> contentMeta;
     public boolean isMultiPage;
 
-    public ParseResult(String url, String title, String content, Map<String, String> links) {
+    public ParseResult(String url, String title, String content, Map<String, String> links, Map<String, String> parseMeta, Map<String, String> contentMeta) {
         this.url = url;
         this.title = title;
         this.content = content;
+        this.parseMeta = Objects.requireNonNull(parseMeta, "parseMeta argument must not be null.");
+        this.contentMeta = Objects.requireNonNull(contentMeta, "contentMeta argument must not be null.");
         this.links = Objects.requireNonNull(links, "links argument must not be null.");
     }
 
-    public ParseResult(String url, String title, String content, boolean isMultiPage) {
-        this(url, title, content, new HashMap<String, String>());
+    public ParseResult(String url, String title, String content, Map<String, String> parseMeta, Map<String, String> contentMeta, boolean isMultiPage) {
+        this(url, title, content, new HashMap<String, String>(), parseMeta, contentMeta);
         this.isMultiPage = isMultiPage;
     }
 }
