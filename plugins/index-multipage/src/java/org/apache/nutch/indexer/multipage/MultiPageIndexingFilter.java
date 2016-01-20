@@ -27,9 +27,9 @@ public class MultiPageIndexingFilter implements IndexingFilter {
         LOG.info("MultiPageIndexingFilter: filter(\"" + url.toString() + "\")");
 
         Metadata contentMeta = parse.getData().getContentMeta();
-        if ("true".equals(contentMeta.get(MultiElasticConstants.MULTI_DOC))) {
-            LOG.debug(url.toString() + " is MULTI_DOC");
-            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, contentMeta.get(MultiElasticConstants.MULTI_DOC));
+        if ("true".equals(contentMeta.get(MultiElasticConstants.MULTI_PAGE))) {
+            LOG.debug(url.toString() + " is MULTI_PAGE");
+            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_PAGE, contentMeta.get(MultiElasticConstants.MULTI_PAGE));
         }
 
         if (doc.getFieldValue("content") != null)

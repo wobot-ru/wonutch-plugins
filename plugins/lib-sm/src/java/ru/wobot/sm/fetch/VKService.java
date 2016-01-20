@@ -13,7 +13,9 @@ import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.sm.core.domain.SMProfile;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.io.BufferedReader;
@@ -25,8 +27,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VKService implements SMService {
+    public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
     public VKService() {
@@ -55,13 +60,12 @@ public class VKService implements SMService {
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
                 .setParameter("fields", "domain")
-                .setParameter("v", "5.40");
+                .setParameter("v", API_v5_40);
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<VKontakteProfile> friends = deserializeVK50ItemsResponse(vkResponse, VKontakteProfile.class);
         List<String> ids = new ArrayList<>(friends.getItems().size());
         for (VKontakteProfile p : friends.getItems()) {
-            //todo: определиться, что мы храним "id" или "screenName a.k.a. domain"
             ids.add("id" + p.getId());
         }
         return ids;
@@ -72,7 +76,7 @@ public class VKService implements SMService {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
-                .setParameter("v", "5.40");
+                .setParameter("v", API_v5_40);
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
@@ -84,7 +88,7 @@ public class VKService implements SMService {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
-                .setParameter("v", "5.40");
+                .setParameter("v", API_v5_40);
 
         if (offset >= 0) {
             uriBuilder.setParameter("offset", String.valueOf(offset));
@@ -102,27 +106,37 @@ public class VKService implements SMService {
     }
 
     @Override
-    public String getProfileData(String userId) throws IOException {
+    public FetchResponse getProfileData(String userId) throws IOException {
         String responseStr = getVKProfiles(Arrays.asList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
-        return toJson(profiles.getProfiles().get(0));
+
+        Map<String, String> metaData = new HashMap<String, String>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        String json = toJson(profiles.getProfiles().get(0));
+        return new FetchResponse(json, metaData);
     }
 
     @Override
-    public String getPostData(String userId, String postId) throws IOException {
+    public FetchResponse getPostData(String userId, String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
-                .setParameter("v", "5.40");
+                .setParameter("v", API_v5_40);
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         Post post = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Post.class);
-        return toJson(post);
+
+        Map<String, String> metaData = new HashMap<String, String>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        String json = toJson(post);
+        return new FetchResponse(json, metaData);
     }
 
     @Override
-    public String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
+    public FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
@@ -130,7 +144,11 @@ public class VKService implements SMService {
                 .offset(skip)
                 .build();
 
-        return toJson(getComments(query));
+        Map<String, String> metaData = new HashMap<String, String>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        String json = toJson(getComments(query));
+        return new FetchResponse(json, metaData);
     }
 
     protected CommentsResponse getComments(CommentsQuery query) throws IOException {
@@ -197,7 +215,7 @@ public class VKService implements SMService {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/users.get")
                 .setParameter("fields", "sex,bdate,city,country,photo_50,photo_100,photo_200_orig,photo_200,photo_400_orig,photo_max,photo_max_orig,photo_id,online,online_mobile,domain,has_mobile,contacts,connections,site,education,universities,schools,can_post,can_see_all_posts,can_see_audio,can_write_private_message,status,last_seen,relation,relatives,counters,screen_name,maiden_name,timezone,occupation,activities,interests,music,movies,tv,books,games,about,quotes,personal,friend_status,military,career")
-                .setParameter("v", "5.40");
+                .setParameter("v", API_v5_40);
 
         if (userIds != null) {
             StringBuilder sb = new StringBuilder();

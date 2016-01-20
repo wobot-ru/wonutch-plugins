@@ -1,6 +1,7 @@
 package ru.wobot.sm.core.meta;
 
 public interface ContentMetaConstants {
-    String TYPE = "type";
-    String PARENT = "parent";
+    String TYPE = "nutch.content.type";
+    String PARENT = "nutch.content.parent";
+    String API_VER = "nutch.content.api.v";
 }

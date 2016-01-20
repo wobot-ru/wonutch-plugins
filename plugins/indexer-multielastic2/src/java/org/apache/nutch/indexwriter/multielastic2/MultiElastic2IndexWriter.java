@@ -157,7 +157,7 @@ public class MultiElastic2IndexWriter implements IndexWriter {
 
         flushIfNecessary(id);
 
-        if ("true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_DOC))) {
+        if ("true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_PAGE))) {
             String content = (String) source.get("content");
             Page[] pages = fromJson(content, Page[].class);
             if (pages != null) {

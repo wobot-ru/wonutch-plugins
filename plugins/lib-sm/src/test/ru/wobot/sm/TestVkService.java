@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import ru.wobot.sm.core.domain.SMProfile;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.fetch.VKService;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -32,8 +34,8 @@ public class TestVkService {
 
     @Test
     public void is_getUsers_return_user_profile() throws IOException {
-        String profileStr = vkService.getProfileData("id1");
-        Assert.assertNotNull(profileStr);
+        FetchResponse r = vkService.getProfileData("id1");
+        assertThat(r, is(not(nullValue())));
     }
 
     @Test
@@ -44,8 +46,8 @@ public class TestVkService {
 
     @Test
     public void is_getPost_return_post() throws IOException {
-        String post = vkService.getPostData("1", "45558");
-        Assert.assertTrue(post.contains("Способность"));
+        FetchResponse r = vkService.getPostData("1", "45558");
+        assertThat(r.getData(), containsString("Способность"));
     }
 
     @Test
@@ -56,7 +58,7 @@ public class TestVkService {
 
     @Test
     public void is_getComments_return_comments() throws IOException {
-        String commentsData = vkService.getPostCommentsData("1", "593585", 0, 100);
-        assertThat(commentsData, is(not(nullValue())));
+        FetchResponse r = vkService.getPostCommentsData("1", "593585", 0, 100);
+        assertThat(r.getData(), is(not(nullValue())));
     }
 }
