@@ -12,6 +12,7 @@ import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.Parse;
+import org.apache.nutch.util.StringUtil;
 
 public class MultiPageIndexingFilter implements IndexingFilter {
     private static final Log LOG = LogFactory.getLog(MultiPageIndexingFilter.class.getName());
@@ -30,6 +31,11 @@ public class MultiPageIndexingFilter implements IndexingFilter {
             LOG.debug(url.toString() + " is MULTI_DOC");
             doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, contentMeta.get(MultiElasticConstants.MULTI_DOC));
         }
+
+        if (doc.getFieldValue("content") != null)
+            return doc;
+
+        doc.add("content", StringUtil.cleanField(parse.getText()));
         return doc;
     }
 

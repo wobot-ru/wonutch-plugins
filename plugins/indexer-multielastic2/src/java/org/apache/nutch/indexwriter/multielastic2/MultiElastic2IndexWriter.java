@@ -160,25 +160,27 @@ public class MultiElastic2IndexWriter implements IndexWriter {
         if ("true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_DOC))) {
             String content = (String) source.get("content");
             Page[] pages = fromJson(content, Page[].class);
-            for (Page page : pages) {
-                id = page.url;
-                source.put("url", page.url);
-                source.put("content", page.content);
-                source.put("title", page.title);
-                source.put("digest", page.digest);
+            if (pages != null) {
+                for (Page page : pages) {
+                    id = page.url;
+                    source.put("url", page.url);
+                    source.put("content", page.content);
+                    source.put("title", page.title);
+                    source.put("digest", page.digest);
 
-                for (Map.Entry<String, Object> field : source.entrySet()) {
-                    bulkLength += field.getValue().toString().length();
+                    for (Map.Entry<String, Object> field : source.entrySet()) {
+                        bulkLength += field.getValue().toString().length();
+                    }
+                    request = client.prepareIndex(defaultIndex, type, id);
+                    request.setSource(source);
+
+                    // Add this indexing request to a bulk request
+                    bulk.add(request);
+                    indexedDocs++;
+                    bulkDocs++;
+
+                    flushIfNecessary(id);
                 }
-                request = client.prepareIndex(defaultIndex, type, id);
-                request.setSource(source);
-
-                // Add this indexing request to a bulk request
-                bulk.add(request);
-                indexedDocs++;
-                bulkDocs++;
-
-                flushIfNecessary(id);
             }
         }
     }
