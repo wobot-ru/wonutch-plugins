@@ -1,6 +1,7 @@
 package ru.wobot.sm.fetch;
 
 import ru.wobot.sm.core.domain.SMProfile;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
 
 import java.io.IOException;
@@ -28,17 +29,17 @@ public class FbService implements SMService {
     }
 
     @Override
-    public String getProfileData(String userId) throws IOException {
+    public FetchResponse getProfileData(String userId) throws IOException {
         return null;
     }
 
     @Override
-    public String getPostData(String userId, String postId) throws IOException {
+    public FetchResponse getPostData(String userId, String postId) throws IOException {
         return null;
     }
 
     @Override
-    public String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
+    public FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
         return null;
     }
 }

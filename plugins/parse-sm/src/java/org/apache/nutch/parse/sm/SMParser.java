@@ -51,10 +51,6 @@ public class SMParser implements org.apache.nutch.parse.Parser {
     }
 
     protected ParseResult convert(ru.wobot.sm.core.parse.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
-        if (parsedDto.isMultiPage) {
-            contentMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
-        }
-
         Outlink[] outlinks = new Outlink[parsedDto.links.size()];
         int index = 0;
         for (Map.Entry<String, String> mapEntry : parsedDto.links.entrySet()) {

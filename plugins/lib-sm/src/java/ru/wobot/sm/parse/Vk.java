@@ -1,5 +1,6 @@
 package ru.wobot.sm.parse;
 
+import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.multipage.dto.Page;
 import org.springframework.social.vkontakte.api.*;
 import ru.wobot.sm.core.Sources;
@@ -156,8 +157,11 @@ public class Vk extends AbstractParser {
         final String[] split = path.split("/");
         final int postId = Integer.parseInt(split[2]);
         final int page = Integer.parseInt(split[4]);
+        final HashMap<String, String> links = new HashMap<>();
         final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, String> contentMeta = new HashMap<String, String>() {{
+            put(MultiElasticConstants.MULTI_PAGE, "true");
+        }};
 
         //todo: теряется totalCount определится, насколько это нам важно
         CommentsResponse response = Serializer.getInstance().fromJson(content, CommentsResponse.class);
@@ -169,6 +173,7 @@ public class Vk extends AbstractParser {
             Page commentPage = new Page(commentUrl, comment.getText(), Serializer.getInstance().toJson(comment));
             pages[i++] = commentPage;
         }
-        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(pages), parseMeta, contentMeta, true);
+
+        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(pages), links, parseMeta, contentMeta);
     }
 }

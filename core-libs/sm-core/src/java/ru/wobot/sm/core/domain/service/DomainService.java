@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.url.UrlCheck;
 import ru.wobot.sm.core.domain.PostIndex;
@@ -72,14 +73,14 @@ public class DomainService {
         String postId = split[2];
         int page = Integer.parseInt(split[4]);
 
-        String json = smService.getPostCommentsData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
-        return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        FetchResponse fetchResponse = smService.getPostCommentsData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
+        return new Response(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private Response createProfileResponse(String userDomain, String urlString) throws IOException {
         SMProfile user = getUserProfile(userDomain);
-        String json = smService.getProfileData(user.getId());
-        return new Response(urlString, json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        FetchResponse fetchResponse = smService.getProfileData(user.getId());
+        return new Response(urlString, fetchResponse.getData().getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private Response createFriendsResponse(String userDomain, String urlString) throws IOException {
@@ -125,8 +126,8 @@ public class DomainService {
 
         String path = url.getPath();
         String posId = path.substring(path.lastIndexOf('/') + 1);
-        String json = smService.getPostData(user.getId(), posId);
-        return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        FetchResponse fetchResponse = smService.getPostData(user.getId(), posId);
+        return new Response(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private SMProfile getUserProfile(String userDomain) throws IOException {

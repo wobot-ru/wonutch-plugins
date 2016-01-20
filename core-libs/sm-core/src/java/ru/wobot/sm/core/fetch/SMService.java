@@ -14,9 +14,9 @@ public interface SMService {
 
     List<String> getPostIds(String userId, int offset, int limit) throws IOException;
 
-    String getProfileData(String userId) throws IOException;
+    FetchResponse getProfileData(String userId) throws IOException;
 
-    String getPostData(String userId, String postId) throws IOException;
+    FetchResponse getPostData(String userId, String postId) throws IOException;
 
-    String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException;
+    FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException;
 }
