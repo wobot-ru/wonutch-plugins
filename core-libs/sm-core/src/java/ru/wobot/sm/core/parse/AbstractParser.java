@@ -1,6 +1,5 @@
 package ru.wobot.sm.core.parse;
 
-import ru.wobot.sm.core.domain.ParseResult;
 import ru.wobot.sm.core.url.UrlCheck;
 
 import java.net.URL;

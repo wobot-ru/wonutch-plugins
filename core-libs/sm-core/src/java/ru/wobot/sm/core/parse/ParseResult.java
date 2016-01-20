@@ -1,4 +1,4 @@
-package ru.wobot.sm.core.domain;
+package ru.wobot.sm.core.parse;
 
 import java.util.HashMap;
 import java.util.Map;

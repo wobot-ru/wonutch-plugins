@@ -1,9 +1,10 @@
-package ru.wobot.sm.core.service;
+package ru.wobot.sm.core.domain.service;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.url.UrlCheck;
 import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.domain.Response;
@@ -71,7 +72,7 @@ public class DomainService {
         String postId = split[2];
         int page = Integer.parseInt(split[4]);
 
-        String json = smService.getPostCommentData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
+        String json = smService.getPostCommentsData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
         return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
