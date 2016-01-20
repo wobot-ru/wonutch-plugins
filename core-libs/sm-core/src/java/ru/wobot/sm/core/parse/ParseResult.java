@@ -1,6 +1,5 @@
 package ru.wobot.sm.core.parse;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
