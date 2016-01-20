@@ -201,8 +201,10 @@
 
     <modules>
         <module>plugins/index-multipage</module>
+        <module>plugins/index-sm</module>
         <module>plugins/indexer-multielastic</module>
         <module>plugins/indexer-multielastic2</module>
+        <module>plugins/indexer-sm-elastic-2</module>
         <module>plugins/lib-sm</module>
         <module>plugins/parse-sm</module>
         <module>plugins/protocol-sm</module>

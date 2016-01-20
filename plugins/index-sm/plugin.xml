@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+        id="index-sm"
+        name="Social Media Indexing Filter"
+        version="1.0"
+        provider-name="wobot.ru">
+
+    <runtime>
+        <library name="index-sm.jar">
+            <export name="*"/>
+        </library>
+    </runtime>
+
+    <requires>
+        <import plugin="nutch-extensionpoints"/>
+        <import plugin="lib-sm"/>
+    </requires>
+
+    <extension id="ru.wobot.nutch.indexer.sm"
+               name="Social Media Indexing Filter"
+               point="org.apache.nutch.indexer.IndexingFilter">
+        <implementation id="SMIndexingFilter"
+                        class="ru.wobot.nutch.indexer.sm.SMIndexingFilter"/>
+    </extension>
+
+</plugin>
