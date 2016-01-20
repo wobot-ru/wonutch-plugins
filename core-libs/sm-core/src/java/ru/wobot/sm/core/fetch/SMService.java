@@ -1,4 +1,4 @@
-package ru.wobot.sm.core.service;
+package ru.wobot.sm.core.fetch;
 
 import ru.wobot.sm.core.domain.SMProfile;
 
@@ -18,5 +18,5 @@ public interface SMService {
 
     String getPostData(String userId, String postId) throws IOException;
 
-    String getPostCommentData(String userId, String postId, int skip, int take) throws IOException;
+    String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException;
 }

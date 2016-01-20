@@ -1,7 +1,7 @@
-package ru.wobot.sm;
+package ru.wobot.sm.fetch;
 
 import ru.wobot.sm.core.domain.SMProfile;
-import ru.wobot.sm.core.service.SMService;
+import ru.wobot.sm.core.fetch.SMService;
 
 import java.io.IOException;
 import java.util.List;
@@ -38,7 +38,7 @@ public class FbService implements SMService {
     }
 
     @Override
-    public String getPostCommentData(String userId, String postId, int skip, int take) throws IOException {
+    public String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
         return null;
     }
 }

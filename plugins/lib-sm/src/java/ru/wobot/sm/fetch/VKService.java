@@ -1,4 +1,4 @@
-package ru.wobot.sm;
+package ru.wobot.sm.fetch;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -13,7 +13,7 @@ import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.sm.core.domain.SMProfile;
-import ru.wobot.sm.core.service.SMService;
+import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.io.BufferedReader;
@@ -122,7 +122,7 @@ public class VKService implements SMService {
     }
 
     @Override
-    public String getPostCommentData(String userId, String postId, int skip, int take) throws IOException {
+    public String getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)

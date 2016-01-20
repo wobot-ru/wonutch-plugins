@@ -23,7 +23,7 @@ public class MultiPageIndexingFilter implements IndexingFilter {
         if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null) {
             return doc;
         }
-        LOG.info("VkIndexingFilter: filter(\"" + url.toString() + "\")");
+        LOG.info("MultiPageIndexingFilter: filter(\"" + url.toString() + "\")");
 
         Metadata contentMeta = parse.getData().getContentMeta();
         if ("true".equals(contentMeta.get(MultiElasticConstants.MULTI_DOC))) {

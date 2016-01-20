@@ -1,4 +1,4 @@
-package ru.wobot.sm.parsers;
+package ru.wobot.sm.parse;
 
 import org.apache.nutch.multipage.dto.Page;
 import org.springframework.social.vkontakte.api.*;
@@ -8,7 +8,7 @@ import ru.wobot.sm.core.mapping.ProfileProperties;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.parse.AbstractParser;
-import ru.wobot.sm.core.domain.ParseResult;
+import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;

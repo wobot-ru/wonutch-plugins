@@ -6,8 +6,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.*;
+import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.sm.parsers.Vk;
+import ru.wobot.sm.parse.Vk;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -39,7 +40,7 @@ public class SMParser implements org.apache.nutch.parse.Parser {
 
         try {
             //todo: Should be implemented the parser for other social media.
-            ru.wobot.sm.core.domain.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
+            ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
         } catch (MalformedURLException e) {
@@ -49,7 +50,7 @@ public class SMParser implements org.apache.nutch.parse.Parser {
         }
     }
 
-    protected ParseResult convert(ru.wobot.sm.core.domain.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+    protected ParseResult convert(ru.wobot.sm.core.parse.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
         if (parsedDto.isMultiPage) {
             contentMetadata.add(MultiElasticConstants.MULTI_DOC, "true");
         }
