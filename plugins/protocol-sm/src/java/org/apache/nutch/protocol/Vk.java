@@ -1,7 +1,7 @@
 package org.apache.nutch.protocol;
 
-import ru.wobot.sm.core.service.SMService;
-import ru.wobot.sm.VKService;
+import ru.wobot.sm.core.fetch.SMService;
+import ru.wobot.sm.fetch.VKService;
 
 public class Vk extends SMProtocol {
     @Override

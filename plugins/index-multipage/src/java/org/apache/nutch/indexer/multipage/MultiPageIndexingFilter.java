@@ -12,6 +12,7 @@ import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.multipage.MultiElasticConstants;
 import org.apache.nutch.parse.Parse;
+import org.apache.nutch.util.StringUtil;
 
 public class MultiPageIndexingFilter implements IndexingFilter {
     private static final Log LOG = LogFactory.getLog(MultiPageIndexingFilter.class.getName());
@@ -23,13 +24,18 @@ public class MultiPageIndexingFilter implements IndexingFilter {
         if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null) {
             return doc;
         }
-        LOG.info("VkIndexingFilter: filter(\"" + url.toString() + "\")");
+        LOG.info("MultiPageIndexingFilter: filter(\"" + url.toString() + "\")");
 
-        Metadata metadata = parse.getData().getParseMeta();
-        if ("true".equals(metadata.get(MultiElasticConstants.MULTI_DOC))) {
-            LOG.debug(url.toString() + " is MULTI_DOC");
-            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_DOC, metadata.get(MultiElasticConstants.MULTI_DOC));
+        Metadata contentMeta = parse.getData().getContentMeta();
+        if ("true".equals(contentMeta.get(MultiElasticConstants.MULTI_PAGE))) {
+            LOG.debug(url.toString() + " is MULTI_PAGE");
+            doc.getDocumentMeta().set(MultiElasticConstants.MULTI_PAGE, contentMeta.get(MultiElasticConstants.MULTI_PAGE));
         }
+
+        if (doc.getFieldValue("content") != null)
+            return doc;
+
+        doc.add("content", StringUtil.cleanField(parse.getText()));
         return doc;
     }
 

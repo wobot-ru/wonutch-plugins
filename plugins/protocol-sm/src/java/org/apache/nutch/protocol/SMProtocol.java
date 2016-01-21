@@ -8,8 +8,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
 import ru.wobot.sm.core.domain.Response;
-import ru.wobot.sm.core.service.DomainService;
-import ru.wobot.sm.core.service.SMService;
+import ru.wobot.sm.core.domain.service.DomainService;
+import ru.wobot.sm.core.fetch.SMService;
 
 public abstract class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());

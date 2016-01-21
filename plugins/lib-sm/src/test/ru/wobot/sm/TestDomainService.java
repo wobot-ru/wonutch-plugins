@@ -3,9 +3,10 @@ package ru.wobot.sm;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.social.vkontakte.api.VKontakteErrorException;
-import ru.wobot.sm.parsers.Vk;
-import ru.wobot.sm.core.service.DomainService;
-import ru.wobot.sm.core.domain.ParseResult;
+import ru.wobot.sm.fetch.VKService;
+import ru.wobot.sm.parse.Vk;
+import ru.wobot.sm.core.domain.service.DomainService;
+import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.domain.Response;
 
 import java.io.IOException;
