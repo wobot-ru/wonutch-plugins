@@ -11,6 +11,10 @@ public class ParseResult {
     private final Map<String, String> parseMeta;
     private final Map<String, String> contentMeta;
 
+    public ParseResult(String url, Map<String, String> links, Map<String, String> parseMeta, Map<String, String> contentMeta) {
+        this(url, null, null, links, parseMeta, contentMeta);
+    }
+
     public ParseResult(String url, String title, String content, Map<String, String> links, Map<String, String> parseMeta, Map<String, String> contentMeta) {
         this.url = url;
         this.title = title;

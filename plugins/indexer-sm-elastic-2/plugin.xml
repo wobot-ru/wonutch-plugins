@@ -63,6 +63,7 @@
 
     <requires>
         <import plugin="nutch-extensionpoints"/>
+        <import plugin="lib-sm"/>
     </requires>
 
     <extension id="ru.wobot.nutch.indexwriter.sm.elastic2"

@@ -46,6 +46,7 @@ public class SMIndexingFilter implements IndexingFilter {
         Metadata documentMeta = doc.getDocumentMeta();
         copyMetaKey(ContentMetaConstants.TYPE, contentMeta, documentMeta);
         copyMetaKey(ContentMetaConstants.PARENT, contentMeta, documentMeta);
+        copyMetaKey(ContentMetaConstants.MULTIPLE_PARSE_RESULT, contentMeta, documentMeta);
 
         Metadata parseMeta = parse.getData().getParseMeta();
         for (String tag : parseMeta.names()) {

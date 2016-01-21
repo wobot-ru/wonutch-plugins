@@ -14,7 +14,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.nutch.indexer.IndexWriter;
 import org.apache.nutch.indexer.NutchDocument;
-import org.apache.nutch.multipage.MultiElasticConstants;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.ListenableActionFuture;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -30,8 +29,8 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.nutch.multipage.dto.Page;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.core.parse.ParseResult;
 
 
 @SuppressWarnings("Duplicates")
@@ -110,15 +109,16 @@ public class SMIndexWriter implements IndexWriter {
 
     @Override
     public void write(NutchDocument doc) throws IOException {
-        final boolean isSingleDoc = !"true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_PAGE));
+        final boolean isSingleDoc = !"true".equals(doc.getDocumentMeta().get(ContentMetaConstants.MULTIPLE_PARSE_RESULT));
         String id = (String) doc.getFieldValue("id");
         String type = doc.getDocumentMeta().get(ContentMetaConstants.TYPE);
         if (type == null)
             type = "doc";
 
         IndexRequestBuilder request;
-        Map<String, Object> source = new HashMap<>();
+        Map<String, Object> source;
         if (isSingleDoc) {
+            source = new HashMap<>();
             request = client.prepareIndex(defaultIndex, type, id);
             // Loop through all fields of this doc
             for (String fieldName : doc.getFieldNames()) {
@@ -135,7 +135,10 @@ public class SMIndexWriter implements IndexWriter {
             }
 
             request.setSource(source);
-
+            String parent = doc.getDocumentMeta().get(ContentMetaConstants.PARENT);
+            if (parent != null) {
+                request.setParent(parent);
+            }
             // Add this indexing request to a bulk request
             bulk.add(request);
             indexedDocs++;
@@ -143,23 +146,31 @@ public class SMIndexWriter implements IndexWriter {
 
             flushIfNecessary(id);
         } else {
-            //for indexing document more than one
+            // for indexing documents more than one
             String content = (String) doc.getFieldValue("content");
-            Page[] pages = fromJson(content, Page[].class);
-            if (pages != null) {
-                for (Page page : pages) {
-                    id = page.url;
-                    source.put("url", page.url);
-                    source.put("content", page.content);
-                    source.put("title", page.title);
-                    source.put("digest", page.digest);
+            ParseResult[] parseResults = fromJson(content, ParseResult[].class);
+            if (parseResults != null) {
+                for (ParseResult parseResult : parseResults) {
+                    id = parseResult.getUrl();
+                    source = new HashMap<>();
+                    source.put("url", id);
+                    for (Map.Entry<String, String> p : parseResult.getParseMeta().entrySet()) {
+                        source.put(p.getKey(), p.getValue());
+                    }
 
                     for (Map.Entry<String, Object> field : source.entrySet()) {
                         bulkLength += field.getValue().toString().length();
                     }
-                    request = client.prepareIndex(defaultIndex, type, id);
+                    String subType = parseResult.getContentMeta().get(ContentMetaConstants.TYPE);
+                    if (subType == null) {
+                        subType = type;
+                    }
+                    request = client.prepareIndex(defaultIndex, subType, id);
                     request.setSource(source);
-
+                    String parent = parseResult.getContentMeta().get(ContentMetaConstants.PARENT);
+                    if (parent != null) {
+                        request.setParent(parent);
+                    }
                     // Add this indexing request to a bulk request
                     bulk.add(request);
                     indexedDocs++;

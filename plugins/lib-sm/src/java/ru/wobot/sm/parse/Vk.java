@@ -1,7 +1,5 @@
 package ru.wobot.sm.parse;
 
-import org.apache.nutch.multipage.MultiElasticConstants;
-import org.apache.nutch.multipage.dto.Page;
 import org.springframework.social.vkontakte.api.*;
 import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.mapping.PostProperties;
@@ -152,7 +150,8 @@ public class Vk extends AbstractParser {
 
     @Override
     protected ParseResult parseCommentPage(URL url, String content) {
-        final String userDomain = url.getHost();
+        final String user = url.getHost();
+        final int userId = Integer.parseInt(user.substring(2));
         final String path = url.getPath();
         final String[] split = path.split("/");
         final int postId = Integer.parseInt(split[2]);
@@ -160,20 +159,36 @@ public class Vk extends AbstractParser {
         final HashMap<String, String> links = new HashMap<>();
         final Map<String, String> parseMeta = new HashMap<>();
         final Map<String, String> contentMeta = new HashMap<String, String>() {{
-            put(MultiElasticConstants.MULTI_PAGE, "true");
+            put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, "true");
         }};
 
-        //todo: теряется totalCount определится, насколько это нам важно
-        CommentsResponse response = Serializer.getInstance().fromJson(content, CommentsResponse.class);
+        HashMap<String, String> commonCommentsContentMeta = new HashMap<String, String>() {{
+            put(ContentMetaConstants.PARENT, user);
+            put(ContentMetaConstants.TYPE, Types.POST);
+        }};
 
-        final Page[] pages = new Page[response.getComments().size()];
+        CommentsResponse response = Serializer.getInstance().fromJson(content, CommentsResponse.class);
+        //todo: replace with joda time
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+        final ParseResult[] parseResults = new ParseResult[response.getComments().size()];
         int i = 0;
-        for (Comment comment : response.getComments()) {
-            String commentUrl = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/" + postId + "/comments/" + comment.getId();
-            Page commentPage = new Page(commentUrl, comment.getText(), Serializer.getInstance().toJson(comment));
-            pages[i++] = commentPage;
+        for (final Comment comment : response.getComments()) {
+            String commentUrl = UrlSchemaConstants.VKONTAKTE + user + "/posts/" + postId + "/comments/" + comment.getId();
+            HashMap<String, String> commentParseMeta = new HashMap<String, String>() {{
+                put(PostProperties.SOURCE, Sources.VKONTAKTE);
+                put(PostProperties.PROFILE_ID, String.valueOf(comment.getFromId()));
+                put(PostProperties.HREF, "http://vk.com/wall" + userId + "_" + postId + "?reply=" + comment.getId());
+                put(PostProperties.SM_POST_ID, String.valueOf(comment.getId()));
+                put(PostProperties.BODY, comment.getText());
+                put(PostProperties.POST_DATE, dateFormat.format(comment.getDate()));
+                //todo: is only one number?
+                put(PostProperties.INVOLVEMENT, String.valueOf(comment.getLikes().getCount()));
+            }};
+
+            ParseResult commentPage = new ParseResult(commentUrl, new HashMap<String, String>(), commentParseMeta, commonCommentsContentMeta);
+            parseResults[i++] = commentPage;
         }
 
-        return new ParseResult(url.toString(), userDomain + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(pages), links, parseMeta, contentMeta);
+        return new ParseResult(url.toString(), user + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(parseResults), links, parseMeta, contentMeta);
     }
 }
