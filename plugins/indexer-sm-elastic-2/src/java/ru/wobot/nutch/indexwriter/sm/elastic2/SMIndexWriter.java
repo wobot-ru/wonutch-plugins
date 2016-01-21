@@ -110,9 +110,7 @@ public class SMIndexWriter implements IndexWriter {
 
     @Override
     public void write(NutchDocument doc) throws IOException {
-        LOG.info("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         final boolean isSingleDoc = !"true".equals(doc.getDocumentMeta().get(MultiElasticConstants.MULTI_PAGE));
-        LOG.info("isSingleDoc=" + isSingleDoc);
         String id = (String) doc.getFieldValue("id");
         String type = doc.getDocumentMeta().get(ContentMetaConstants.TYPE);
         if (type == null)
