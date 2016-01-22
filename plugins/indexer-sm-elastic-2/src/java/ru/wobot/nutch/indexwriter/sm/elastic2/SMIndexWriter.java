@@ -20,6 +20,7 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
+import org.elasticsearch.action.fieldstats.FieldStats;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -30,6 +31,7 @@ import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 
 
@@ -148,26 +150,31 @@ public class SMIndexWriter implements IndexWriter {
         } else {
             // for indexing documents more than one
             String content = (String) doc.getFieldValue("content");
+            String segment = (String) doc.getFieldValue(NutchDocumentMetaConstants.SEGMENT);
+            String boost = (String) doc.getFieldValue(NutchDocumentMetaConstants.BOOST);
+            Float score = (Float) doc.getFieldValue("score");
             ParseResult[] parseResults = fromJson(content, ParseResult[].class);
             if (parseResults != null) {
                 for (ParseResult parseResult : parseResults) {
                     id = parseResult.getUrl();
                     source = new HashMap<>();
-                    source.put("url", id);
-                    for (Map.Entry<String, String> p : parseResult.getParseMeta().entrySet()) {
+                    source.put("segment", segment);
+                    source.put("boost", Float.parseFloat(boost));
+                    source.put("score", score);
+                    for (Map.Entry<String, Object> p : parseResult.getParseMeta().entrySet()) {
                         source.put(p.getKey(), p.getValue());
                     }
 
                     for (Map.Entry<String, Object> field : source.entrySet()) {
                         bulkLength += field.getValue().toString().length();
                     }
-                    String subType = parseResult.getContentMeta().get(ContentMetaConstants.TYPE);
+                    String subType = (String) parseResult.getContentMeta().get(ContentMetaConstants.TYPE);
                     if (subType == null) {
                         subType = type;
                     }
                     request = client.prepareIndex(defaultIndex, subType, id);
                     request.setSource(source);
-                    String parent = parseResult.getContentMeta().get(ContentMetaConstants.PARENT);
+                    String parent = (String) parseResult.getContentMeta().get(ContentMetaConstants.PARENT);
                     if (parent != null) {
                         request.setParent(parent);
                     }

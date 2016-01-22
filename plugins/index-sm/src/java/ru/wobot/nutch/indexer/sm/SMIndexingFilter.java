@@ -53,17 +53,16 @@ public class SMIndexingFilter implements IndexingFilter {
             doc.add(tag, parseMeta.get(tag));
         }
 
-        if (doc.getFieldValue("content") == null)
+        if ("true".equals(contentMeta.get(ContentMetaConstants.MULTIPLE_PARSE_RESULT))
+                && doc.getFieldValue("content") == null
+                && !StringUtil.isEmpty(parse.getText())) {
             doc.add("content", StringUtil.cleanField(parse.getText()));
+        }
+
+        if (doc.getFieldValue("score") == null)
+            doc.add("score", crawlDatum.getScore());
 
         return doc;
-    }
-
-    private void copyMetaKey(String key, Metadata from, Metadata to) {
-        String value = from.get(key);
-        if (value != null) {
-            to.set(key, value);
-        }
     }
 
     @Override
@@ -74,5 +73,12 @@ public class SMIndexingFilter implements IndexingFilter {
     @Override
     public void setConf(Configuration configuration) {
         this.conf = configuration;
+    }
+
+    private void copyMetaKey(String key, Metadata from, Metadata to) {
+        String value = from.get(key);
+        if (value != null) {
+            to.set(key, value);
+        }
     }
 }

@@ -8,14 +8,14 @@ public class ParseResult {
     private final String title;
     private final String content;
     private final Map<String, String> links;
-    private final Map<String, String> parseMeta;
-    private final Map<String, String> contentMeta;
+    private final Map<String, Object> parseMeta;
+    private final Map<String, Object> contentMeta;
 
-    public ParseResult(String url, Map<String, String> links, Map<String, String> parseMeta, Map<String, String> contentMeta) {
-        this(url, null, null, links, parseMeta, contentMeta);
+    public ParseResult(String url, Map<String, String> links, Map<String, Object> parseMeta, Map<String, Object> contentMeta) {
+        this(url, "", "", links, parseMeta, contentMeta);
     }
 
-    public ParseResult(String url, String title, String content, Map<String, String> links, Map<String, String> parseMeta, Map<String, String> contentMeta) {
+    public ParseResult(String url, String title, String content, Map<String, String> links, Map<String, Object> parseMeta, Map<String, Object> contentMeta) {
         this.url = url;
         this.title = title;
         this.content = content;
@@ -40,11 +40,11 @@ public class ParseResult {
         return links;
     }
 
-    public Map<String, String> getParseMeta() {
+    public Map<String, Object> getParseMeta() {
         return parseMeta;
     }
 
-    public Map<String, String> getContentMeta() {
+    public Map<String, Object> getContentMeta() {
         return contentMeta;
     }
 }

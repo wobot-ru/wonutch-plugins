@@ -1,11 +1,13 @@
 package ru.wobot.sm.parse;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.social.vkontakte.api.*;
 import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.AbstractParser;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.domain.PostIndex;
@@ -22,8 +24,8 @@ public class Vk extends AbstractParser {
     protected ParseResult parseProfile(URL url, String content) {
         final String urlString = url.toString();
         final String userDomain = url.getHost();
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<>();
 
         VKontakteProfile profile = Serializer.getInstance().fromJson(content, VKontakteProfile.class);
 
@@ -54,7 +56,7 @@ public class Vk extends AbstractParser {
         }
         Counters counters = profile.getCounters();
         if (counters != null) {
-            parseMeta.put(ProfileProperties.COVERAGE, String.valueOf(counters.getFollowers() + counters.getFriends()));
+            parseMeta.put(ProfileProperties.REACH, counters.getFollowers() + counters.getFriends());
         }
 
         // fill content metadata
@@ -65,8 +67,8 @@ public class Vk extends AbstractParser {
     @Override
     protected ParseResult parseFriends(URL url, String content) {
         final String userDomain = url.getHost();
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<>();
 
         String[] friendIds = Serializer.getInstance().fromJson(content, String[].class);
 
@@ -83,8 +85,8 @@ public class Vk extends AbstractParser {
     protected ParseResult parsePostsIndex(URL url, String content) {
         final String userDomain = url.getHost();
         final String urlString = url.toString();
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<>();
 
         final int postsCount = Serializer.getInstance().fromJson(content, int.class);
         final int indexPageCount = postsCount / 100;
@@ -102,8 +104,8 @@ public class Vk extends AbstractParser {
     protected ParseResult parsePostsIndexPage(URL url, String content) {
         final String userDomain = url.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<>();
 
         PostIndex postIndex = Serializer.getInstance().fromJson(content, PostIndex.class);
 
@@ -117,8 +119,8 @@ public class Vk extends AbstractParser {
     @Override
     protected ParseResult parsePost(URL url, String content) {
         final String urlString = url.toString();
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<>();
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<>();
 
         Post post = Serializer.getInstance().fromJson(content, Post.class);
         final int indexPageCount = post.getComments().getCount() / 100;
@@ -126,26 +128,27 @@ public class Vk extends AbstractParser {
         final HashMap<String, String> links = new HashMap<>(indexPageCount);
         for (long i = 0; i <= indexPageCount; i++) {
             String blockNumber = String.format("%06d", i);
-            // generate link <a href='vk://user/posts/x100/000001'>post-index-x100-page-1</a>
+            // generate link <a href='vk://user/posts/1/x100/000001'>post-index-x100-page-1</a>
             links.put(urlString + "/x100/" + blockNumber, "post-index-x100-page-" + i);
         }
 
+        final String ownerProfile = UrlSchemaConstants.VKONTAKTE + "id" + post.getOwnerId();
         parseMeta.put(PostProperties.SOURCE, Sources.VKONTAKTE);
-        String ownerId = String.valueOf(post.getOwnerId());
-        parseMeta.put(PostProperties.PROFILE_ID, ownerId);
-        parseMeta.put(PostProperties.HREF, "http://vk.com/wall" + ownerId + "_" + post.getId()); //like http://vk.com/wall1_730207
-        parseMeta.put(PostProperties.SM_POST_ID, String.valueOf(post.getId()));
+        parseMeta.put(PostProperties.PROFILE_ID, ownerProfile);
+        parseMeta.put(PostProperties.HREF, "http://vk.com/wall" + post.getOwnerId() + "_" + post.getId()); //like http://vk.com/wall1_730207
+        parseMeta.put(PostProperties.SM_POST_ID, post.getId());
         parseMeta.put(PostProperties.BODY, post.getText());
         //todo: replace to JodaTime
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
         parseMeta.put(PostProperties.POST_DATE, dateFormat.format(post.getDate()));
-        int involvement = post.getLikes().getCount() + post.getReposts().getCount() + post.getComments().getCount();
-        parseMeta.put(PostProperties.INVOLVEMENT, String.valueOf(involvement));
+        int engagement = post.getLikes().getCount() + post.getReposts().getCount() + post.getComments().getCount();
+        parseMeta.put(PostProperties.ENGAGEMENT, engagement);
+        parseMeta.put(PostProperties.IS_COMMENT, false);
 
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.POST);
-        contentMeta.put(ContentMetaConstants.PARENT, "id" + post.getOwnerId());
-        return new ParseResult(urlString, post.getText(), content, links, parseMeta, contentMeta);
+        contentMeta.put(ContentMetaConstants.PARENT, ownerProfile);
+        return new ParseResult(urlString, links, parseMeta, contentMeta);
     }
 
     @Override
@@ -157,36 +160,41 @@ public class Vk extends AbstractParser {
         final int postId = Integer.parseInt(split[2]);
         final int page = Integer.parseInt(split[4]);
         final HashMap<String, String> links = new HashMap<>();
-        final Map<String, String> parseMeta = new HashMap<>();
-        final Map<String, String> contentMeta = new HashMap<String, String>() {{
-            put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, "true");
-        }};
-
-        HashMap<String, String> commonCommentsContentMeta = new HashMap<String, String>() {{
-            put(ContentMetaConstants.PARENT, user);
-            put(ContentMetaConstants.TYPE, Types.POST);
+        final Map<String, Object> parseMeta = new HashMap<>();
+        final Map<String, Object> contentMeta = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
         }};
 
         CommentsResponse response = Serializer.getInstance().fromJson(content, CommentsResponse.class);
-        //todo: replace with joda time
+        //todo: replace to JodaTime
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
         final ParseResult[] parseResults = new ParseResult[response.getComments().size()];
         int i = 0;
         for (final Comment comment : response.getComments()) {
-            String commentUrl = UrlSchemaConstants.VKONTAKTE + user + "/posts/" + postId + "/comments/" + comment.getId();
-            HashMap<String, String> commentParseMeta = new HashMap<String, String>() {{
+            final String postUrl = UrlSchemaConstants.VKONTAKTE + user + "/posts/" + postId;
+            final String commentOwnerProfile = UrlSchemaConstants.VKONTAKTE + "id" + comment.getFromId();
+            links.put(commentOwnerProfile, "");
+
+            String commentUrl = postUrl + "/comments/" + comment.getId();
+            HashMap<String, Object> commentParseMeta = new HashMap<String, Object>() {{
                 put(PostProperties.SOURCE, Sources.VKONTAKTE);
-                put(PostProperties.PROFILE_ID, String.valueOf(comment.getFromId()));
+                put(PostProperties.PROFILE_ID, commentOwnerProfile);
+                put(PostProperties.PARENT_POST_ID, postUrl);
                 put(PostProperties.HREF, "http://vk.com/wall" + userId + "_" + postId + "?reply=" + comment.getId());
-                put(PostProperties.SM_POST_ID, String.valueOf(comment.getId()));
+                put(PostProperties.SM_POST_ID, comment.getId());
                 put(PostProperties.BODY, comment.getText());
                 put(PostProperties.POST_DATE, dateFormat.format(comment.getDate()));
                 //todo: is only one number?
-                put(PostProperties.INVOLVEMENT, String.valueOf(comment.getLikes().getCount()));
+                put(PostProperties.ENGAGEMENT, comment.getLikes().getCount());
+                put(PostProperties.IS_COMMENT, true);
+                put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(comment.toString()));
             }};
 
-            ParseResult commentPage = new ParseResult(commentUrl, new HashMap<String, String>(), commentParseMeta, commonCommentsContentMeta);
-            parseResults[i++] = commentPage;
+            HashMap<String, Object> commonCommentsContentMeta = new HashMap<String, Object>() {{
+                put(ContentMetaConstants.PARENT, commentOwnerProfile);
+                put(ContentMetaConstants.TYPE, Types.POST);
+            }};
+            parseResults[i++] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParseMeta, commonCommentsContentMeta);
         }
 
         return new ParseResult(url.toString(), user + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(parseResults), links, parseMeta, contentMeta);

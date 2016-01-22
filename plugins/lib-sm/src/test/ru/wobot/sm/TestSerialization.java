@@ -19,11 +19,11 @@ public class TestSerialization {
             put("vk://dura", "dura");
             put("vk://trololo", "trololo");
         }};
-        Map<String, String> parseMeta = new HashMap<String, String>() {{
+        Map<String, Object> parseMeta = new HashMap<String, Object>() {{
             put("p1", "p1");
             put("p2", "p2");
         }};
-        Map<String, String> contentMeta = new HashMap<String, String>() {{
+        Map<String, Object> contentMeta = new HashMap<String, Object>() {{
             put("c1", "c1");
             put("c2", "c2");
         }};
