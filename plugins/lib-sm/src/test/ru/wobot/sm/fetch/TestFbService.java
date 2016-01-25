@@ -60,6 +60,13 @@ public class TestFbService {
         assertThat(friendIds, hasItems("431891506856669", "21435141328"));
     }
 
+    @Test
+    public void shouldGetTotalNumberOfPosts() throws IOException {
+        // given when
+        List<String> friendIds = fbService.getFriendIds("24496278123");
 
-
+        // then
+        assertThat(friendIds.size(), is(greaterThan(0)));
+        assertThat(friendIds, hasItems("431891506856669", "21435141328"));
+    }
 }

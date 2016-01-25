@@ -99,8 +99,8 @@ public class VKService implements SMService {
     }
 
     @Override
-    public List<String> getPostIds(String userId, int offset, int limit) throws IOException {
-        URIBuilder uriBuilder = new URIBuilder();
+    public FetchResponse getPostsData(String userId, int offset, int limit) throws IOException {
+        /*URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
@@ -117,7 +117,8 @@ public class VKService implements SMService {
         List<String> ids = new ArrayList<>(posts.getItems().size());
         for (int i = 0; i < posts.getItems().size(); i++)
             ids.add(String.valueOf(posts.getItems().get(i).getId()));
-        return ids;
+        return ids;*/
+        return null;
     }
 
     @Override

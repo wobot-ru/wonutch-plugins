@@ -83,7 +83,7 @@ public class FbService implements SMService {
     }
 
     @Override
-    public List<String> getPostIds(String userId, int offset, int limit) throws IOException {
+    public FetchResponse getPostsData(String userId, int offset, int limit) throws IOException {
         return null;
     }
 

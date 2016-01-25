@@ -7,7 +7,6 @@ import org.apache.commons.logging.LogFactory;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.url.UrlCheck;
 import ru.wobot.sm.core.fetch.SMService;
-import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.domain.Response;
 import ru.wobot.sm.core.domain.SMProfile;
 
@@ -120,10 +119,8 @@ public class DomainService {
         int totalPosts = getPostCountForUser(user.getId());
         int offset = totalPosts - (page + 1) * POSTS_LIMIT;
 
-        List<String> ids = smService.getPostIds(user.getId(), offset, POSTS_LIMIT);
-        Collections.sort(ids);
-        String json = toJson(new PostIndex(ids.toArray(new String[ids.size()]), totalPosts));
-        return new Response(url.toString(), json.getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
+        FetchResponse fetchResponse = smService.getPostsData(user.getId(), offset, POSTS_LIMIT);
+        return new Response(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), System.currentTimeMillis());
     }
 
     private Response createPostResponse(URL url) throws IOException {
