@@ -21,12 +21,10 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
-import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.serialize.Serializer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,7 +38,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.wobot.sm.serialize.Serializer.*;
+import static ru.wobot.sm.serialize.Serializer.getInstance;
 
 public class VKService implements SMService {
     public static final String API_v5_40 = "5.40";
@@ -115,15 +113,10 @@ public class VKService implements SMService {
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
-        List<String> ids = new ArrayList<>(posts.getItems().size());
-        for (int i = 0; i < posts.getItems().size(); i++)
-            ids.add(String.valueOf(posts.getItems().get(i).getId()));
-
         Map<String, String> metaData = new HashMap<String, String>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
-        final PostIndex postIndex = new PostIndex(ids.toArray(new String[posts.getItems().size()]), posts.getCount());
-        return new FetchResponse(toJson(postIndex), metaData);
+        return new FetchResponse(toJson(posts), metaData);
     }
 
     @Override

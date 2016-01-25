@@ -1,7 +1,9 @@
 package ru.wobot.sm.parse;
 
+import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.social.vkontakte.api.*;
+import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
@@ -10,10 +12,10 @@ import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.AbstractParser;
 import ru.wobot.sm.core.parse.ParseResult;
-import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -107,11 +109,15 @@ public class Vk extends AbstractParser {
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<>();
 
-        PostIndex postIndex = Serializer.getInstance().fromJson(content, PostIndex.class);
+        Type collectionType = new TypeToken<VKArray<Post>>() {}.getType();
+        VKArray<Post> posts = Serializer.getInstance().fromJson(content, collectionType);
 
-        final Map<String, String> links = new HashMap<>(postIndex.postIds.length);
-        for (String id : postIndex.postIds) {
-            links.put(urlPrefix + id, id);
+        Map<String, String> links = new HashMap<>();
+        if (posts != null && posts.getItems() != null) {
+            links = new HashMap<>(posts.getItems().size());
+            for (Post post : posts.getItems()) {
+                links.put(urlPrefix + post.getId(), String.valueOf(post.getId()));
+            }
         }
         return new ParseResult(url.toString(), userDomain, content, links, parseMeta, contentMeta);
     }
