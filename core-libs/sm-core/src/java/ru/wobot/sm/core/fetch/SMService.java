@@ -18,5 +18,7 @@ public interface SMService {
 
     FetchResponse getPostData(String userId, String postId) throws IOException;
 
+    FetchResponse getPostsData(String userId, int skip, int take);
+
     FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException;
 }
