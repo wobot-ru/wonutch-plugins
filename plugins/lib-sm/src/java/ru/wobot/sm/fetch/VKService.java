@@ -21,6 +21,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
+import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
@@ -100,7 +101,7 @@ public class VKService implements SMService {
 
     @Override
     public FetchResponse getPostsData(String userId, int offset, int limit) throws IOException {
-        /*URIBuilder uriBuilder = new URIBuilder();
+        URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
@@ -117,8 +118,12 @@ public class VKService implements SMService {
         List<String> ids = new ArrayList<>(posts.getItems().size());
         for (int i = 0; i < posts.getItems().size(); i++)
             ids.add(String.valueOf(posts.getItems().get(i).getId()));
-        return ids;*/
-        return null;
+
+        Map<String, String> metaData = new HashMap<String, String>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        final PostIndex postIndex = new PostIndex(ids.toArray(new String[posts.getItems().size()]), posts.getCount());
+        return new FetchResponse(toJson(postIndex), metaData);
     }
 
     @Override
