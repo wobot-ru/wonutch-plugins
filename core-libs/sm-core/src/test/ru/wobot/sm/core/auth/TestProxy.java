@@ -8,9 +8,6 @@ import org.apache.log4j.PatternLayout;
 import org.joda.time.DateTimeUtils;
 import org.junit.After;
 import org.junit.Test;
-import ru.wobot.sm.core.auth.Credential;
-import ru.wobot.sm.core.auth.Proxy;
-import ru.wobot.sm.core.auth.TooManyRequestsException;
 
 import java.util.ArrayList;
 import java.util.Collection;

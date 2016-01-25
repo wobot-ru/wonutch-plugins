@@ -6,7 +6,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
-import org.springframework.social.vkontakte.api.*;
+import org.springframework.social.vkontakte.api.ApiVersion;
+import org.springframework.social.vkontakte.api.Comment;
+import org.springframework.social.vkontakte.api.CommentsResponse;
+import org.springframework.social.vkontakte.api.Group;
+import org.springframework.social.vkontakte.api.Post;
+import org.springframework.social.vkontakte.api.VKGenericResponse;
+import org.springframework.social.vkontakte.api.VKResponse;
+import org.springframework.social.vkontakte.api.VKontakteErrorException;
+import org.springframework.social.vkontakte.api.VKontakteProfile;
+import org.springframework.social.vkontakte.api.VKontakteProfiles;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
@@ -26,9 +35,11 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+import static ru.wobot.sm.serialize.Serializer.*;
 
 public class VKService implements SMService {
     public static final String API_v5_40 = "5.40";
@@ -38,6 +49,10 @@ public class VKService implements SMService {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VKontakteModule());
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+    }
+
+    protected static String toJson(Object obj) {
+        return getInstance().toJson(obj);
     }
 
     @Override
@@ -227,10 +242,6 @@ public class VKService implements SMService {
         }
 
         return readUrlToString(uriBuilder.toString());
-    }
-
-    protected static String toJson(Object obj) {
-        return Serializer.getInstance().toJson(obj);
     }
 
     protected <T> VKArray<T> deserializeVK50ItemsResponse(VKGenericResponse response, Class<T> itemClass) {

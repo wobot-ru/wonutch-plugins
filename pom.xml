@@ -53,9 +53,10 @@
         <gson.version>2.4</gson.version>
         <es1.version>1.4.1</es1.version>
         <es2.version>2.1.0</es2.version>
-        <httpclient.version>4.2.5</httpclient.version>
+        <httpclient.version>4.5.1</httpclient.version>
         <jackson.version>2.5.3</jackson.version>
         <ssvk.version>1.1.0.RELEASE</ssvk.version>
+        <ssfb.version>2.0.3.RELEASE</ssfb.version>
     </properties>
 
     <dependencies>
