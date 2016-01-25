@@ -45,8 +45,8 @@ public class TestVkService {
 
     @Test
     public void is_getPostsForUser_return_posts() throws IOException {
-        List<String> posts = vkService.getPostIds("1", 0, 100);
-        Assert.assertTrue(posts.size() > 1);
+        FetchResponse r = vkService.getPostsData("1", 0, 100);
+        assertThat(r.getData(), is(not(nullValue())));
     }
 
     @Test
