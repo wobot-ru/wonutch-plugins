@@ -50,29 +50,29 @@ public class SMParser implements org.apache.nutch.parse.Parser {
     }
 
     protected ParseResult convert(ru.wobot.sm.core.parse.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
-        Outlink[] outlinks = new Outlink[parsedDto.links.size()];
+        Outlink[] outlinks = new Outlink[parsedDto.getLinks().size()];
         int index = 0;
-        for (Map.Entry<String, String> mapEntry : parsedDto.links.entrySet()) {
+        for (Map.Entry<String, String> mapEntry : parsedDto.getLinks().entrySet()) {
             outlinks[index] = new Outlink(mapEntry.getKey(), mapEntry.getValue());
             index++;
         }
 
-        for (Map.Entry<String, String> entry : parsedDto.parseMeta.entrySet()) {
-            parseMetadata.add(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : parsedDto.getParseMeta().entrySet()) {
+            parseMetadata.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
-        for (Map.Entry<String, String> entry : parsedDto.contentMeta.entrySet()) {
-            contentMetadata.add(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : parsedDto.getContentMeta().entrySet()) {
+            contentMetadata.add(entry.getKey(), String.valueOf(entry.getValue()));
         }
 
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, parsedDto.title, outlinks, contentMetadata, parseMetadata);
-        ParseResult parseResult = ParseResult.createParseResult(parsedDto.url, new ParseImpl(parsedDto.content, parseData));
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, parsedDto.getTitle(), outlinks, contentMetadata, parseMetadata);
+        ParseResult parseResult = ParseResult.createParseResult(parsedDto.getUrl(), new ParseImpl(parsedDto.getContent(), parseData));
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Finish parse links [" + parsedDto.url + "] : [" + parsedDto.title + "] : [link.size=" + parsedDto.links.size() + "]");
-            LOG.trace("Finish parse content [" + parsedDto.url + "] : [" + parsedDto.title + "] : [content='" + parsedDto.content + "']");
+            LOG.trace("Finish parse links [" + parsedDto.getUrl() + "] : [" + parsedDto.getTitle() + "] : [link.size=" + parsedDto.getLinks().size() + "]");
+            LOG.trace("Finish parse content [" + parsedDto.getUrl() + "] : [" + parsedDto.getTitle() + "] : [content='" + parsedDto.getContent() + "']");
         }
         if (LOG.isInfoEnabled()) {
-            LOG.info("Finish parse: " + parsedDto.url);
+            LOG.info("Finish parse: " + parsedDto.getUrl());
         }
         return parseResult;
     }

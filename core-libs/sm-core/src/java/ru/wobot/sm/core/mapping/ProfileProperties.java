@@ -1,12 +1,16 @@
 package ru.wobot.sm.core.mapping;
 
 public interface ProfileProperties {
-    String ID = "id";
     String SOURCE = "source";
     String HREF = "href";
     String SM_PROFILE_ID = "sm_profile_id";
     String NAME = "name";
     String CITY = "city";
-    String COVERAGE = "coverage";
+    /**
+     * Reach is the potential audience for a message based on total follower count (Twitter, Pinterest and LinkedIn followers, total Likes on your Facebook page, etc).
+     *
+     * @see <a href="https://wobot-ru.atlassian.net/wiki/x/FAAq">Охват</a>
+     */
+    String REACH = "reach";
     String GENDER = "gender";
 }
