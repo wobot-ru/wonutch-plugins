@@ -107,19 +107,49 @@ public class Vk extends AbstractParser {
         final String userDomain = url.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
         final Map<String, Object> parseMeta = new HashMap<>();
-        final Map<String, Object> contentMeta = new HashMap<>();
+        final Map<String, Object> commonContentMeta =  new HashMap<String, Object>() {{
+            put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
+        }};
 
         Type collectionType = new TypeToken<VKArray<Post>>() {}.getType();
         VKArray<Post> posts = Serializer.getInstance().fromJson(content, collectionType);
 
         Map<String, String> links = new HashMap<>();
+        ParseResult[] parseResults = null;
+        int i = 0;
         if (posts != null && posts.getItems() != null) {
+            parseResults = new ParseResult[posts.getItems().size()];
             links = new HashMap<>(posts.getItems().size());
             for (Post post : posts.getItems()) {
-                links.put(urlPrefix + post.getId(), String.valueOf(post.getId()));
+                final int commentPageCount = post.getComments().getCount() / 100;
+                for (long block = 0; block <= commentPageCount; block++) {
+                    String blockNumber = String.format("%06d", block);
+                    links.put(urlPrefix + post.getId() + "/x100/" + blockNumber, "comment-index-x100-page-" + block);
+                }
+                Map<String, Object> postContent = new HashMap<>();
+                Map<String, Object> postParse = new HashMap<>();
+
+                final String ownerProfile = UrlSchemaConstants.VKONTAKTE + "id" + post.getOwnerId();
+                postParse.put(PostProperties.SOURCE, Sources.VKONTAKTE);
+                postParse.put(PostProperties.PROFILE_ID, ownerProfile);
+                postParse.put(PostProperties.HREF, "http://vk.com/wall" + post.getOwnerId() + "_" + post.getId()); //like http://vk.com/wall1_730207
+                postParse.put(PostProperties.SM_POST_ID, post.getId());
+                postParse.put(PostProperties.BODY, post.getText());
+                //todo: replace to JodaTime
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+                postParse.put(PostProperties.POST_DATE, dateFormat.format(post.getDate()));
+                int engagement = post.getLikes().getCount() + post.getReposts().getCount() + post.getComments().getCount();
+                postParse.put(PostProperties.ENGAGEMENT, engagement);
+                postParse.put(PostProperties.IS_COMMENT, false);
+
+                // fill content metadata
+                postContent.put(ContentMetaConstants.TYPE, Types.POST);
+                postContent.put(ContentMetaConstants.PARENT, ownerProfile);
+                postContent.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
+                parseResults[i++] = new ParseResult(urlPrefix + post.getId(), new HashMap<String, String>(), postParse, postContent);
             }
         }
-        return new ParseResult(url.toString(), userDomain, content, links, parseMeta, contentMeta);
+        return new ParseResult(url.toString(), userDomain, Serializer.getInstance().toJson(parseResults), links, parseMeta, commonContentMeta);
     }
 
     @Override
@@ -131,7 +161,7 @@ public class Vk extends AbstractParser {
         Post post = Serializer.getInstance().fromJson(content, Post.class);
         final int indexPageCount = post.getComments().getCount() / 100;
 
-        final HashMap<String, String> links = new HashMap<>(indexPageCount);
+        final Map<String, String> links = new HashMap<>(indexPageCount);
         for (long i = 0; i <= indexPageCount; i++) {
             String blockNumber = String.format("%06d", i);
             // generate link <a href='vk://user/posts/1/x100/000001'>post-index-x100-page-1</a>
@@ -154,6 +184,7 @@ public class Vk extends AbstractParser {
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.POST);
         contentMeta.put(ContentMetaConstants.PARENT, ownerProfile);
+        contentMeta.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
         return new ParseResult(urlString, links, parseMeta, contentMeta);
     }
 
@@ -165,7 +196,7 @@ public class Vk extends AbstractParser {
         final String[] split = path.split("/");
         final int postId = Integer.parseInt(split[2]);
         final int page = Integer.parseInt(split[4]);
-        final HashMap<String, String> links = new HashMap<>();
+        final Map<String, String> links = new HashMap<>();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
@@ -182,7 +213,7 @@ public class Vk extends AbstractParser {
             links.put(commentOwnerProfile, "");
 
             String commentUrl = postUrl + "/comments/" + comment.getId();
-            HashMap<String, Object> commentParseMeta = new HashMap<String, Object>() {{
+            HashMap<String, Object> commentParse = new HashMap<String, Object>() {{
                 put(PostProperties.SOURCE, Sources.VKONTAKTE);
                 put(PostProperties.PROFILE_ID, commentOwnerProfile);
                 put(PostProperties.PARENT_POST_ID, postUrl);
@@ -196,11 +227,11 @@ public class Vk extends AbstractParser {
                 put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(comment.toString()));
             }};
 
-            HashMap<String, Object> commonCommentsContentMeta = new HashMap<String, Object>() {{
+            HashMap<String, Object> commentContentMeta = new HashMap<String, Object>() {{
                 put(ContentMetaConstants.PARENT, commentOwnerProfile);
                 put(ContentMetaConstants.TYPE, Types.POST);
             }};
-            parseResults[i++] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParseMeta, commonCommentsContentMeta);
+            parseResults[i++] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta);
         }
 
         return new ParseResult(url.toString(), user + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(parseResults), links, parseMeta, contentMeta);

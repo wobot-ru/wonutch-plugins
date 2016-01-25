@@ -34,7 +34,7 @@ public class SMIndexingFilter implements IndexingFilter {
         }
 
         // skip system's API calls from an index
-        if (url == null || UrlCheck.isFriends(url) || UrlCheck.isPostsIndex(url) || UrlCheck.isPostsIndexPage(url))
+        if (url == null || UrlCheck.isFriends(url) || UrlCheck.isPostsIndex(url))
             return null;
 
         if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
