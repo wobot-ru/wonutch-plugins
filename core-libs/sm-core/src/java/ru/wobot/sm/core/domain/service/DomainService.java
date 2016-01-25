@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.url.UrlCheck;
+import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.domain.PostIndex;
 import ru.wobot.sm.core.domain.Response;
 import ru.wobot.sm.core.domain.SMProfile;
@@ -18,6 +18,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Сервис, получающий информацию (пользователи, комментарии, посты) из социальных медиа.
+ * Для доступа к конкретной социальной сети использует реализацию интерфейса {@link #SMService()}.
+ * Используется на фазе fetch процесса обхода веб ресурсов.
+ */
 public class DomainService {
 
     public static final int POSTS_LIMIT = 100;

@@ -1,11 +1,9 @@
-package ru.wobot.sm;
+package ru.wobot.sm.fetch;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.fetch.VKService;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -16,20 +14,15 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertTrue;
 
 public class TestVkService {
-    private VKService vkService;
-
-    @Before
-    public void executedBeforeEach() {
-        vkService = new VKService();
-    }
-
+    private VKService vkService = new VKService();
 
     @Test
     public void is_getSMProfiles_return_SMProfiles() throws IOException {
         List<SMProfile> profiles = vkService.getProfiles(Arrays.asList("durov", "id2"));
-        Assert.assertTrue(profiles.size() == 2);
+        assertTrue(profiles.size() == 2);
     }
 
     @Test

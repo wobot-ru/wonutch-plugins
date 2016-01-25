@@ -2,7 +2,6 @@ package ru.wobot.sm.core.auth;
 
 import org.joda.time.DateTimeUtils;
 import org.junit.Test;
-import ru.wobot.sm.core.auth.DelayedCredential;
 
 import java.util.concurrent.TimeUnit;
 

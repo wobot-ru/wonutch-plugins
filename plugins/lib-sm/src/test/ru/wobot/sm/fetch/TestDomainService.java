@@ -1,9 +1,8 @@
-package ru.wobot.sm;
+package ru.wobot.sm.fetch;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.social.vkontakte.api.VKontakteErrorException;
-import ru.wobot.sm.fetch.VKService;
 import ru.wobot.sm.parse.Vk;
 import ru.wobot.sm.core.domain.service.DomainService;
 import ru.wobot.sm.core.parse.ParseResult;

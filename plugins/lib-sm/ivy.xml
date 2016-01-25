@@ -38,6 +38,7 @@
     <dependencies>
         <dependency org="com.google.code.gson" name="gson" rev="2.4"/>
         <dependency org="org.springframework.social" name="spring-social-vkontakte" rev="1.1.0.RELEASE"/>
+        <dependency org="org.springframework.social" name="spring-social-facebook" rev="2.0.3.RELEASE"/>
         <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.2.5"/>
         <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.5.3" />
         <dependency org="ru.wobot" name="multipage" rev="0.2.0-SNAPSHOT"/>
