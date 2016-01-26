@@ -98,7 +98,7 @@ public class VKService implements SMService {
     }
 
     @Override
-    public FetchResponse getPostsData(String userId, int offset, int limit) throws IOException {
+    public FetchResponse getPostsData(String userId, long offset, int limit) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)

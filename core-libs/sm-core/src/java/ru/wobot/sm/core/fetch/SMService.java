@@ -12,7 +12,7 @@ public interface SMService {
 
     int getPostCount(String userId) throws IOException;
 
-    FetchResponse getPostsData(String userId, int skip, int limit) throws IOException;
+    FetchResponse getPostsData(String userId, long offset, int limit) throws IOException;
 
     FetchResponse getProfileData(String userId) throws IOException;
 

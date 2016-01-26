@@ -61,12 +61,12 @@ public class TestFbService {
     }
 
     @Test
-    public void shouldGetTotalNumberOfPosts() throws IOException {
+    public void shouldGetPageOfPostsNotAfterTimestamp() throws IOException {
         // given when
-        List<String> friendIds = fbService.getFriendIds("24496278123");
+        FetchResponse posts = fbService.getPostsData("165107853523677", 1450780702L, 25); //Tue, 22 Dec 2015 10:38:22 GMT
 
         // then
-        assertThat(friendIds.size(), is(greaterThan(0)));
-        assertThat(friendIds, hasItems("431891506856669", "21435141328"));
+        assertThat(posts, is(not(nullValue())));
+        assertThat(posts.getData(), is(not(nullValue())));
     }
 }
