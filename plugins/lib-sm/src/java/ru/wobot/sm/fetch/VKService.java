@@ -26,7 +26,6 @@ import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMService;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.serialize.Serializer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -100,7 +99,7 @@ public class VKService implements SMService {
     }
 
     @Override
-    public FetchResponse getPostsData(String userId, int offset, int limit) throws IOException {
+    public FetchResponse getPostsData(String userId, long offset, int limit) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
