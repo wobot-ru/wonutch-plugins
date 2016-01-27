@@ -5,7 +5,7 @@ import ru.wobot.sm.core.domain.SMProfile;
 import java.io.IOException;
 import java.util.List;
 
-public interface SMService {
+public interface SMFetcher {
     List<SMProfile> getProfiles(List<String> userIds) throws IOException;
 
     List<String> getFriendIds(String userId) throws IOException;

@@ -1,4 +1,4 @@
-package org.apache.nutch.protocol;
+package org.apache.nutch.protocol.sm;
 
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.commons.logging.Log;
@@ -7,9 +7,17 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
-import ru.wobot.sm.core.domain.Response;
+import org.apache.nutch.protocol.Content;
+import org.apache.nutch.protocol.Protocol;
+import org.apache.nutch.protocol.ProtocolOutput;
+import org.apache.nutch.protocol.ProtocolStatus;
+import org.apache.nutch.protocol.RobotRulesParser;
+import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.domain.service.DomainService;
-import ru.wobot.sm.core.fetch.SMService;
+import ru.wobot.sm.core.fetch.SMFetcher;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
+
+import java.util.Properties;
 
 public abstract class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
@@ -24,7 +32,7 @@ public abstract class SMProtocol implements Protocol {
         }
 
         try {
-            Response response = domainService.request(urlString);
+            SMContent response = domainService.request(urlString);
             return new ProtocolOutput(convertToContent(response));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
@@ -48,15 +56,20 @@ public abstract class SMProtocol implements Protocol {
         domainService = new DomainService(createSMService());
     }
 
-    protected Content convertToContent(Response response) {
+    protected Content convertToContent(SMContent response) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.fetchTime + "]");
+            LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.metadata.get
+                    (ContentMetaConstants.FETCH_TIME) + "]");
         }
 
         Metadata metadata = new Metadata();
-        metadata.add("nutch.fetch.time", Long.toString(response.fetchTime));
-        return new Content(response.url, response.url, response.data, Response.MIME_TYPE, metadata, this.conf);
+        Properties p = new Properties();
+        p.putAll(response.metadata);
+        metadata.setAll(p);
+        metadata.add("nutch.fetch.time", response.metadata.get
+                (ContentMetaConstants.FETCH_TIME));
+        return new Content(response.url, response.url, response.data, SMContent.JSON_MIME_TYPE, metadata, this.conf);
     }
 
-    protected abstract SMService createSMService();
+    protected abstract SMFetcher createSMService();
 }

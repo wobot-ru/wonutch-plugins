@@ -14,15 +14,17 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class SMParser implements org.apache.nutch.parse.Parser {
+public final class SMParser implements org.apache.nutch.parse.Parser {
     private static final Log LOG = LogFactory.getLog(SMParser.class.getName());
     private Configuration conf;
     private ru.wobot.sm.core.parse.Parser parser;
 
+    @Override
     public Configuration getConf() {
         return this.conf;
     }
 
+    @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
         if (parser == null) {
@@ -49,7 +51,8 @@ public class SMParser implements org.apache.nutch.parse.Parser {
         }
     }
 
-    protected ParseResult convert(ru.wobot.sm.core.parse.ParseResult parsedDto, Metadata contentMetadata, Metadata parseMetadata) throws MalformedURLException {
+    private ParseResult convert(ru.wobot.sm.core.parse.ParseResult parsedDto, Metadata contentMetadata, Metadata
+            parseMetadata) throws MalformedURLException {
         Outlink[] outlinks = new Outlink[parsedDto.getLinks().size()];
         int index = 0;
         for (Map.Entry<String, String> mapEntry : parsedDto.getLinks().entrySet()) {

@@ -1,13 +1,5 @@
 package ru.wobot.nutch.indexwriter.sm.elastic2;
 
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.google.gson.GsonBuilder;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -20,7 +12,6 @@ import org.elasticsearch.action.bulk.BulkItemResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.delete.DeleteRequestBuilder;
-import org.elasticsearch.action.fieldstats.FieldStats;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
@@ -34,14 +25,19 @@ import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
 
 @SuppressWarnings("Duplicates")
 public class SMIndexWriter implements IndexWriter {
-    public static Logger LOG = LoggerFactory.getLogger(SMIndexWriter.class);
-
     private static final int DEFAULT_MAX_BULK_DOCS = 250;
     private static final int DEFAULT_MAX_BULK_LENGTH = 2500500;
-
+    public static Logger LOG = LoggerFactory.getLogger(SMIndexWriter.class);
     private Client client;
     private Node node;
     private String defaultIndex;
@@ -59,6 +55,18 @@ public class SMIndexWriter implements IndexWriter {
     private int bulkDocs = 0;
     private int bulkLength = 0;
     private boolean createNewBulk = false;
+
+    private static <T> T fromJson(String json, Class<T> classOfT) {
+        return new GsonBuilder()
+                .create()
+                .fromJson(json, classOfT);
+    }
+
+    public static IOException makeIOException(ElasticsearchException e) {
+        final IOException ioe = new IOException();
+        ioe.initCause(e);
+        return ioe;
+    }
 
     @Override
     public void open(JobConf job, String name) throws IOException {
@@ -200,12 +208,6 @@ public class SMIndexWriter implements IndexWriter {
         }
     }
 
-    private static <T> T fromJson(String json, Class<T> classOfT) {
-        return new GsonBuilder()
-                .create()
-                .fromJson(json, classOfT);
-    }
-
     @Override
     public void delete(String key) throws IOException {
         try {
@@ -217,12 +219,6 @@ public class SMIndexWriter implements IndexWriter {
         } catch (ElasticsearchException e) {
             throw makeIOException(e);
         }
-    }
-
-    public static IOException makeIOException(ElasticsearchException e) {
-        final IOException ioe = new IOException();
-        ioe.initCause(e);
-        return ioe;
     }
 
     @Override
@@ -300,6 +296,11 @@ public class SMIndexWriter implements IndexWriter {
     }
 
     @Override
+    public Configuration getConf() {
+        return config;
+    }
+
+    @Override
     public void setConf(Configuration conf) {
         config = conf;
         String cluster = conf.get(ElasticConstants.CLUSTER);
@@ -311,10 +312,5 @@ public class SMIndexWriter implements IndexWriter {
             LOG.error(message);
             throw new RuntimeException(message);
         }
-    }
-
-    @Override
-    public Configuration getConf() {
-        return config;
     }
 }

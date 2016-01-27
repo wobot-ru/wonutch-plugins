@@ -16,16 +16,16 @@
         <import plugin="lib-sm"/>
     </requires>
 
-    <extension id="org.apache.nutch.protocol.vk"
-               name="HttpProtocol"
+    <extension id="org.apache.nutch.protocol.sm"
+               name="SMProtocol"
                point="org.apache.nutch.protocol.Protocol">
 
-        <implementation id="org.apache.nutch.protocol.vk"
-                        class="org.apache.nutch.protocol.Vk">
+        <implementation id="org.apache.nutch.protocol.sm.Vk"
+                        class="org.apache.nutch.protocol.sm.Vk">
             <parameter name="protocolName" value="vk"/>
         </implementation>
-        <implementation id="org.apache.nutch.protocol.fb"
-                        class="org.apache.nutch.protocol.Fb">
+        <implementation id="org.apache.nutch.protocol.sm.Fb"
+                        class="org.apache.nutch.protocol.sm.Fb">
             <parameter name="protocolName" value="fb"/>
         </implementation>
     </extension>

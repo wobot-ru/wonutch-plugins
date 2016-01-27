@@ -1,5 +1,9 @@
 package ru.wobot.sm.core.domain;
 
+/**
+ * Core profile attributes in social media.
+ * Used to reference profiles during phases of retrieving user data.
+ */
 public final class SMProfile {
     /**
      * ID of profile in social media

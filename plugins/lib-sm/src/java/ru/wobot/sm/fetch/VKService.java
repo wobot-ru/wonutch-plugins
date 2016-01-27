@@ -23,7 +23,7 @@ import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.SMService;
+import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.io.BufferedReader;
@@ -40,7 +40,7 @@ import java.util.Map;
 
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
-public class VKService implements SMService {
+public class VKService implements SMFetcher {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
