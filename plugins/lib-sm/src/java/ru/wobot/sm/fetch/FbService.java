@@ -60,7 +60,7 @@ public class FbService implements SMFetcher {
     public FetchResponse getProfileData(String userId) throws IOException {
         Page page = facebook.fetchObject(userId, Page.class, PROFILE_FIELDS);
 
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
 
@@ -102,7 +102,7 @@ public class FbService implements SMFetcher {
         URI uri = uriBuilder.build();
         JsonNode responseNode = facebook.restOperations().getForObject(uri, JsonNode.class);
 
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
 

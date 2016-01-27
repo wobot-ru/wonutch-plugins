@@ -58,17 +58,15 @@ public abstract class SMProtocol implements Protocol {
 
     protected Content convertToContent(SMContent response) {
         if (LOG.isInfoEnabled()) {
-            LOG.info("Finish fetching: " + response.url + " [fetchTime=" + response.metadata.get
-                    (ContentMetaConstants.FETCH_TIME) + "]");
+            LOG.info("Finish fetching: " + response.getUrl() + " [fetchTime=" + response.getMetadata().get(ContentMetaConstants.FETCH_TIME) + "]");
         }
 
         Metadata metadata = new Metadata();
         Properties p = new Properties();
-        p.putAll(response.metadata);
+        p.putAll(response.getMetadata());
         metadata.setAll(p);
-        metadata.add("nutch.fetch.time", response.metadata.get
-                (ContentMetaConstants.FETCH_TIME));
-        return new Content(response.url, response.url, response.data, SMContent.JSON_MIME_TYPE, metadata, this.conf);
+        metadata.add("nutch.fetch.time", String.valueOf(response.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
+        return new Content(response.getUrl(), response.getUrl(), response.getData(), SMContent.JSON_MIME_TYPE, metadata, this.conf);
     }
 
     protected abstract SMFetcher createSMService();

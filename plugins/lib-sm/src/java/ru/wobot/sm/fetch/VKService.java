@@ -113,7 +113,7 @@ public class VKService implements SMFetcher {
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
         return new FetchResponse(toJson(posts), metaData);
@@ -125,7 +125,7 @@ public class VKService implements SMFetcher {
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
 
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
         String json = toJson(profiles.getProfiles().get(0));
@@ -142,7 +142,7 @@ public class VKService implements SMFetcher {
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         Post post = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Post.class);
 
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
         String json = toJson(post);
@@ -158,7 +158,7 @@ public class VKService implements SMFetcher {
                 .offset(skip)
                 .build();
 
-        Map<String, String> metaData = new HashMap<String, String>() {{
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
         String json = toJson(getComments(query));

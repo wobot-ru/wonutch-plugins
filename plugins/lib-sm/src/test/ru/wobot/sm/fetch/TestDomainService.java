@@ -31,7 +31,7 @@ public class TestDomainService {
     @Test
     public void check_that_request_and_parse_serialization_is_success_for_post() throws IOException {
         SMContent request = new DomainService(new VKService()).request("vk://durov/posts/145488");
-        String content = new String(request.data, StandardCharsets.UTF_8);
+        String content = new String(request.getData(), StandardCharsets.UTF_8);
         ParseResult parse = new Vk().parse(new URL("vk://durov/posts/145488"), content);
 
         Assert.assertNotNull(parse);
