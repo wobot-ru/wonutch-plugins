@@ -40,11 +40,11 @@ import java.util.Map;
 
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
-public class VKService implements SMFetcher {
+public class VKFetcher implements SMFetcher {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
-    public VKService() {
+    public VKFetcher() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VKontakteModule());
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);

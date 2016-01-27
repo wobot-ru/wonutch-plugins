@@ -18,12 +18,12 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
 public class TestFbService {
-    private FbService fbService = new FbService();
+    private FbFetcher fbFetcher = new FbFetcher();
 
     @Test
     public void shouldGetProfilesFor2Ids() throws IOException {
         // given when
-        List<SMProfile> profiles = fbService.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
+        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
 
         // then
         assertThat(profiles.size(), is(2));
@@ -32,7 +32,7 @@ public class TestFbService {
     @Test
     public void shouldGetProfileDataFor2Ids() throws IOException {
         // given when
-        List<SMProfile> profiles = fbService.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
+        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
 
         // then
         assertThat(profiles.get(0).getId(), is(equalTo("165107853523677")));
@@ -43,7 +43,7 @@ public class TestFbService {
     @Test
     public void shouldGetSomeProfileDataForId() throws IOException {
         // given when
-        FetchResponse response = fbService.getProfileData("mastercardrussia");
+        FetchResponse response = fbFetcher.getProfileData("mastercardrussia");
 
         // then
         assertThat(response, is(not(nullValue())));
@@ -53,7 +53,7 @@ public class TestFbService {
     @Test
     public void shouldGetWhoLikedPageForId() throws IOException {
         // given when
-        List<String> friendIds = fbService.getFriendIds("24496278123");
+        List<String> friendIds = fbFetcher.getFriendIds("24496278123");
 
         // then
         assertThat(friendIds.size(), is(greaterThan(0)));
@@ -63,7 +63,7 @@ public class TestFbService {
     @Test
     public void shouldGetPageOfPostsNotAfterTimestamp() throws IOException {
         // given when
-        FetchResponse posts = fbService.getPostsData("165107853523677", 1450780702L, 25); //Tue, 22 Dec 2015 10:38:22 GMT
+        FetchResponse posts = fbFetcher.getPostsData("165107853523677", 1450780702L, 25); //Tue, 22 Dec 2015 10:38:22 GMT
 
         // then
         assertThat(posts, is(not(nullValue())));

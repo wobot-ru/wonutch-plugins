@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FbService implements SMFetcher {
+public class FbFetcher implements SMFetcher {
     //TODO: Add more fields
     static final String[] PROFILE_FIELDS = {
             "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website"
@@ -41,7 +41,7 @@ public class FbService implements SMFetcher {
     private final Facebook facebook = new FacebookTemplate("1518184651811311|pvxdxslPYhiOS3xaB5V2lp0U2D0");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public FbService() {
+    public FbFetcher() {
         objectMapper.registerModule(new FacebookModule());
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
     }

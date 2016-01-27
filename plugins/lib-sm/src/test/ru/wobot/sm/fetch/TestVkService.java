@@ -17,41 +17,41 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
 
 public class TestVkService {
-    private VKService vkService = new VKService();
+    private VKFetcher vkFetcher = new VKFetcher();
 
     @Test
     public void is_getSMProfiles_return_SMProfiles() throws IOException {
-        List<SMProfile> profiles = vkService.getProfiles(Arrays.asList("durov", "id2"));
+        List<SMProfile> profiles = vkFetcher.getProfiles(Arrays.asList("durov", "id2"));
         assertTrue(profiles.size() == 2);
     }
 
     @Test
     public void is_getUsers_return_user_profile() throws IOException {
-        FetchResponse r = vkService.getProfileData("id1");
+        FetchResponse r = vkFetcher.getProfileData("id1");
         assertThat(r, is(not(nullValue())));
     }
 
     @Test
     public void is_getFriends_return_users_friends() throws IOException {
-        List<String> friendIds = vkService.getFriendIds("1");
+        List<String> friendIds = vkFetcher.getFriendIds("1");
         Assert.assertTrue(friendIds.size() > 1);
     }
 
     @Test
     public void is_getPost_return_post() throws IOException {
-        FetchResponse r = vkService.getPostData("1", "45558");
+        FetchResponse r = vkFetcher.getPostData("1", "45558");
         assertThat(r.getData(), containsString("Способность"));
     }
 
     @Test
     public void is_getPostsForUser_return_posts() throws IOException {
-        FetchResponse r = vkService.getPostsData("1", 0, 100);
+        FetchResponse r = vkFetcher.getPostsData("1", 0, 100);
         assertThat(r.getData(), is(not(nullValue())));
     }
 
     @Test
     public void is_getComments_return_comments() throws IOException {
-        FetchResponse r = vkService.getPostCommentsData("1", "593585", 0, 100);
+        FetchResponse r = vkFetcher.getPostCommentsData("1", "593585", 0, 100);
         assertThat(r.getData(), is(not(nullValue())));
     }
 }

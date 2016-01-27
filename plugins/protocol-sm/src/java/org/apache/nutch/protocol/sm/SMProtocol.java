@@ -21,7 +21,7 @@ import java.util.Properties;
 
 public abstract class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
-    protected DomainService domainService;
+    private DomainService domainService;
     private Configuration conf;
 
     @Override
@@ -53,7 +53,7 @@ public abstract class SMProtocol implements Protocol {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
-        domainService = new DomainService(createSMService());
+        domainService = new DomainService(createSMFetcher());
     }
 
     protected Content convertToContent(SMContent response) {
@@ -66,8 +66,9 @@ public abstract class SMProtocol implements Protocol {
         p.putAll(response.getMetadata());
         metadata.setAll(p);
         metadata.add("nutch.fetch.time", String.valueOf(response.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
-        return new Content(response.getUrl(), response.getUrl(), response.getData(), SMContent.JSON_MIME_TYPE, metadata, this.conf);
+        return new Content(response.getUrl(), response.getUrl(), response.getData(), response.getMetadata().get
+                (ContentMetaConstants.MIME_TYPE).toString(), metadata, this.conf);
     }
 
-    protected abstract SMFetcher createSMService();
+    protected abstract SMFetcher createSMFetcher();
 }

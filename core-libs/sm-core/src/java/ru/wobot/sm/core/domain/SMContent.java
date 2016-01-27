@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class SMContent {
-    public static final String JSON_MIME_TYPE = "application/json";
+    private static final String JSON_MIME_TYPE = "application/json";
     private final String url;
     private final byte[] data;
     private final Map<String, Object> metadata;
