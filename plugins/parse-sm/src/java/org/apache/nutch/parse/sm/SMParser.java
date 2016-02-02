@@ -4,20 +4,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.parse.*;
+import org.apache.nutch.parse.Outlink;
+import org.apache.nutch.parse.ParseData;
+import org.apache.nutch.parse.ParseImpl;
 import org.apache.nutch.parse.ParseResult;
+import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.protocol.Content;
+import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.parse.FbParser;
 import ru.wobot.sm.parse.Vk;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 public final class SMParser implements org.apache.nutch.parse.Parser {
     private static final Log LOG = LogFactory.getLog(SMParser.class.getName());
     private Configuration conf;
-    private ru.wobot.sm.core.parse.Parser parser;
+    private Map<String, ru.wobot.sm.core.parse.Parser> parsers = new HashMap<>();
 
     @Override
     public Configuration getConf() {
@@ -27,8 +33,10 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
-        if (parser == null) {
-            parser = new Vk();
+        if (parsers.isEmpty()) {
+            //TODO: make this configurable (maybe reflection or config file)
+            parsers.put(Sources.VKONTAKTE, new Vk());
+            parsers.put(Sources.FACEBOOK, new FbParser());
         }
     }
 
@@ -40,8 +48,10 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
         }
 
         try {
-            //todo: Should be implemented the parser for other social media.
-            ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(new URL(urlString), new String(content.getContent(), StandardCharsets.UTF_8));
+            URL url = new URL(urlString);
+            ru.wobot.sm.core.parse.Parser parser = parsers.get(url.getProtocol());
+            ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(url, new String(content.getContent(),
+                    StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
         } catch (MalformedURLException e) {

@@ -1,6 +1,5 @@
 package ru.wobot.sm.fetch;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.social.facebook.api.Facebook;
@@ -28,22 +27,26 @@ import java.util.Map;
 public class FbFetcher implements SMFetcher {
     //TODO: Add more fields
     static final String[] PROFILE_FIELDS = {
-            "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website"
+            "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website",
+            "link", "location"
     };
 
     private static final String[] POST_FIELDS = {
-            "id", "actions", "admin_creator", "application", "caption", "created_time", "description", "from", "icon",
+            "id", "actions", "admin_creator", "application", "caption", "created_time", "description", "from{id,name}", "icon",
             "is_hidden", "is_published", "link", "message", "message_tags", "name", "object_id", "picture", "place",
             "privacy", "properties", "source", "status_type", "story", "to", "type", "updated_time",
-            "with_tags", "shares", "likes{name,id,username,link,profile_type}", "comments{message,from,like_count,likes}"
+            "with_tags", "shares", "likes.summary(true).limit(0)", "comments.summary(true).limit(0)"
     };
+
+    private static final String[] COMMENT_FIELDS = {"message", "from", "like_count", "likes", "created_time",
+            "object{link}"};
+
     private static final String API_VERSION = "2.5";
     private final Facebook facebook = new FacebookTemplate("1518184651811311|pvxdxslPYhiOS3xaB5V2lp0U2D0");
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public FbFetcher() {
         objectMapper.registerModule(new FacebookModule());
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
     }
 
     @Override
@@ -72,7 +75,7 @@ public class FbFetcher implements SMFetcher {
         List<String> result = new ArrayList<>();
 
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
-        queryParameters.set("limit", "50");
+        queryParameters.set("limit", "100");
         PagedList<Page> pages = facebook.fetchConnections(userId, "likes", Page.class, queryParameters);
         for (Page p : pages)
             result.add(p.getId());
@@ -90,7 +93,7 @@ public class FbFetcher implements SMFetcher {
 
     @Override
     public int getPostCount(String userId) throws IOException {
-        return 0;
+        throw new UnsupportedOperationException("Method not supported by Facebook API.");
     }
 
     @Override
@@ -99,6 +102,8 @@ public class FbFetcher implements SMFetcher {
         uriBuilder.queryParam("fields", StringUtils.arrayToCommaDelimitedString(POST_FIELDS));
         if (offset > 0)
             uriBuilder.queryParam("until", String.valueOf(offset));
+        if (limit > 0)
+            uriBuilder.queryParam("limit", String.valueOf(limit));
         URI uri = uriBuilder.build();
         JsonNode responseNode = facebook.restOperations().getForObject(uri, JsonNode.class);
 
@@ -116,6 +121,21 @@ public class FbFetcher implements SMFetcher {
 
     @Override
     public FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
-        return null;
+        URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + postId + "/comments");
+        uriBuilder.queryParam("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));
+        //TODO: HACK - rewrite ASAP
+        if (userId != null)
+            uriBuilder.queryParam("after", userId);
+        if (take > 0)
+            uriBuilder.queryParam("limit", String.valueOf(take));
+        uriBuilder.queryParam("order", "reverse_chronological");
+        URI uri = uriBuilder.build();
+        JsonNode responseNode = facebook.restOperations().getForObject(uri, JsonNode.class);
+
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_VERSION);
+        }};
+
+        return new FetchResponse(responseNode.toString(), metaData);
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -47,7 +49,7 @@ public class DomainService {
         URL url = new URL(urlString);
         String userDomain = url.getHost();
         if (UrlCheck.isProfile(url)) {
-            return createProfileResponse(userDomain, urlString);
+            return createProfileResponse(url);
         }
         if (UrlCheck.isFriends(url)) {
             return createFriendsResponse(userDomain, urlString);
@@ -75,15 +77,30 @@ public class DomainService {
         String[] split = path.split("/");
         String postId = split[2];
         int page = Integer.parseInt(split[4]);
+        //TODO: HACK - remove
+        String param = null;
+        if (url.getProtocol().equals(Sources.VKONTAKTE)) {
+            param = user.getId();
+        } else if (url.getProtocol().equals(Sources.FACEBOOK)) {
+            String queryParam = url.getQuery();
+            if (queryParam != null)
+                param = queryParam.substring(queryParam.indexOf("=") + 1);
+        }
 
-        FetchResponse fetchResponse = smService.getPostCommentsData(user.getId(), postId, page * POSTS_LIMIT, POSTS_LIMIT);
+        FetchResponse fetchResponse = smService.getPostCommentsData(param, postId, page * POSTS_LIMIT,
+                POSTS_LIMIT);
         return new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata());
     }
 
-    private SMContent createProfileResponse(String userDomain, String urlString) throws IOException {
+    private SMContent createProfileResponse(URL url) throws IOException {
+        String userDomain = url.getHost();
+        if (url.getQuery() != null)
+            return new SMContent(url.toString(), new byte[0], new HashMap<String,Object>());
+
         SMProfile user = getUserProfile(userDomain);
         FetchResponse fetchResponse = smService.getProfileData(user.getId());
-        return new SMContent(urlString, fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata());
+        return new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse
+                .getMetadata());
     }
 
     private SMContent createFriendsResponse(String userDomain, String urlString) throws IOException {
@@ -113,10 +130,15 @@ public class DomainService {
 
         String path = url.getPath();
         String pageStr = path.substring(path.lastIndexOf('/') + 1);
-        int page = Integer.parseInt(pageStr);
-
-        int totalPosts = getPostCountForUser(user.getId());
-        int offset = totalPosts - (page + 1) * POSTS_LIMIT;
+        long offset = 0;
+        //TODO: HACK - remove
+        if (url.getProtocol().equals(Sources.VKONTAKTE)) {
+            int page = Integer.parseInt(pageStr);
+            int totalPosts = getPostCountForUser(user.getId());
+            offset = totalPosts - (page + 1) * POSTS_LIMIT;
+        } else if (url.getProtocol().equals(Sources.FACEBOOK)) {
+            offset = Long.parseLong(pageStr);
+        }
 
         FetchResponse fetchResponse = smService.getPostsData(user.getId(), offset, POSTS_LIMIT);
         return new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata());

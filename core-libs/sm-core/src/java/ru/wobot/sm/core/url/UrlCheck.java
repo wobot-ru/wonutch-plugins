@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 public class UrlCheck {
     private static final Pattern POST = Pattern.compile("/posts/\\d+");
     private static final Pattern POSTS_INDEX_PAGE = Pattern.compile("/index-posts/x100/\\d+");
-    private static final Pattern COMMENTS_PAGE = Pattern.compile("/posts/\\d+/x100/\\d+");
+    private static final Pattern COMMENTS_PAGE = Pattern.compile("/posts/[\\d_]+/x100/\\d+(\\?)*");
 
     public static boolean isProfile(URL url) {
         String path = url.getPath();

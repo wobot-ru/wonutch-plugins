@@ -28,6 +28,26 @@ public class TestUrlCheck {
     }
 
     @Test
+    public void is_isCommentPage_should_be_true_for_such_url() throws MalformedURLException {
+        URL url = new URL("http://user/posts/1/x100/0");
+        assertTrue(UrlCheck.isCommentPage(url));
+    }
+
+    @Test
+     public void is_isCommentPage_should_be_true_for_underscore_post_id_url() throws MalformedURLException {
+        URL url = new URL("http://user/posts/1_2/x100/0");
+        assertTrue(UrlCheck.isCommentPage(url));
+    }
+
+    @Test
+    public void is_isCommentPage_should_be_true_for_token_url() throws MalformedURLException {
+        URL url = new URL
+                ("http://user/posts/1_2/x100/0" +
+                        "?after=WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE0TXpFMk1qYzJNVGN4T0RFM056b3hORFV5TWpreE56YzQ%3D");
+        assertTrue(UrlCheck.isCommentPage(url));
+    }
+
+    @Test
     public void is_post_should_be_false_for_prefix_url() throws MalformedURLException {
         URL url = new URL("http://user/posts/");
         assertFalse(UrlCheck.isPost(url));

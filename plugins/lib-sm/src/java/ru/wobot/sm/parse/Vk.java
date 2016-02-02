@@ -2,7 +2,11 @@ package ru.wobot.sm.parse;
 
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.springframework.social.vkontakte.api.*;
+import org.springframework.social.vkontakte.api.Comment;
+import org.springframework.social.vkontakte.api.CommentsResponse;
+import org.springframework.social.vkontakte.api.Counters;
+import org.springframework.social.vkontakte.api.Post;
+import org.springframework.social.vkontakte.api.VKontakteProfile;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.mapping.PostProperties;
@@ -19,6 +23,7 @@ import java.lang.reflect.Type;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class Vk extends AbstractParser {
@@ -107,14 +112,15 @@ public class Vk extends AbstractParser {
         final String userDomain = url.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
         final Map<String, Object> parseMeta = new HashMap<>();
-        final Map<String, Object> commonContentMeta =  new HashMap<String, Object>() {{
+        final Map<String, Object> commonContentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
         }};
 
-        Type collectionType = new TypeToken<VKArray<Post>>() {}.getType();
+        Type collectionType = new TypeToken<VKArray<Post>>() {
+        }.getType();
         VKArray<Post> posts = Serializer.getInstance().fromJson(content, collectionType);
 
-        Map<String, String> links = new HashMap<>();
+        Map<String, String> links = null;
         ParseResult[] parseResults = null;
         int i = 0;
         if (posts != null && posts.getItems() != null) {
@@ -149,7 +155,8 @@ public class Vk extends AbstractParser {
                 parseResults[i++] = new ParseResult(urlPrefix + post.getId(), new HashMap<String, String>(), postParse, postContent);
             }
         }
-        return new ParseResult(url.toString(), userDomain, Serializer.getInstance().toJson(parseResults), links, parseMeta, commonContentMeta);
+        return new ParseResult(url.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
+                == null ? new HashMap<String, String>() : links), parseMeta, commonContentMeta);
     }
 
     @Override
@@ -196,7 +203,7 @@ public class Vk extends AbstractParser {
         final String[] split = path.split("/");
         final int postId = Integer.parseInt(split[2]);
         final int page = Integer.parseInt(split[4]);
-        final Map<String, String> links = new HashMap<>();
+        final Map<String, String> links = new IdentityHashMap<>();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
@@ -213,7 +220,7 @@ public class Vk extends AbstractParser {
             links.put(commentOwnerProfile, "");
 
             String commentUrl = postUrl + "/comments/" + comment.getId();
-            HashMap<String, Object> commentParse = new HashMap<String, Object>() {{
+            Map<String, Object> commentParse = new HashMap<String, Object>() {{
                 put(PostProperties.SOURCE, Sources.VKONTAKTE);
                 put(PostProperties.PROFILE_ID, commentOwnerProfile);
                 put(PostProperties.PARENT_POST_ID, postUrl);
@@ -227,7 +234,7 @@ public class Vk extends AbstractParser {
                 put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(comment.toString()));
             }};
 
-            HashMap<String, Object> commentContentMeta = new HashMap<String, Object>() {{
+            Map<String, Object> commentContentMeta = new HashMap<String, Object>() {{
                 put(ContentMetaConstants.PARENT, commentOwnerProfile);
                 put(ContentMetaConstants.TYPE, Types.POST);
             }};
