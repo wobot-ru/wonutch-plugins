@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -94,8 +93,9 @@ public class DomainService {
 
     private SMContent createProfileResponse(URL url) throws IOException {
         String userDomain = url.getHost();
+        //TODO: rewrite for different scopes
         if (url.getQuery() != null)
-            return new SMContent(url.toString(), new byte[0], new HashMap<String,Object>());
+            userDomain += "?" + url.getQuery();
 
         SMProfile user = getUserProfile(userDomain);
         FetchResponse fetchResponse = smService.getProfileData(user.getId());

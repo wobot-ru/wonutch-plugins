@@ -34,8 +34,8 @@ public class TestUrlCheck {
     }
 
     @Test
-     public void is_isCommentPage_should_be_true_for_underscore_post_id_url() throws MalformedURLException {
-        URL url = new URL("http://user/posts/1_2/x100/0");
+     public void is_isCommentPage_should_be_true_for_fb_post_id_url() throws MalformedURLException {
+        URL url = new URL("http://user/posts/1:2_3/x100/0");
         assertTrue(UrlCheck.isCommentPage(url));
     }
 

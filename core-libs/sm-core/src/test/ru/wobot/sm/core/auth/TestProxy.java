@@ -13,12 +13,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
-/**
- * Created by Leon Misakyan on 25.12.2015.
- */
 public class TestProxy {
     private static Proxy proxy = Proxy.INSTANCE;
 
@@ -45,7 +44,6 @@ public class TestProxy {
         DateTimeUtils.setCurrentMillisSystem();
     }
 
-
     @Test
     public void shouldReturnCredentialFromQueue() {
         // given
@@ -58,6 +56,20 @@ public class TestProxy {
 
         // then
         assertThat(c, is(not(nullValue())));
+    }
+
+    @Test
+    public void shouldReturnCredentialWithoutClientSecretFromQueue() {
+        // given
+        Collection<String> s = new ArrayList<>();
+        s.add("first");
+        setup(1, s);
+
+        //when
+        Credential c = proxy.getInstance();
+
+        // then
+        assertThat(c.getAccessToken(), is("first"));
     }
 
     @Test

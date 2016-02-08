@@ -9,9 +9,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.core.Is.is;
 
-/**
- * Created by lmisakyan on 26.12.2015.
- */
 public class TestDelayedCredential {
     @Test
     public void shouldBeReadyToUseAfterCreating() {
@@ -47,6 +44,24 @@ public class TestDelayedCredential {
 
         // then
         assertThat(c.getDelay(TimeUnit.NANOSECONDS), is(greaterThan(0L)));
+    }
+
+    @Test
+    public void shouldBeAlwaysReadyIfMaxRequestsLessThanOrEqualToZero() {
+        //given
+        DelayedCredential c = new DelayedCredential("", "", -1);
+
+        // when
+        long curTime = DateTimeUtils.currentTimeMillis();
+        DateTimeUtils.setCurrentMillisFixed(curTime);
+
+        // then
+        for (int i = 0; i < 500; i++) { //some big value
+            c.used();
+            assertThat(c.getDelay(TimeUnit.NANOSECONDS), is(lessThanOrEqualTo(0L)));
+        }
+
+        DateTimeUtils.setCurrentMillisSystem();
     }
 
     @Test

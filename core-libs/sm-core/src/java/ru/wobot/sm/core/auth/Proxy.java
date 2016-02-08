@@ -31,6 +31,7 @@ public enum Proxy implements CredentialRepository {
     }
 
     private Collection<String> getTokensFromStream(InputStream input) throws IOException {
+        Objects.requireNonNull(input);
         Collection<String> result = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new InputStreamReader(input))) {
             String line;
@@ -50,7 +51,7 @@ public enum Proxy implements CredentialRepository {
             credentials.clear();
 
         int accounts = credentialsSource.size();
-        int maxRequests = conf.getInt(REQUESTS_PERSECOND, 1);
+        int maxRequests = conf.getInt(REQUESTS_PERSECOND, -1);
         int partitions = conf.getInt("mapreduce.job.maps", 1);
         int partitionNum = conf.getInt("mapreduce.task.partition", 0);
 
@@ -71,7 +72,7 @@ public enum Proxy implements CredentialRepository {
                 continue;
             String[] c = cred.split(",");
             try {
-                credentials.put(new DelayedCredential(c[0], c[1], maxRequests));
+                credentials.put(new DelayedCredential(c[0], c.length == 2 ? c[1] : null, maxRequests));
             } catch (InterruptedException e) {
                 LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             }
