@@ -31,7 +31,7 @@ public class UriTranslator_Translate_SMScheme_Test {
 
     @Test
     public void add_when_translate_uri_with_pathParams_than_defined_method_should_be_invoked() throws URISyntaxException, InvocationTargetException, IllegalAccessException {
-        String result = translator.translate(ParsedUri.parse(new URI("sm://root/arg1/arg2")));
+        String result = translator.translate(ParsedUri.parse(new URI("sm://root/arg1/arg2/")));
         assertThat(result, equalTo("root/arg1/arg2"));
         assertThat(scheme.isMethod1Invoked(), equalTo(true));
     }

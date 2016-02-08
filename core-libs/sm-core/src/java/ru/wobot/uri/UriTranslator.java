@@ -3,9 +3,9 @@ package ru.wobot.uri;
 import ru.wobot.sm.core.reflect.MethodInvoker;
 import ru.wobot.uri.impl.*;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 import java.util.*;
 
 public class UriTranslator {
@@ -23,17 +23,24 @@ public class UriTranslator {
 
             Collection<ParsedPath> paths = new ArrayList<>();
             for (Method method : aClass.getDeclaredMethods()) {
-                final Path path = method.getDeclaredAnnotation(Path.class);
+                final Path path = method.getAnnotation(Path.class);
                 if (path != null) {
                     final HashMap<String, ValueConverter> converters = new HashMap<>();
-                    for (Parameter parameter : method.getParameters()) {
-                        final PathParam pathParam = parameter.getAnnotation(PathParam.class);
+                    int i = 0;
+                    PathParam pathParam = null;
+                    for (Class parameter : method.getParameterTypes()) {
+                        for (Annotation annotation : method.getParameterAnnotations()[i++]) {
+                            if (annotation instanceof PathParam) {
+                                pathParam = (PathParam) annotation;
+                                break;
+                            }
+                        }
                         if (pathParam == null)
                             throw new IllegalArgumentException(parameter.toString() + " should be annotated by PathParam");
                         final String paramVal = pathParam.value();
                         if (paramVal.isEmpty())
                             throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
-                        converters.put(paramVal, new ValueConverter(Class.forName(parameter.getParameterizedType().getTypeName())));
+                        converters.put(paramVal, new ValueConverter(parameter));
                     }
                     paths.add(PathParser.parse(new MethodInvoker(obj, method), path.value().trim(), converters));
                 }
