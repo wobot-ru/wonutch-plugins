@@ -1,17 +1,17 @@
 package ru.wobot.sm.parse;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import ru.wobot.sm.core.parse.ParseResult;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Arrays;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 public class TestFbParser {
     private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
@@ -52,7 +52,7 @@ public class TestFbParser {
             "        \"data\": [],\n" +
             "        \"summary\": {\n" +
             "          \"order\": \"ranked\",\n" +
-            "          \"total_count\": 0,\n" +
+            "          \"total_count\": 1,\n" +
             "          \"can_comment\": false\n" +
             "        }\n" +
             "      }\n" +
@@ -60,12 +60,10 @@ public class TestFbParser {
             "    {\n" +
             "      \"id\": \"165107853523677_1094750970559356\",\n" +
             "      \"created_time\": \"2016-01-28T17:25:41+0000\",\n" +
-            "      \"from\": {\n" +
-            "        \"id\": \"165107853523677\",\n" +
-            "        \"name\": \"MasterCard\",\n" +
-            "        \"link\": \"https://www.facebook.com/mastercardrussia/\",\n" +
-            "        \"likes\": 13519446\n" +
-            "      },\n" +
+            "      \"from\": {" +
+            "           \"name\": \"Ольга Миленина\"," +
+            "           \"id\": \"900662163382117\"" +
+            "      }," +
             "      \"is_hidden\": false,\n" +
             "      \"is_published\": true,\n" +
             "      \"link\": \"https://www.facebook.com/mastercardrussia/photos/a.210500762317719.60293.165107853523677/1094750970559356/?type=3\",\n" +
@@ -76,40 +74,46 @@ public class TestFbParser {
             "      \"type\": \"photo\",\n" +
             "      \"updated_time\": \"2016-01-30T19:56:30+0000\",\n" +
             "      \"shares\": {\n" +
-            "        \"count\": 18\n" +
-            "      },\n" +
-            "      \"likes\": {\n" +
-            "        \"paging\": {\n" +
-            "          \"cursors\": {\n" +
-            "            \"after\": \"MTcwNTAzNTk2MzA0MTgxNg==\",\n" +
-            "            \"before\": \"NjQzODc3NTQyNDE5NTAx\"\n" +
-            "          },\n" +
-            "          \"next\": \"https://graph.facebook.com/v2.5/165107853523677_1094750970559356/likes?summary=true&fields=name,id,username,link,profile_type&limit=25&after=MTcwNTAzNTk2MzA0MTgxNg%3D%3D\"\n" +
-            "        },\n" +
-            "        \"summary\": {\n" +
-            "          \"total_count\": 589,\n" +
-            "          \"can_like\": false,\n" +
-            "          \"has_liked\": false\n" +
-            "        }\n" +
-            "      },\n" +
-            "      \"comments\": {\n" +
-            "        \"paging\": {\n" +
-            "          \"cursors\": {\n" +
-            "            \"after\": \"WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE1TlRrNU5ESXdNemMyT0RNMk5qb3hORFUwTVRnek56a3c=\",\n" +
-            "            \"before\": \"WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE1TlRJek5EY3pNemcwTkRNeE16b3hORFUwTURjME56azE=\"\n" +
-            "          }\n" +
-            "        },\n" +
-            "        \"summary\": {\n" +
-            "          \"order\": \"ranked\",\n" +
-            "          \"total_count\": 10,\n" +
-            "          \"can_comment\": false\n" +
-            "        }\n" +
+            "        \"count\": 20\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +
             "}\n";
 
-    private FbParser fbParser = new FbParser();
+    private static final String RAW_COMMENT = "{\n" +
+            "  \"data\": [\n" +
+            "    {\n" +
+            "      \"message\": \"Если постараться не ездить в метро.не заходить в арабские кварталы.то по-прежнему Париж - город-сказка.Это Монмартр.Нотр-Дам.Елисейские поля,уютные кафе.сад Тюильри...Но есть опасения,что мигранты - это начало конца Европы.\",\n" +
+            "      \"from\": {\n" +
+            "        \"name\": \"Lidia  Mazurova\",\n" +
+            "        \"id\": \"884167345038247\"\n" +
+            "      },\n" +
+            "      \"like_count\": 0,\n" +
+            "      \"created_time\": \"2016-01-08T02:44:25+0000\",\n" +
+            "      \"id\": \"1081856348515485_1082735698427550\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+
+    private static final String RAW_REPLY = "{\n" +
+            "  \"data\": [\n" +
+            "    {\n" +
+            "      \"message\": \"А вы что супермодель? Я много раз была в арабских районах и не заметила особого отношения к собственной персоне! С арабами или без - Париж это праздник!\",\n" +
+            "      \"from\": {\n" +
+            "        \"name\": \"Evgenia Zinovjeva\",\n" +
+            "        \"id\": \"1117812631564394\"\n" +
+            "      },\n" +
+            "      \"like_count\": 4,\n" +
+            "      \"parent\": {\n" +
+            "        \"id\": \"1081856348515485_1082735698427550\"\n" +
+            "      },\n" +
+            "      \"created_time\": \"2016-01-08T02:44:25+0000\",\n" +
+            "      \"id\": \"1081856348515485_1082938725073914\"\n" +
+            "    }\n" +
+            "  ]\n" +
+            "}";
+
+    private final FbParser fbParser = new FbParser();
 
     @Test
     public void shouldParseProfileContent() throws IOException {
@@ -118,7 +122,7 @@ public class TestFbParser {
                 RAW_PROFILE);
 
         // then
-        assertThat(result.getContent(), containsString("165107853523677"));  // test via ID, it shouldn't change
+        assertThat(result.getContent(), containsString("165107853523677")); //ID
     }
 
     @Test
@@ -128,8 +132,8 @@ public class TestFbParser {
                 RAW_PROFILE);
 
         // then
-        assertThat(result.getLinks().keySet(), hasItems("fb://mastercardrussia/friends",
-                "fb://mastercardrussia/index-posts/x100/00000000"));
+        assertThat(result.getLinks().keySet(), hasItems("fb://165107853523677/friends",
+                "fb://165107853523677/index-posts/x100/00000000"));
     }
 
     @Test
@@ -144,28 +148,156 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldParsePostsPageContent() throws IOException {
-        // given when
-        ParseResult result = fbParser.parsePostsIndexPage(new URL
-                        ("fb://mastercardrussia/index-posts/x100/00000000"),
-                RAW_POSTS);
-
-        // then
-        assertThat(result.getContent(), stringContainsInOrder(Arrays.asList("165107853523677", "18", "https://www.facebook.com/mastercardrussia/photos/a.210500762317719.60293.165107853523677/1094750970559356")));
-    }
-
-    @Test
     public void shouldCreatePostsOutLinks() throws IOException {
         // given when
         ParseResult result = fbParser.parsePostsIndexPage(new URL
-                        ("fb://mastercardrussia/index-posts/x100/00000000"),
-                RAW_POSTS);
+                ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         // then
         assertThat(result.getLinks().size(), is(2));
         assertThat(result.getLinks().keySet(), hasItems
-                ("fb://mastercardrussia/posts/165107853523677_1095411087160011/x100/0",
-                        "fb://mastercardrussia/posts/165107853523677_1094750970559356/x100/0"));
+                ("fb://165107853523677/posts/165107853523677_1095411087160011/x100/0",
+                        "fb://165107853523677/posts/165107853523677_1094750970559356/x100/0"));
+    }
 
+    @Test
+    public void shouldCountPostsEngagement() throws IOException {
+        // given
+        ParseResult result = fbParser.parsePostsIndexPage(new URL
+                ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstPost = node.get(0);
+        JsonNode secondPost = node.get(1);
+
+        // then
+        assertThat(firstPost.get("parseMeta").get("engagement").asInt(), is(19));
+        assertThat(secondPost.get("parseMeta").get("engagement").asInt(), is(20));
+    }
+
+    @Test
+    public void shouldFormPostsHref() throws IOException {
+        // given
+        ParseResult result = fbParser.parsePostsIndexPage(new URL
+                ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstPost = node.get(0);
+        JsonNode secondPost = node.get(1);
+
+        // then
+        assertThat(firstPost.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/165107853523677/posts/1095411087160011"));
+        assertThat(secondPost.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/165107853523677/posts/1094750970559356"));
+    }
+
+    @Test
+    public void shouldFormPostsProfileId() throws IOException {
+        // given
+        ParseResult result = fbParser.parsePostsIndexPage(new URL
+                ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstPost = node.get(0);
+        JsonNode secondPost = node.get(1);
+
+        // then
+        assertThat(firstPost.get("parseMeta").get("profile_id").asText(), is("fb://165107853523677"));
+        assertThat(secondPost.get("parseMeta").get("profile_id").asText(), is("fb://900662163382117"));
+    }
+
+    @Test
+    public void shouldFormCommentsHrefIfParentIsPost() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstComment = node.get(0);
+
+        // then
+        assertThat(firstComment.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/165107853523677/posts/1081856348515485?comment_id=1082735698427550"));
+    }
+
+    @Test
+    public void shouldFormCommentsParentIfParentIsPost() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstComment = node.get(0);
+
+        // then
+        assertThat(firstComment.get("parseMeta").get("parent_post_id").asText(),
+                is("fb://165107853523677/posts/165107853523677_1081856348515485"));
+    }
+
+    @Test
+    public void shouldFormCommentsOutlinksIfParentIsPost() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
+
+        // then
+        assertThat(result.getLinks().size(), is(2));
+        assertThat(result.getLinks().keySet(), hasItems
+                ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0",
+                        "fb://884167345038247?scope=user"));
+    }
+
+    @Test
+    public void shouldFormCommentsHrefIfParentIsComment() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstComment = node.get(0);
+
+        // then
+        assertThat(firstComment.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/165107853523677/posts/1081856348515485?comment_id=1082938725073914"));
+    }
+
+    @Test
+    public void shouldFormCommentsParentIfParentIsComment() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstComment = node.get(0);
+
+        // then
+        assertThat(firstComment.get("parseMeta").get("parent_post_id").asText(),
+                is("fb://165107853523677/posts/165107853523677_1081856348515485"));
+    }
+
+    @Test
+    public void shouldFormCommentsOutlinksIfParentIsComment() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
+
+        // then
+        assertThat(result.getLinks().size(), is(2));
+        assertThat(result.getLinks().keySet(), hasItems
+                ("fb://1117812631564394?scope=user",
+                        "fb://165107853523677/posts/1081856348515485_1082938725073914/x100/0"));
+    }
+
+    private JsonNode getJsonContent(ParseResult result) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(result.getContent(), JsonNode.class);
     }
 }

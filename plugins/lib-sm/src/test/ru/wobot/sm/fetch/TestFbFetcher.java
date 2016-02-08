@@ -9,6 +9,8 @@ import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
+import ru.wobot.sm.core.auth.Credential;
+import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 
@@ -26,22 +28,32 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 public class TestFbFetcher {
-    private FbFetcher fbFetcher = new FbFetcher();
+
     private ObjectMapper objectMapper = new ObjectMapper();
+    private CredentialRepository repository = mock(CredentialRepository.class);
+    private FbFetcher fbFetcher = new FbFetcher(repository);
 
     {
+        Credential credential = mock(Credential.class);
+        given(credential.getAccessToken()).willReturn("717502605052808|vJSXEhRP-HhsrDcY-6qj4Q2vTYU");
+        given(repository.getInstance()).willReturn(credential);
         objectMapper.registerModule(new FacebookModule());
     }
 
     @Test
     public void shouldGetProfilesFor2Ids() throws IOException {
         // given when
-        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
+        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia",
+                "903823909732609?scope=user"));
 
         // then
         assertThat(profiles.size(), is(2));
+        assertThat(profiles.get(0).getId(), is("165107853523677"));
+        assertThat(profiles.get(1).getFullName(), is("Ольга Миленина"));
     }
 
     @Test
@@ -63,6 +75,16 @@ public class TestFbFetcher {
         // then
         assertThat(response, is(not(nullValue())));
         assertThat(response.getData(), containsString("MasterCard"));
+    }
+
+    @Test
+    public void shouldGetFullUserDataForId() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileData("903823909732609?scope=user");
+
+        // then
+        assertThat(response, is(not(nullValue())));
+        assertThat(response.getData(), containsString("Ольга Миленина"));
     }
 
     @Test

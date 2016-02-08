@@ -28,6 +28,8 @@ public class DelayedCredential implements Delayed, Credential {
     }
 
     public void used() {
+        if (maxRequests <= 0)
+            return;
         long now = DateTimeUtils.currentTimeMillis();
         startTime = now;
         if (checkTime == -1) //first usage
