@@ -17,19 +17,23 @@ public class UriTranslator {
         for (Object obj : objs) {
             Objects.requireNonNull(obj);
             final Class<?> aClass = obj.getClass();
-            final Scheme scheme = aClass.getAnnotation(Scheme.class);
+            final Scheme scheme = findScheme(aClass);
             if (scheme == null)
                 throw new IllegalArgumentException(obj.toString() + " should be annotated by Scheme");
 
             Collection<ParsedPath> paths = new ArrayList<>();
-            for (Method method : aClass.getDeclaredMethods()) {
-                final Path path = method.getAnnotation(Path.class);
-                if (path != null) {
+            final Method[] declaredMethods = aClass.getDeclaredMethods();
+            for (Method m : declaredMethods) {
+                Method method = findPathAnnotatedMethod(m);
+                if (method != null) {
+                    final Path path = method.getAnnotation(Path.class);
                     final HashMap<String, ValueConverter> converters = new HashMap<>();
                     int i = 0;
                     PathParam pathParam = null;
-                    for (Class parameter : method.getParameterTypes()) {
-                        for (Annotation annotation : method.getParameterAnnotations()[i++]) {
+                    final Class<?>[] parameterTypes = method.getParameterTypes();
+                    for (Class parameter : parameterTypes) {
+                        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+                        for (Annotation annotation : parameterAnnotations[i++]) {
                             if (annotation instanceof PathParam) {
                                 pathParam = (PathParam) annotation;
                                 break;
@@ -42,13 +46,50 @@ public class UriTranslator {
                             throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
                         converters.put(paramVal, new ValueConverter(parameter));
                     }
-                    paths.add(PathParser.parse(new MethodInvoker(obj, method), path.value().trim(), converters));
+                    paths.add(PathParser.parse(new MethodInvoker(obj, m), path.value().trim(), converters));
                 }
             }
             if (paths.isEmpty()) throw new IllegalArgumentException(obj.toString() + " can't find Path annotation");
             else schemas.put(scheme.value(), paths);
         }
     }
+
+    private Scheme findScheme(Class<?> aClass) {
+        if (aClass.isAnnotationPresent(Scheme.class))
+            return aClass.getAnnotation(Scheme.class);
+        for (Class<?> i : aClass.getInterfaces()) {
+            final Scheme scheme = findScheme(i);
+            if (scheme != null) return scheme;
+        }
+        return null;
+    }
+
+    private Method findPathAnnotatedMethod(Method method) {
+        if (method.isAnnotationPresent(Path.class))
+            return method;
+        final Class<?> declaringClass = method.getDeclaringClass();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        for (Class<?> aClass : declaringClass.getInterfaces()) {
+            try {
+                final Method base = aClass.getDeclaredMethod(method.getName(), parameterTypes);
+                if (base != null)
+                    return findPathAnnotatedMethod(base);
+            } catch (NoSuchMethodException e) {
+            }
+        }
+        final Class<?> superclass = declaringClass.getSuperclass();
+        if (superclass != null && superclass != Object.class) {
+            try {
+                final Method base = superclass.getDeclaredMethod(method.getName(), parameterTypes);
+                if (base != null)
+                    return findPathAnnotatedMethod(base);
+            } catch (NoSuchMethodException e) {
+            }
+        }
+
+        return null;
+    }
+
 
     public <T> T translate(ParsedUri u) throws InvocationTargetException, IllegalAccessException {
         final Collection<ParsedPath> paths = schemas.get(u.getScheme());
