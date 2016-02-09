@@ -107,8 +107,8 @@ public class UriTranslator {
                             break;
                         }
                     } else {
-                        final ValueConverter converter = (ValueConverter) segment;
-                        final ValueConverter.ConvertResult convertResult = converter.convert(uriSegmentsIterator.next());
+                        final ParamSegment paramSegment = (ParamSegment) segment;
+                        final ValueConverter.ConvertResult convertResult = paramSegment.convert(uriSegmentsIterator.next());
                         if (convertResult.isConvertSuccess())
                             params.add(convertResult.getResult());
                         else {

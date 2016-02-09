@@ -2,7 +2,7 @@ package ru.wobot.uri.impl;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class ValueConverter implements Segment {
+public class ValueConverter {
     private Class aClass;
 
     public ValueConverter(Class aClass) {
@@ -19,12 +19,11 @@ public class ValueConverter implements Segment {
     }
 
     public static String parseValueTemplate(String tmp) {
-        if (tmp.startsWith("{") && tmp.endsWith("}")) {
-            tmp = tmp.substring(1, tmp.length() - 1);
-            if (!tmp.isEmpty())
-                return tmp;
-        }
-        throw new IllegalArgumentException();
+        tmp = tmp.substring(tmp.indexOf("{") + 1, tmp.indexOf("}"));
+        if (tmp.isEmpty())
+            throw new IllegalArgumentException();
+
+        return tmp;
     }
 
 
