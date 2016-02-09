@@ -9,8 +9,6 @@ import java.util.Objects;
 
 @Scheme("ftp")
 public class FtpScheme {
-    private boolean isRootInvoked = false;
-
     @Path("{arg1}")
     String method(@PathParam("arg1") String arg1) {
         return arg1;
@@ -18,11 +16,6 @@ public class FtpScheme {
 
     @Path("root")
     public Object root() {
-        isRootInvoked = true;
         return new Object();
-    }
-
-    public boolean isRootInvoked() {
-        return isRootInvoked;
     }
 }

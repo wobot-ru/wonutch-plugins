@@ -3,14 +3,11 @@ package ru.wobot.uri;
 import org.junit.Before;
 import org.junit.Test;
 import ru.wobot.uri.impl.ParsedUri;
-import ru.wobot.uri.stub.SMScheme;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class UriTranslator_Translate_SMScheme_Test {
     private UriTranslator translator;
@@ -18,21 +15,37 @@ public class UriTranslator_Translate_SMScheme_Test {
 
     @Before
     public void setUp() throws ClassNotFoundException {
-        scheme = new SMScheme();
+        scheme = spy(SMScheme.class);
         translator = new UriTranslator(scheme);
     }
 
     @Test
-    public void add_when_translate_const_segment_than_defined_method_should_be_invoked() throws URISyntaxException, InvocationTargetException, IllegalAccessException {
-        String result = translator.translate(ParsedUri.parse(new URI("sm://root")));
-        assertThat(result, equalTo("root"));
-        assertThat(scheme.isRootInvoked(), equalTo(true));
+    public void add_when_translate_const_segment_than_defined_method_should_be_invoked() throws InvocationTargetException, IllegalAccessException {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("sm://root"));
+
+        // than
+        verify(scheme).root();
     }
 
     @Test
-    public void add_when_translate_uri_with_pathParams_than_defined_method_should_be_invoked() throws URISyntaxException, InvocationTargetException, IllegalAccessException {
-        String result = translator.translate(ParsedUri.parse(new URI("sm://root/arg1/arg2/")));
-        assertThat(result, equalTo("root/arg1/arg2"));
-        assertThat(scheme.isMethod1Invoked(), equalTo(true));
+    public void add_when_translate_uri_with_pathParams_than_defined_method_should_be_invoked() throws InvocationTargetException, IllegalAccessException {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("sm://root/arg1/arg2/"));
+
+        // than
+        verify(scheme).method1("root", "arg1", "arg2");
+    }
+
+    @Scheme("sm")
+    public interface SMScheme {
+
+        @Path("root")
+        String root();
+
+        @Path("{host}/{arg1}/{arg2}")
+        String method1(@PathParam("host") String host, @PathParam("arg1") String arg1, @PathParam("arg2") String arg2);
     }
 }

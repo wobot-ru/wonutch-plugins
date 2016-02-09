@@ -2,8 +2,6 @@ package ru.wobot.uri;
 
 import org.junit.Test;
 import ru.wobot.uri.impl.ParsedUri;
-import ru.wobot.uri.stub.SchemeBaseImpl;
-import ru.wobot.uri.stub.SchemeInterfaceIml;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -25,5 +23,31 @@ public class UriTranslator_Inheritance_Test {
         final UriTranslator translator = new UriTranslator(new SchemeBaseImpl());
         String result = translator.translate(ParsedUri.parse(new URI("sm://root/abc")));
         assertThat(result, equalTo("abc"));
+    }
+
+    @Scheme("sm")
+    public interface SchemeInterface {
+        @Path("root/{a}")
+        String root(@PathParam("a") String a);
+    }
+
+    public class SchemeBaseImpl extends SchemeBase {
+        @Override
+        public String root(String a) {
+            return a;
+        }
+    }
+
+    @Scheme("sm")
+    abstract class SchemeBase {
+        @Path("root/{a}")
+        public abstract String root(@PathParam("a") String a);
+    }
+
+    public class SchemeInterfaceIml implements SchemeInterface {
+        @Override
+        public String root(String a) {
+            return a;
+        }
     }
 }

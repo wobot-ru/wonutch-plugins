@@ -7,14 +7,12 @@ import ru.wobot.uri.impl.ParsedUri;
 import ru.wobot.uri.stub.FtpScheme;
 import ru.wobot.uri.stub.HttpsScheme;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class UriTranslator_Translate_Test {
     @Rule
@@ -29,8 +27,8 @@ public class UriTranslator_Translate_Test {
 
     @Test
     public void add_when_translate_root_domain_than_defined_method_should_be_invoked() throws URISyntaxException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
-        final FtpScheme ftpScheme = new FtpScheme();
+        final FtpScheme ftpScheme = spy(new FtpScheme());
         new UriTranslator(ftpScheme).translate(ParsedUri.parse(new URI("ftp://root")));
-        assertThat(ftpScheme.isRootInvoked(), is(true));
+        verify(ftpScheme).root();
     }
 }
