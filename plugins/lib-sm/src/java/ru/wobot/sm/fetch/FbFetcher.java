@@ -155,7 +155,7 @@ public class FbFetcher implements SMFetcher {
     }
 
     @Override
-    public FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
+    public FetchResponse getPostCommentsData(String userId, String postId, int take, int skip) throws IOException {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + postId + "/comments");
         uriBuilder.queryParam("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));

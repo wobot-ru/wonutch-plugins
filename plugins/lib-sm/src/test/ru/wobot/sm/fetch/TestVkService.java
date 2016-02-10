@@ -51,7 +51,7 @@ public class TestVkService {
 
     @Test
     public void is_getComments_return_comments() throws IOException {
-        FetchResponse r = vkFetcher.getPostCommentsData("1", "593585", 0, 100);
+        FetchResponse r = vkFetcher.getPostCommentsData("1", "593585", 100, 0);
         assertThat(r.getData(), is(not(nullValue())));
     }
 }
