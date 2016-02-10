@@ -49,6 +49,16 @@ public class UriTranslator_Translate_SMScheme_Test {
         verify(scheme).method2("-test-");
     }
 
+    @Test
+    public void given_queryParam_and_when_translate_uri_than_invocation_should_be_correct() throws InvocationTargetException, IllegalAccessException {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("sm://durov?scope=auth"));
+
+        // than
+        verify(scheme).method3("durov", "auth");
+    }
+
     @Scheme("sm")
     public interface SMScheme {
         @Path("root")
@@ -59,5 +69,8 @@ public class UriTranslator_Translate_SMScheme_Test {
 
         @Path("prefix{host}suffix")
         String method2(@PathParam("host") String host);
+
+        @Path("{host}")
+        String method3(@PathParam("host") String host, @QueryParam("scope") String scope);
     }
 }

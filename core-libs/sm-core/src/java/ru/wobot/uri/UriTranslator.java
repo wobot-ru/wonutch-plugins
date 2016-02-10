@@ -27,26 +27,35 @@ public class UriTranslator {
                 Method method = findPathAnnotatedMethod(m);
                 if (method != null) {
                     final Path path = method.getAnnotation(Path.class);
-                    final HashMap<String, ValueConverter> converters = new HashMap<>();
+                    final Map<String, ValueConverter> converters = new HashMap<>();
+                    final Map<String, ValueConverter> queryConverters = new LinkedHashMap<>();
                     int i = 0;
                     PathParam pathParam = null;
+                    QueryParam queryParam = null;
                     final Class<?>[] parameterTypes = method.getParameterTypes();
                     for (Class parameter : parameterTypes) {
                         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
                         for (Annotation annotation : parameterAnnotations[i++]) {
-                            if (annotation instanceof PathParam) {
+                            if (annotation instanceof PathParam)
                                 pathParam = (PathParam) annotation;
+                            if (annotation instanceof QueryParam)
+                                queryParam = (QueryParam) annotation;
+                            if (pathParam != null && queryParam != null)
                                 break;
-                            }
                         }
                         if (pathParam == null)
                             throw new IllegalArgumentException(parameter.toString() + " should be annotated by PathParam");
-                        final String paramVal = pathParam.value();
-                        if (paramVal.isEmpty())
+                        if (pathParam.value().isEmpty())
                             throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
-                        converters.put(paramVal, new ValueConverter(parameter));
+                        converters.put(pathParam.value(), new ValueConverter(parameter));
+
+                        if (queryParam != null) {
+                            if (queryParam.value().isEmpty())
+                                throw new IllegalArgumentException(parameter.toString() + " QueryParam can't be empty");
+                            queryConverters.put(queryParam.value(), new ValueConverter(parameter));
+                        }
                     }
-                    paths.add(PathParser.parse(new MethodInvoker(obj, m), path.value().trim(), converters));
+                    paths.add(PathParser.parse(new MethodInvoker(obj, m), path.value().trim(), converters, queryConverters));
                 }
             }
             if (paths.isEmpty()) throw new IllegalArgumentException(obj.toString() + " can't find Path annotation");
@@ -91,7 +100,7 @@ public class UriTranslator {
     }
 
 
-    public <T> T translate(ParsedUri u) throws InvocationTargetException, IllegalAccessException {
+    public <T> T translate(ParsedUri u) {
         final Collection<ParsedPath> paths = schemas.get(u.getScheme());
         if (paths == null)
             throw new IllegalArgumentException(u.getScheme() + " is schema not supported");
@@ -108,7 +117,7 @@ public class UriTranslator {
                         }
                     } else {
                         final ParamSegment paramSegment = (ParamSegment) segment;
-                        final ValueConverter.ConvertResult convertResult = paramSegment.convert(uriSegmentsIterator.next());
+                        final ConvertResult convertResult = paramSegment.convert(uriSegmentsIterator.next());
                         if (convertResult.isConvertSuccess())
                             params.add(convertResult.getResult());
                         else {
@@ -118,10 +127,19 @@ public class UriTranslator {
                     }
                 }
                 if (canInvoke)
-                    return path.invoke(params.toArray());
+                    try {
+                        Object[] allParams = concat(params.toArray(), path.convertQuery(u.getQuery()));
+                        return path.invoke(allParams);
+                    } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                    }
             }
         }
         throw new UriNoMapException();
     }
 
+    private static <T> T[] concat(T[] first, T[] second) {
+        T[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
+    }
 }

@@ -13,7 +13,7 @@ public class ValueConverter_Test {
         // given
         ValueConverter c = new ValueConverter(Integer.class);
         // when
-        ValueConverter.ConvertResult convert = c.convert("789");
+        ConvertResult convert = c.convert("789");
         //then
         assertThat(convert.isConvertSuccess(), is(true));
         assertThat((Integer) convert.getResult(), equalTo(789));
@@ -24,7 +24,7 @@ public class ValueConverter_Test {
         // given
         ValueConverter c = new ValueConverter(Integer.class);
         // when
-        ValueConverter.ConvertResult convert = c.convert("abc");
+        ConvertResult convert = c.convert("abc");
         //then
         assertThat(convert.isConvertSuccess(), is(false));
     }

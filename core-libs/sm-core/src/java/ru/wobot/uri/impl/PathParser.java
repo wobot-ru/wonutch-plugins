@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class PathParser {
-    public static ParsedPath parse(MethodInvoker invoker, String path, Map<String, ValueConverter> converters) {
+    public static ParsedPath parse(MethodInvoker invoker, String path, Map<String, ValueConverter> converters, Map<String, ValueConverter> queryConverters) {
         final String trimmedPath = Objects.requireNonNull(path).trim();
         final String[] segments = trimmedPath.split("/");
         if (segments.length == 0)
@@ -22,6 +22,6 @@ public class PathParser {
                 parsedSegs.add(new ConstSegment(seg));
         }
 
-        return new ParsedPath(invoker, parsedSegs);
+        return new ParsedPath(invoker, parsedSegs, queryConverters);
     }
 }

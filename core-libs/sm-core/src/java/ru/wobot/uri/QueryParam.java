@@ -49,7 +49,7 @@ import java.lang.annotation.*;
  * Values are URL decoded unless this is disabled using the {@link Encoded}
  * annotation. A default value can be specified using the {@link DefaultValue}
  * annotation.
- *
+ * <p/>
  * The type {@code T} of the annotated parameter, field or property must
  * either:
  * <ol>
@@ -65,11 +65,11 @@ import java.lang.annotation.*;
  * {@code SortedSet<T>}, where {@code T} satisfies 2, 3 or 4 above.
  * The resulting collection is read-only.</li>
  * </ol>
- *
+ * <p/>
  * <p>If the type is not one of the collection types listed in 5 above and the
  * query parameter is represented by multiple values then the first value (lexically)
  * of the parameter is used.</p>
- *
+ * <p/>
  * <p>Because injection occurs at object creation time, use of this annotation
  * on resource class fields and bean properties is only supported for the
  * default per-request resource class lifecycle. Resource classes using
@@ -83,7 +83,7 @@ import java.lang.annotation.*;
  * @see javax.ws.rs.core.UriInfo#getQueryParameters
  * @since 1.0
  */
-@Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface QueryParam {

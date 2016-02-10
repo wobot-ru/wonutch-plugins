@@ -15,7 +15,7 @@ public class ValueConverter {
             return new ConvertResult(converted);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
         }
-        return new ConvertResult();
+        return ConvertResult.getFailedConvertResult();
     }
 
     public static String parseValueTemplate(String tmp) {
@@ -24,28 +24,5 @@ public class ValueConverter {
             throw new IllegalArgumentException();
 
         return tmp;
-    }
-
-
-    public class ConvertResult {
-        private final boolean isConvertSuccess;
-        private Object result;
-
-        ConvertResult(Object result) {
-            this.result = result;
-            this.isConvertSuccess = true;
-        }
-
-        public ConvertResult() {
-            isConvertSuccess = false;
-        }
-
-        public Object getResult() {
-            return result;
-        }
-
-        public boolean isConvertSuccess() {
-            return isConvertSuccess;
-        }
     }
 }

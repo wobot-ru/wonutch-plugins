@@ -8,12 +8,17 @@ public class ParamSegment implements Segment {
 
     public ParamSegment(String pattern, ValueConverter converter) {
         start = pattern.indexOf("{");
-        end = pattern.indexOf("}")+1;
+        end = pattern.indexOf("}") + 1;
         this.pattern = pattern;
         this.converter = converter;
     }
 
-    public ValueConverter.ConvertResult convert(String from) {
-        return converter.convert(from.substring(start, end-(pattern.length()-from.length())));
+    public ConvertResult convert(String from) {
+        try {
+            return converter.convert(from.substring(start, end - (pattern.length() - from.length())));
+        } catch (IndexOutOfBoundsException ex) {
+
+        }
+        return ConvertResult.getFailedConvertResult();
     }
 }

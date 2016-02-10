@@ -95,7 +95,7 @@ import java.lang.annotation.*;
  * @see javax.ws.rs.core.UriInfo
  * @since 1.0
  */
-@Target({ElementType.PARAMETER, ElementType.METHOD, ElementType.FIELD})
+@Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface PathParam {
