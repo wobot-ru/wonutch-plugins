@@ -30,6 +30,16 @@ public class ValueConverter_Test {
     }
 
     @Test
+    public void test_primitive_type_convert() {
+        // given
+        ValueConverter c = new ValueConverter(int.class);
+        // when
+        ConvertResult convert = c.convert("123");
+        //then
+        assertThat((int) convert.getResult(), equalTo(123));
+    }
+
+    @Test
     public void test_parseValueTemplate() {
         // given
         // when

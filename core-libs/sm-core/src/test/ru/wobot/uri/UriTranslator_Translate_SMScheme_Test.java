@@ -43,7 +43,7 @@ public class UriTranslator_Translate_SMScheme_Test {
     public void given_complex_pathParam_and_when_translate_uri_than_invocation_should_be_correct() throws InvocationTargetException, IllegalAccessException {
         // given
         // when
-        translator.translate(ParsedUri.parse("sm://prefix-test-suffix"));
+        translator.translate(ParsedUri.parse("sm://prefix-test-suffix/abc"));
 
         // than
         verify(scheme).method2("-test-");
@@ -67,10 +67,10 @@ public class UriTranslator_Translate_SMScheme_Test {
         @Path("{host}/{arg1}/{arg2}")
         String method1(@PathParam("host") String host, @PathParam("arg1") String arg1, @PathParam("arg2") String arg2);
 
-        @Path("prefix{host}suffix")
-        String method2(@PathParam("host") String host);
-
         @Path("{host}")
         String method3(@PathParam("host") String host, @QueryParam("scope") String scope);
+
+        @Path("prefix{host}suffix/abc")
+        String method2(@PathParam("host") String host);
     }
 }
