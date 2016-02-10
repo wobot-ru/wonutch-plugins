@@ -86,8 +86,8 @@ public class DomainService {
                 param = queryParam.substring(queryParam.indexOf("=") + 1);
         }
 
-        FetchResponse fetchResponse = smService.getPostCommentsData(param, postId, page * POSTS_LIMIT,
-                POSTS_LIMIT);
+        FetchResponse fetchResponse = smService.getPostCommentsData(param, postId, POSTS_LIMIT, page * POSTS_LIMIT
+        );
         return new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata());
     }
 

@@ -3,7 +3,6 @@ package ru.wobot.sm.core.fetch;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
-import ru.wobot.uri.Scheme;
 
 import java.io.IOException;
 import java.util.List;
@@ -27,5 +26,5 @@ public interface SMFetcher {
     FetchResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException;
 
     @Path("{userId}/posts/{postId}/x{take}/{skip}")
-    FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId")String postId, @PathParam("skip")int skip, @PathParam("take") int take) throws IOException;
+    FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("take") int take, @PathParam("skip") int skip) throws IOException;
 }

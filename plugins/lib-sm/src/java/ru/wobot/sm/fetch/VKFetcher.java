@@ -25,8 +25,6 @@ import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.uri.Path;
-import ru.wobot.uri.PathParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.BufferedReader;
@@ -154,7 +152,7 @@ public class VKFetcher implements SMFetcher {
     }
 
     @Override
-    public FetchResponse getPostCommentsData(String userId, String postId, int skip, int take) throws IOException {
+    public FetchResponse getPostCommentsData(String userId, String postId, int take, int skip) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)

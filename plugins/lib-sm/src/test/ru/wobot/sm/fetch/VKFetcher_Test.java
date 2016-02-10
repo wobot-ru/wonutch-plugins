@@ -76,6 +76,6 @@ public class VKFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112"));
 
         //then
-        verify(scheme).getPostCommentsData("id1", "531296", 112, 77);
+        verify(scheme).getPostCommentsData("id1", "531296", 77, 112);
     }
 }
