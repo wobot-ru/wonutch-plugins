@@ -1,6 +1,5 @@
 package ru.wobot.sm.fetch;
 
-import org.junit.Assert;
 import org.junit.Test;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -33,8 +32,8 @@ public class TestVkService {
 
     @Test
     public void is_getFriends_return_users_friends() throws IOException {
-        List<String> friendIds = vkFetcher.getFriendIds("1");
-        Assert.assertTrue(friendIds.size() > 1);
+        final FetchResponse response = vkFetcher.getFriendIds("1");
+        assertThat(response, is(not(nullValue())));
     }
 
     @Test

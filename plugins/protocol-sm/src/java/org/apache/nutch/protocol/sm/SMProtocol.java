@@ -1,6 +1,5 @@
 package org.apache.nutch.protocol.sm;
 
-import com.google.gson.GsonBuilder;
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -8,11 +7,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.protocol.Content;
-import org.apache.nutch.protocol.Protocol;
-import org.apache.nutch.protocol.ProtocolOutput;
-import org.apache.nutch.protocol.ProtocolStatus;
-import org.apache.nutch.protocol.RobotRulesParser;
+import org.apache.nutch.protocol.*;
 import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.Proxy;
@@ -28,12 +23,10 @@ import ru.wobot.uri.impl.ParsedUri;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Properties;
 
 public class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
-    private static final com.google.gson.Gson Gson = new GsonBuilder().create();
     private DomainService domainService;
     private Configuration conf;
     private UriTranslator translator;
@@ -50,19 +43,8 @@ public class SMProtocol implements Protocol {
                 SMContent response = domainService.request(urlString);
                 return new ProtocolOutput(convertToContent(response));
             }
-            final Object o = translator.translate(ParsedUri.parse(urlString));
-
-            if (o instanceof List<?>) {
-                List<String> ids = (List<String>) o;
-                return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8))));
-            }
-            if (o.getClass() == Integer.class) {
-                int postsCount = (int) o;
-                return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(postsCount).getBytes(StandardCharsets.UTF_8))));
-            }
-            FetchResponse fetchResponse = (FetchResponse) o;
-            return new ProtocolOutput(convertToContent(new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse
-                    .getMetadata())));
+            FetchResponse fetchResponse =  translator.translate(ParsedUri.parse(urlString));
+            return new ProtocolOutput(convertToContent(new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata())));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return new ProtocolOutput(null, new ProtocolStatus(e));
@@ -110,9 +92,5 @@ public class SMProtocol implements Protocol {
         metadata.add("nutch.fetch.time", String.valueOf(response.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
         return new Content(response.getUrl(), response.getUrl(), response.getData(), response.getMetadata().get
                 (ContentMetaConstants.MIME_TYPE).toString(), metadata, this.conf);
-    }
-
-    private String toJson(Object obj) {
-        return Gson.toJson(obj);
     }
 }

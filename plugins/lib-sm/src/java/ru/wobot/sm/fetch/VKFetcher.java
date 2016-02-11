@@ -22,6 +22,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
+import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMFetcher;
@@ -36,6 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static ru.wobot.sm.serialize.Serializer.getInstance;
@@ -65,7 +67,7 @@ public class VKFetcher {
     }
 
     @Path("id{userId}/friends")
-    public List<String> getFriendIds(@PathParam("userId") String userId) throws IOException {
+    public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
@@ -79,11 +81,14 @@ public class VKFetcher {
             ids.add("id" + p.getId());
         }
         Collections.sort(ids);
-        return ids;
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        return new FetchResponse(toJson(ids), metaData);
     }
 
     @Path("id{userId}/index-posts")
-    public int getPostCount(@PathParam("userId") String userId) throws IOException {
+    public FetchResponse getPostCount(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -91,7 +96,10 @@ public class VKFetcher {
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
-        return posts.getCount();
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
+        return new FetchResponse(toJson(posts.getCount()), metaData);
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
