@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.social.UncategorizedApiException;
-import org.springframework.social.facebook.api.Page;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
@@ -45,17 +44,17 @@ public class FbParser extends AbstractParser {
         if (content == null || content.isEmpty())
             return new ParseResult(urlString, userDomain, content, new HashMap<String, String>(), parseMeta,
                     contentMeta);
-        Page profile;
+        JsonNode profile;
         try {
-            profile = objectMapper.reader(Page.class).readValue(content);
+            profile = objectMapper.readValue(content, JsonNode.class);
         } catch (IOException e) {
             throw new UncategorizedApiException("facebook", "Error deserializing profile [" + userDomain + "]", e);
         }
 
-        String userId = profile.getId();
+        String userId = profile.get("id").asText();
         Map<String, String> links = new HashMap<>();
         //TODO: HACK-REWRITE ASAP
-        if (!urlString.contains("scope=user")) {
+        if (profile.get("type") != null && !profile.get("type").asText().equals("user")) {
             // generate link <a href='fb://{user}/friends'>user-friends</a>
             links.put(UrlSchemaConstants.FACEBOOK + userId + "/friends", userId + "-friends");
 
@@ -64,12 +63,12 @@ public class FbParser extends AbstractParser {
         }
 
         // fill parse metadata
-        final String fullName = profile.getName();
+        final String fullName = profile.get("name").asText();
         parseMeta.put(ProfileProperties.SOURCE, Sources.FACEBOOK);
         parseMeta.put(ProfileProperties.NAME, fullName);
-        parseMeta.put(ProfileProperties.HREF, profile.getLink());
-        parseMeta.put(ProfileProperties.SM_PROFILE_ID, String.valueOf(profile.getId()));
-        parseMeta.put(ProfileProperties.REACH, profile.getLikes());
+        parseMeta.put(ProfileProperties.HREF, profile.get("link").asText());
+        parseMeta.put(ProfileProperties.SM_PROFILE_ID, userId);
+        parseMeta.put(ProfileProperties.REACH, profile.get("likes") == null ? 1 : profile.get("likes").asText());  //default reach is 1 IMHO
 
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.PROFILE);
@@ -130,7 +129,7 @@ public class FbParser extends AbstractParser {
         ParseResult[] parseResults = null;
         if (posts != null && posts.size() != 0) {
             parseResults = new ParseResult[posts.size()];
-            links = new HashMap<>(posts.size() + 1);
+            links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page
             if (nextPage != null)
                 // generate link <a href='fb://{user}/index-posts/x100/{until}'>{user}-index-posts-x100-page-{until}</a>
                 links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
@@ -142,13 +141,19 @@ public class FbParser extends AbstractParser {
 
                 // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
+                if (!post.getFrom().getId().equals(userDomain)) {
+                    // generate link <a href='fb://{user}?scope=user&comment_id={post}'>{user}?scope=user&comment_id={post}</a>
+                    links.put(UrlSchemaConstants.FACEBOOK + post.getFrom().getId() + "?scope=user&comment_id=" + postId,
+                            "");
+                }
 
                 Map<String, Object> postParse = new HashMap<>();
                 Map<String, Object> postContent = new HashMap<>();
 
                 postParse.put(PostProperties.SOURCE, Sources.FACEBOOK);
                 postParse.put(PostProperties.PROFILE_ID, UrlSchemaConstants.FACEBOOK + post.getFrom().getId());
-                postParse.put(PostProperties.HREF, "https://www.facebook.com/" + userDomain + "/posts/" + post.getObjectId());
+                postParse.put(PostProperties.HREF, "https://www.facebook.com/" + userDomain + "/posts/" +
+                        postId.substring(postId.lastIndexOf('_') + 1));
                 postParse.put(PostProperties.SM_POST_ID, postId);
                 postParse.put(PostProperties.BODY, post.getMessage() == null ? post.getDescription() : post.getMessage());
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
@@ -165,7 +170,7 @@ public class FbParser extends AbstractParser {
 
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
-                postContent.put(ContentMetaConstants.PARENT, UrlSchemaConstants.FACEBOOK + postId.substring(0, postId.indexOf('_')));
+                postContent.put(ContentMetaConstants.PARENT, UrlSchemaConstants.FACEBOOK + post.getFrom().getId());
                 postContent.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
                 parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
             }
@@ -176,14 +181,14 @@ public class FbParser extends AbstractParser {
 
     @Override
     protected ParseResult parsePost(URL url, String content) {
-        return null;
+        throw new UnsupportedOperationException("Method not supported by Facebook API.");
     }
 
     @Override
     protected ParseResult parseCommentPage(URL url, String content) {
         final String userDomain = url.getHost();
         final String[] path = url.getPath().split("/");
-        final String parentMessageId = path[2]; // maybe post or comment (replies have comment as a parent, not post)
+        final String parentMessageId = path[2]; // may be post or comment (reply comments have comment as a parent, not post)
 
         Map<String, Object> parseMeta = new HashMap<>();
         Map<String, Object> contentMeta = new HashMap<String, Object>() {{
@@ -212,12 +217,18 @@ public class FbParser extends AbstractParser {
         for (int i = 0; i < comments.size(); i++) {
             final JsonNode comment = comments.get(i);
             final String id = comment.get("id").asText();
-            final String postObjectId = id.substring(0, id.indexOf('_'));
+            final String postObjectId;
+            if (comment.get("object") != null) {
+                String objectId = comment.get("object").get("id").asText();
+                postObjectId = objectId.contains("_") ? objectId.substring(0, objectId.indexOf('_')) : objectId;
+            } else
+                postObjectId = id.substring(0, id.indexOf('_'));
+
             final String postUrl = UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + userDomain + "_" + postObjectId;
             final String commentOwnerProfile = UrlSchemaConstants.FACEBOOK + comment.get("from").get("id")
-                    .asText() + "?scope=user";
-            // generate link <a href='fb://{user}?scope=user'>{user}?scope=user</a>
-            links.put(commentOwnerProfile, "");
+                    .asText();
+            // generate link <a href='fb://{user}?scope=user&comment_id={comment}'>{user}?scope=user&comment_id={comment}</a>
+            links.put(commentOwnerProfile + "?scope=user&comment_id=" + id, "");
 
             //TODO: Think about another link for replies, to not to confuse with posts
             // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>

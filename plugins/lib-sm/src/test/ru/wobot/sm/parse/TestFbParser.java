@@ -14,7 +14,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class TestFbParser {
-    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
+    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"type\":\"page\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
+    private static final String RAW_USER_PROFILE = "{\"id\":\"884167345038247\",\"type\":\"user\",\"likes\":0,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"Лидия Мазурова\"}";
     private static final String RAW_POSTS = "{\n" +
             "  \"data\": [\n" +
             "    {\n" +
@@ -69,7 +70,6 @@ public class TestFbParser {
             "      \"link\": \"https://www.facebook.com/mastercardrussia/photos/a.210500762317719.60293.165107853523677/1094750970559356/?type=3\",\n" +
             "      \"message\": \"Сегодня во всех кинотеатрах страны состоялась самая пухлая премьера года — мультфильм «Кунг-фу Панда 3»! Но только в сети кинотеатров «Формула кино» держатели MasterCard® получат скидку 10% на билеты. Впрочем, как и на все фильмы в течение 2016 года.\\n\\nНе пропустите!\",\n" +
             "      \"name\": \"Timeline Photos\",\n" +
-            "      \"object_id\": \"1094750970559356\",\n" +
             "      \"status_type\": \"added_photos\",\n" +
             "      \"type\": \"photo\",\n" +
             "      \"updated_time\": \"2016-01-30T19:56:30+0000\",\n" +
@@ -87,6 +87,9 @@ public class TestFbParser {
             "      \"from\": {\n" +
             "        \"name\": \"Lidia  Mazurova\",\n" +
             "        \"id\": \"884167345038247\"\n" +
+            "      },\n" +
+            "      \"object\": {\n" +
+            "        \"id\": \"1081856348515485\"\n" +
             "      },\n" +
             "      \"like_count\": 0,\n" +
             "      \"created_time\": \"2016-01-08T02:44:25+0000\",\n" +
@@ -137,6 +140,16 @@ public class TestFbParser {
     }
 
     @Test
+    public void shouldNotCreateUserOutLinks() throws IOException {
+        // given when
+        ParseResult result = fbParser.parseProfile(new URL("fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"),
+                RAW_USER_PROFILE);
+
+        // then
+        assertThat(result.getLinks().size(), is(0));
+    }
+
+    @Test
     public void shouldCreateFriendsOutLinks() throws IOException {
         // given when
         ParseResult result = fbParser.parseFriends(new URL("fb://165107853523677/friends"), //mastercardrussia
@@ -154,10 +167,11 @@ public class TestFbParser {
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         // then
-        assertThat(result.getLinks().size(), is(2));
+        assertThat(result.getLinks().size(), is(3));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/165107853523677_1095411087160011/x100/0",
-                        "fb://165107853523677/posts/165107853523677_1094750970559356/x100/0"));
+                        "fb://165107853523677/posts/165107853523677_1094750970559356/x100/0",
+                        "fb://900662163382117?scope=user&comment_id=165107853523677_1094750970559356"));
     }
 
     @Test
@@ -250,7 +264,22 @@ public class TestFbParser {
         assertThat(result.getLinks().size(), is(2));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0",
-                        "fb://884167345038247?scope=user"));
+                        "fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"));
+    }
+
+    @Test
+    public void shouldFormCommentsProfileIfParentIsPost() throws IOException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URL
+                ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode firstComment = node.get(0);
+
+        // then
+        assertThat(firstComment.get("parseMeta").get("profile_id").asText(),
+                is("fb://884167345038247"));
     }
 
     @Test
@@ -292,7 +321,7 @@ public class TestFbParser {
         // then
         assertThat(result.getLinks().size(), is(2));
         assertThat(result.getLinks().keySet(), hasItems
-                ("fb://1117812631564394?scope=user",
+                ("fb://1117812631564394?scope=user&comment_id=1081856348515485_1082938725073914",
                         "fb://165107853523677/posts/1081856348515485_1082938725073914/x100/0"));
     }
 

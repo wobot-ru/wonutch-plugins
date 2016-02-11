@@ -27,7 +27,6 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -39,21 +38,20 @@ public class TestFbFetcher {
 
     {
         Credential credential = mock(Credential.class);
-        given(credential.getAccessToken()).willReturn("717502605052808|vJSXEhRP-HhsrDcY-6qj4Q2vTYU");
+        given(credential.getAccessToken()).willReturn("1673845006238395|FkqeRkmP1kT_Ae42i8IkZx8KxBM");
         given(repository.getInstance()).willReturn(credential);
         objectMapper.registerModule(new FacebookModule());
     }
 
     @Test
-    public void shouldGetProfilesFor2Ids() throws IOException {
+    public void shouldGetProfilesForDifferentIds() throws IOException {
         // given when
         List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia",
-                "903823909732609?scope=user"));
+                "884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"));
 
         // then
-        assertThat(profiles.size(), is(2));
         assertThat(profiles.get(0).getId(), is("165107853523677"));
-        assertThat(profiles.get(1).getFullName(), is("Ольга Миленина"));
+        assertThat(profiles.get(1).getFullName(), is("Лидия Мазурова"));
     }
 
     @Test
@@ -68,23 +66,33 @@ public class TestFbFetcher {
     }
 
     @Test
-    public void shouldGetFullProfileDataForId() throws IOException {
+    public void shouldGetFullPageDataForId() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileData("mastercardrussia");
 
         // then
-        assertThat(response, is(not(nullValue())));
         assertThat(response.getData(), containsString("MasterCard"));
     }
 
     @Test
-    public void shouldGetFullUserDataForId() throws IOException {
+    public void shouldGetFullPageDataForIdWithScope() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("903823909732609?scope=user");
+        FetchResponse response = fbFetcher.getProfileData("1704938049732711?scope=user&comment_id=10154479526792506_10154481125912506");
 
         // then
-        assertThat(response, is(not(nullValue())));
-        assertThat(response.getData(), containsString("Ольга Миленина"));
+        assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
+        assertThat(response.getData(), not(containsString("\"type\":\"user\"")));
+        assertThat(response.getData(), containsString("\"type\":\"page\""));
+    }
+
+    @Test
+    public void shouldGetFullUserDataForIdWithCommentId() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileData("892133830908265?scope=user&comment_id=1081856348515485_1082735698427550");
+
+        // then
+        assertThat(response.getData(), containsString("Лидия Мазурова"));
+        assertThat(response.getData(), containsString("\"type\":\"user\""));
     }
 
     @Test

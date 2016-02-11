@@ -1,14 +1,14 @@
 package ru.wobot.sm.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.Page;
 import org.springframework.social.facebook.api.PagedList;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.User;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
-import org.springframework.social.facebook.api.impl.json.FacebookModule;
 import org.springframework.social.support.URIBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -20,7 +20,6 @@ import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,10 @@ public class FbFetcher implements SMFetcher {
             "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website",
             "link", "location"
     };
+
+    static final String[] COMMENT_PROFILE_FIELDS = {"from{id,name,link,first_name,last_name,name_format}"};
+
+    @SuppressWarnings("unused")
     static final String[] USER_FIELDS = {
             "id", "about", "age_range", "bio", "birthday", "cover", "currency", "devices", "education", "email",
             "favorite_athletes", "favorite_teams", "first_name", "gender", "hometown", "inspirational_people", "installed", "install_type",
@@ -47,60 +50,78 @@ public class FbFetcher implements SMFetcher {
             "with_tags", "shares", "likes.summary(true).limit(0)", "comments.summary(true).limit(0)"
     };
     private static final String[] COMMENT_FIELDS = {"message", "from", "like_count", "likes", "created_time",
-            "parent{id}"};
+            "parent{id}", "object{id}"};
 
     private static final String API_VERSION = "2.5";
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final CredentialRepository repository;
 
     public FbFetcher(CredentialRepository repository) {
         this.repository = repository;
-        objectMapper.registerModule(new FacebookModule());
     }
 
-    @Override
-    public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
+    private String getObjectType(String id) {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
-        List<SMProfile> result = new ArrayList<>(userIds.size());
-        for (String id : userIds) {
-            if (id.contains("scope=user")) {
+        try {
+            if (id.contains("scope=user")) { //may be user or page (comment author)
                 MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
                 queryParameters.set("fields", "metadata{type}");
                 queryParameters.set("metadata", "1");
                 User node = facebook.fetchObject(id.substring(0, id.indexOf("?")), User.class, queryParameters);
-                String type = ((Map) node.getExtraData().get("metadata")).get("type").toString();
-                if (type.equals("user")) {
-                    User user = facebook.fetchObject(node.getId(), User.class, USER_FIELDS);
-                    result.add(new SMProfile(id, user.getId(), user.getName()));
-                    continue;
-                }
+                return ((Map) node.getExtraData().get("metadata")).get("type").toString();
+            } else
+                return "page";
+        } catch (UncategorizedApiException e) {
+            return "user";
+        }
+    }
+
+    private JsonNode getObject(MultiValueMap<String, String> queryParameters, String path) {
+        Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
+        URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + path);
+        return facebook.restOperations().getForObject(uriBuilder.queryParams(queryParameters).build(), JsonNode.class);
+    }
+
+    @Override
+    public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
+        List<SMProfile> result = new ArrayList<>(userIds.size());
+        for (String id : userIds) {
+            String objectId = !id.contains("?") ? id : id.substring(0, id.indexOf("?"));
+            String objectType = getObjectType(id);
+            MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
+            if (objectType.equals("page")) {
+                queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(PROFILE_FIELDS));
+                JsonNode page = getObject(queryParameters, objectId);
+                String pageId = page.get("id").asText();
+                JsonNode username = page.get("username");
+                result.add(new SMProfile(pageId, username != null ? username.asText() : pageId, page.get("name").asText()));
+            } else {
+                queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_PROFILE_FIELDS));
+                JsonNode object = getObject(queryParameters, id.substring(id.lastIndexOf("=") + 1)).get("from");
+                result.add(new SMProfile(id, object.get("id").asText(), object.get("name").asText()));
             }
-            Page page = facebook.fetchObject(id, Page.class, PROFILE_FIELDS);
-            result.add(new SMProfile(page.getId(), page.getUsername(), page.getName()));
         }
         return result;
     }
 
     @Override
     public FetchResponse getProfileData(String userId) throws IOException {
-        Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-
-        if (userId.contains("scope=user")) {
-            MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
-            queryParameters.set("fields", "metadata{type}");
-            queryParameters.set("metadata", "1");
-            User node = facebook.fetchObject(userId.substring(0, userId.indexOf("?")), User.class, queryParameters);
-            String type = ((Map) node.getExtraData().get("metadata")).get("type").toString();
-            if (type.equals("user")) {
-                User user = facebook.fetchObject(node.getId(), User.class, USER_FIELDS);
-                return new FetchResponse(objectMapper.writeValueAsString(user), metaData);
-            }
+        String objectId = !userId.contains("?") ? userId : userId.substring(0, userId.indexOf("?"));
+        String objectType = getObjectType(userId);
+        MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
+        if (objectType.equals("page")) {
+            queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(PROFILE_FIELDS));
+            JsonNode user = getObject(queryParameters, objectId);
+            ((ObjectNode) user).put("type", "page");
+            return new FetchResponse(user.toString(), metaData);
+        } else {
+            queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_PROFILE_FIELDS));
+            JsonNode user = getObject(queryParameters, userId.substring(userId.lastIndexOf("=") + 1)).get("from");
+            ((ObjectNode) user).put("type", "user");
+            return new FetchResponse(user.toString(), metaData);
         }
-        Page page = facebook.fetchObject(userId, Page.class, PROFILE_FIELDS);
-        return new FetchResponse(objectMapper.writeValueAsString(page), metaData);
     }
 
     @Override
@@ -132,20 +153,17 @@ public class FbFetcher implements SMFetcher {
 
     @Override
     public FetchResponse getPostsData(String userId, long offset, int limit) throws IOException {
-        Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
-        URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + userId + "/feed");
-        uriBuilder.queryParam("fields", StringUtils.arrayToCommaDelimitedString(POST_FIELDS));
+        MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
+        queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(POST_FIELDS));
         if (offset > 0)
-            uriBuilder.queryParam("until", String.valueOf(offset));
+            queryParameters.set("until", String.valueOf(offset));
         if (limit > 0)
-            uriBuilder.queryParam("limit", String.valueOf(limit));
-        URI uri = uriBuilder.build();
-        JsonNode responseNode = facebook.restOperations().getForObject(uri, JsonNode.class);
+            queryParameters.set("limit", String.valueOf(limit));
 
+        JsonNode responseNode = getObject(queryParameters, userId + "/feed");
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-
         return new FetchResponse(responseNode.toString(), metaData);
     }
 
@@ -156,22 +174,19 @@ public class FbFetcher implements SMFetcher {
 
     @Override
     public FetchResponse getPostCommentsData(String userId, String postId, int take, int skip) throws IOException {
-        Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
-        URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + postId + "/comments");
-        uriBuilder.queryParam("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));
+        MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
+        queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));
         //TODO: HACK - rewrite ASAP
         if (userId != null)
-            uriBuilder.queryParam("after", userId);
+            queryParameters.set("after", userId);
         if (take > 0)
-            uriBuilder.queryParam("limit", String.valueOf(take));
-        uriBuilder.queryParam("order", "reverse_chronological");
-        URI uri = uriBuilder.build();
-        JsonNode responseNode = facebook.restOperations().getForObject(uri, JsonNode.class);
+            queryParameters.set("limit", String.valueOf(take));
+        queryParameters.set("order", "reverse_chronological");
 
+        JsonNode responseNode = getObject(queryParameters, postId + "/comments");
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-
         return new FetchResponse(responseNode.toString(), metaData);
     }
 }

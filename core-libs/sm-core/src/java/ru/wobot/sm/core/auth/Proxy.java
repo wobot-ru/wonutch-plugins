@@ -113,8 +113,7 @@ public enum Proxy implements CredentialRepository {
         } catch (InterruptedException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
         }
-
-        LOG.info("Thread: " + Thread.currentThread().getId() + "; Credentials used: " + c.getAccessToken() + "-" + c.getClientSecret());
+        //LOG.info("Thread: " + Thread.currentThread().getId() + "; Credentials used: " + c.getAccessToken() + "-" + c.getClientSecret());
         return c;
     }
 

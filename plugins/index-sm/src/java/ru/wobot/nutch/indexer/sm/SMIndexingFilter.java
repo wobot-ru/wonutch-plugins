@@ -62,6 +62,11 @@ public class SMIndexingFilter implements IndexingFilter {
         if (doc.getFieldValue("score") == null)
             doc.add("score", crawlDatum.getScore());
 
+        String id = (String) doc.getFieldValue("id");
+        if (id.contains("?scope=user&comment_id")) {
+            doc.removeField("id");
+            doc.add("id", id.substring(0, id.indexOf("?")));
+        }
         return doc;
     }
 
