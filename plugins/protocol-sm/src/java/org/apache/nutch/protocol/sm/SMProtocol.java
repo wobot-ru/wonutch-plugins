@@ -56,7 +56,7 @@ public class SMProtocol implements Protocol {
                 List<String> ids = (List<String>) o;
                 return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8))));
             }
-            if (o.getClass() == Integer.TYPE) {
+            if (o.getClass() == Integer.class) {
                 int postsCount = (int) o;
                 return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(postsCount).getBytes(StandardCharsets.UTF_8))));
             }
