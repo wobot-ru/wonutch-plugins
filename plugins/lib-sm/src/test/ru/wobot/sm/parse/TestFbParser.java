@@ -6,7 +6,8 @@ import org.junit.Test;
 import ru.wobot.sm.core.parse.ParseResult;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -119,9 +120,9 @@ public class TestFbParser {
     private final FbParser fbParser = new FbParser();
 
     @Test
-    public void shouldParseProfileContent() throws IOException {
+    public void shouldParseProfileContent() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseProfile(new URL("fb://mastercardrussia"),
+        ParseResult result = fbParser.parseProfile(new URI("fb://mastercardrussia"),
                 RAW_PROFILE);
 
         // then
@@ -129,9 +130,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldCreateProfileOutLinks() throws IOException {
+    public void shouldCreateProfileOutLinks() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseProfile(new URL("fb://mastercardrussia"),
+        ParseResult result = fbParser.parseProfile(new URI("fb://mastercardrussia"),
                 RAW_PROFILE);
 
         // then
@@ -140,9 +141,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldNotCreateUserOutLinks() throws IOException {
+    public void shouldNotCreateUserOutLinks() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseProfile(new URL("fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"),
+        ParseResult result = fbParser.parseProfile(new URI("fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"),
                 RAW_USER_PROFILE);
 
         // then
@@ -150,9 +151,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldCreateFriendsOutLinks() throws IOException {
+    public void shouldCreateFriendsOutLinks() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseFriends(new URL("fb://165107853523677/friends"), //mastercardrussia
+        ParseResult result = fbParser.parseFriends(new URI("fb://165107853523677/friends"), //mastercardrussia
                 "[\"431891506856669\", \"21435141328\"]");
 
         // then
@@ -161,9 +162,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldCreatePostsOutLinks() throws IOException {
+    public void shouldCreatePostsOutLinks() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parsePostsIndexPage(new URL
+        ParseResult result = fbParser.parsePostsIndexPage(new URI
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         // then
@@ -175,9 +176,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldCountPostsEngagement() throws IOException {
+    public void shouldCountPostsEngagement() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parsePostsIndexPage(new URL
+        ParseResult result = fbParser.parsePostsIndexPage(new URI
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         //when
@@ -191,9 +192,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormPostsHref() throws IOException {
+    public void shouldFormPostsHref() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parsePostsIndexPage(new URL
+        ParseResult result = fbParser.parsePostsIndexPage(new URI
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         //when
@@ -209,9 +210,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormPostsProfileId() throws IOException {
+    public void shouldFormPostsProfileId() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parsePostsIndexPage(new URL
+        ParseResult result = fbParser.parsePostsIndexPage(new URI
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         //when
@@ -225,9 +226,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsHrefIfParentIsPost() throws IOException {
+    public void shouldFormCommentsHrefIfParentIsPost() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
 
         //when
@@ -240,9 +241,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsParentIfParentIsPost() throws IOException {
+    public void shouldFormCommentsParentIfParentIsPost() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
 
         //when
@@ -255,9 +256,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsOutlinksIfParentIsPost() throws IOException {
+    public void shouldFormCommentsOutlinksIfParentIsPost() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
 
         // then
@@ -268,9 +269,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsProfileIfParentIsPost() throws IOException {
+    public void shouldFormCommentsProfileIfParentIsPost() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
 
         //when
@@ -283,9 +284,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsHrefIfParentIsComment() throws IOException {
+    public void shouldFormCommentsHrefIfParentIsComment() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
 
         //when
@@ -298,9 +299,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsParentIfParentIsComment() throws IOException {
+    public void shouldFormCommentsParentIfParentIsComment() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
 
         //when
@@ -313,9 +314,9 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsOutlinksIfParentIsComment() throws IOException {
+    public void shouldFormCommentsOutlinksIfParentIsComment() throws IOException, URISyntaxException {
         // given
-        ParseResult result = fbParser.parseCommentPage(new URL
+        ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
 
         // then

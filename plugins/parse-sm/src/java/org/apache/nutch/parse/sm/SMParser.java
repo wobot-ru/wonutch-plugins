@@ -15,7 +15,8 @@ import ru.wobot.sm.parse.FbParser;
 import ru.wobot.sm.parse.Vk;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,13 +49,13 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
         }
 
         try {
-            URL url = new URL(urlString);
-            ru.wobot.sm.core.parse.Parser parser = parsers.get(url.getProtocol());
+            URI url = new URI(urlString);
+            ru.wobot.sm.core.parse.Parser parser = parsers.get(url.getScheme());
             ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(url, new String(content.getContent(),
                     StandardCharsets.UTF_8));
             return convert(parseResult, content.getMetadata(), new Metadata());
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | URISyntaxException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return new ParseStatus(ParseStatus.FAILED, e.getMessage())
                     .getEmptyParseResult(content.getUrl(), getConf());

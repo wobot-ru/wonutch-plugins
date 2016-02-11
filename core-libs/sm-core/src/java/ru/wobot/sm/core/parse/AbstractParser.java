@@ -2,41 +2,41 @@ package ru.wobot.sm.core.parse;
 
 import ru.wobot.sm.core.url.UrlCheck;
 
-import java.net.URL;
+import java.net.URI;
 
 public abstract class AbstractParser implements Parser {
     @Override
-    public ParseResult parse(URL url, String content) {
-        if (UrlCheck.isProfile(url)) {
-            return parseProfile(url, content);
+    public ParseResult parse(URI uri, String content) {
+        if (UrlCheck.isProfile(uri)) {
+            return parseProfile(uri, content);
         }
-        if (UrlCheck.isFriends(url)) {
-            return parseFriends(url, content);
+        if (UrlCheck.isFriends(uri)) {
+            return parseFriends(uri, content);
         }
-        if (UrlCheck.isPostsIndex(url)) {
-            return parsePostsIndex(url, content);
+        if (UrlCheck.isPostsIndex(uri)) {
+            return parsePostsIndex(uri, content);
         }
-        if (UrlCheck.isPostsIndexPage(url)) {
-            return parsePostsIndexPage(url, content);
+        if (UrlCheck.isPostsIndexPage(uri)) {
+            return parsePostsIndexPage(uri, content);
         }
-        if (UrlCheck.isPost(url)) {
-            return parsePost(url, content);
+        if (UrlCheck.isPost(uri)) {
+            return parsePost(uri, content);
         }
-        if (UrlCheck.isCommentPage(url)) {
-            return parseCommentPage(url, content);
+        if (UrlCheck.isCommentPage(uri)) {
+            return parseCommentPage(uri, content);
         }
         throw new UnsupportedOperationException();
     }
 
-    protected abstract ParseResult parseProfile(URL url, String content);
+    protected abstract ParseResult parseProfile(URI url, String content);
 
-    protected abstract ParseResult parseFriends(URL url, String content);
+    protected abstract ParseResult parseFriends(URI url, String content);
 
-    protected abstract ParseResult parsePostsIndex(URL url, String content);
+    protected abstract ParseResult parsePostsIndex(URI url, String content);
 
-    protected abstract ParseResult parsePostsIndexPage(URL url, String content);
+    protected abstract ParseResult parsePostsIndexPage(URI url, String content);
 
-    protected abstract ParseResult parsePost(URL url, String content);
+    protected abstract ParseResult parsePost(URI url, String content);
 
-    protected abstract ParseResult parseCommentPage(URL url, String content);
+    protected abstract ParseResult parseCommentPage(URI url, String content);
 }

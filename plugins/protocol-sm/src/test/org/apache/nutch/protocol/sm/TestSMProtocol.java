@@ -23,7 +23,6 @@ public class TestSMProtocol {
     private static SMFetcher fetcher = mock(SMFetcher.class);
 
     @Test
-    @Ignore
     public void shouldReturnProfileSMContent() throws IOException {
         //given
         SMProtocol protocol = new MockProtocol();
@@ -37,7 +36,7 @@ public class TestSMProtocol {
             }}));
 
         // when
-        Content content = protocol.getProtocolOutput(new Text("http://1"), null).getContent();
+        Content content = protocol.getProtocolOutput(new Text("fb://1"), null).getContent();
         String data = new String(content.getContent());
 
         // then
@@ -46,7 +45,8 @@ public class TestSMProtocol {
     }
 
     private static class MockProtocol extends SMProtocol {
-        protected SMFetcher createSMFetcher() {
+        @Override
+        protected SMFetcher createFbFetcher() {
             return fetcher;
         }
     }

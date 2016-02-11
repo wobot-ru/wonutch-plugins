@@ -1,7 +1,7 @@
 package ru.wobot.sm.core.parse;
 
-import java.net.URL;
+import java.net.URI;
 
 public interface Parser {
-    ParseResult parse(URL url, String content);
+    ParseResult parse(URI uri, String content);
 }

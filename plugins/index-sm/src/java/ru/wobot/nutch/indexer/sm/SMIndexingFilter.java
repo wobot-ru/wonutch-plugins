@@ -15,8 +15,8 @@ import org.apache.nutch.util.StringUtil;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.url.UrlCheck;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class SMIndexingFilter implements IndexingFilter {
     private static final Log LOG = LogFactory.getLog(SMIndexingFilter.class.getName());
@@ -25,10 +25,10 @@ public class SMIndexingFilter implements IndexingFilter {
 
     @Override
     public NutchDocument filter(NutchDocument doc, Parse parse, Text textUrl, CrawlDatum crawlDatum, Inlinks inlinks) throws IndexingException {
-        URL url;
+        URI url;
         try {
-            url = new URL(textUrl.toString());
-        } catch (MalformedURLException e) {
+            url = new URI(textUrl.toString());
+        } catch (URISyntaxException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return null;
         }

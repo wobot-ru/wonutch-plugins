@@ -21,7 +21,7 @@ import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -36,9 +36,9 @@ public class FbParser extends AbstractParser {
     }
 
     @Override
-    public ParseResult parseProfile(URL url, String content) {
-        String urlString = url.toString();
-        String userDomain = url.getHost();
+    public ParseResult parseProfile(URI uri, String content) {
+        String urlString = uri.toString();
+        String userDomain = uri.getHost();
         Map<String, Object> parseMeta = new HashMap<>();
         Map<String, Object> contentMeta = new HashMap<>();
         if (content == null || content.isEmpty())
@@ -76,8 +76,8 @@ public class FbParser extends AbstractParser {
     }
 
     @Override
-    protected ParseResult parseFriends(URL url, String content) {
-        String userDomain = url.getHost();
+    protected ParseResult parseFriends(URI uri, String content) {
+        String userDomain = uri.getHost();
         Map<String, Object> parseMeta = new HashMap<>();
         Map<String, Object> contentMeta = new HashMap<>();
 
@@ -94,17 +94,17 @@ public class FbParser extends AbstractParser {
             links.put(UrlSchemaConstants.FACEBOOK + friendId, friendId);
         }
 
-        return new ParseResult(url.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
+        return new ParseResult(uri.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
     }
 
     @Override
-    protected ParseResult parsePostsIndex(URL url, String content) {
+    protected ParseResult parsePostsIndex(URI uri, String content) {
         throw new UnsupportedOperationException("Method not supported by Facebook API.");
     }
 
     @Override
-    protected ParseResult parsePostsIndexPage(URL url, String content) {
-        String userDomain = url.getHost();
+    protected ParseResult parsePostsIndexPage(URI uri, String content) {
+        String userDomain = uri.getHost();
         String urlPrefix = UrlSchemaConstants.FACEBOOK + userDomain + "/posts/";
         Map<String, Object> contentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
@@ -175,19 +175,19 @@ public class FbParser extends AbstractParser {
                 parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
             }
         }
-        return new ParseResult(url.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
+        return new ParseResult(uri.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
                 == null ? new HashMap<String, String>() : links), new HashMap<String, Object>(), contentMeta);
     }
 
     @Override
-    protected ParseResult parsePost(URL url, String content) {
+    protected ParseResult parsePost(URI uri, String content) {
         throw new UnsupportedOperationException("Method not supported by Facebook API.");
     }
 
     @Override
-    protected ParseResult parseCommentPage(URL url, String content) {
-        final String userDomain = url.getHost();
-        final String[] path = url.getPath().split("/");
+    protected ParseResult parseCommentPage(URI uri, String content) {
+        final String userDomain = uri.getHost();
+        final String[] path = uri.getPath().split("/");
         final String parentMessageId = path[2]; // may be post or comment (reply comments have comment as a parent, not post)
 
         Map<String, Object> parseMeta = new HashMap<>();
@@ -257,7 +257,7 @@ public class FbParser extends AbstractParser {
             parseResults[i] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta);
         }
 
-        return new ParseResult(url.toString(), userDomain + "|post=" + parentMessageId + "|page=" + after, Serializer.getInstance()
+        return new ParseResult(uri.toString(), userDomain + "|post=" + parentMessageId + "|page=" + after, Serializer.getInstance()
                 .toJson(parseResults), links, parseMeta, contentMeta);
     }
 }

@@ -20,6 +20,7 @@ import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.lang.reflect.Type;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
@@ -28,9 +29,9 @@ import java.util.Map;
 
 public class Vk extends AbstractParser {
     @Override
-    protected ParseResult parseProfile(URL url, String content) {
-        final String urlString = url.toString();
-        final String userDomain = url.getHost();
+    protected ParseResult parseProfile(URI uri, String content) {
+        final String urlString = uri.toString();
+        final String userDomain = uri.getHost();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<>();
 
@@ -72,8 +73,8 @@ public class Vk extends AbstractParser {
     }
 
     @Override
-    protected ParseResult parseFriends(URL url, String content) {
-        final String userDomain = url.getHost();
+    protected ParseResult parseFriends(URI uri, String content) {
+        final String userDomain = uri.getHost();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<>();
 
@@ -85,13 +86,13 @@ public class Vk extends AbstractParser {
             links.put(friendHref, friendId);
         }
 
-        return new ParseResult(url.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
+        return new ParseResult(uri.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
     }
 
     @Override
-    protected ParseResult parsePostsIndex(URL url, String content) {
-        final String userDomain = url.getHost();
-        final String urlString = url.toString();
+    protected ParseResult parsePostsIndex(URI uri, String content) {
+        final String userDomain = uri.getHost();
+        final String urlString = uri.toString();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<>();
 
@@ -108,8 +109,8 @@ public class Vk extends AbstractParser {
     }
 
     @Override
-    protected ParseResult parsePostsIndexPage(URL url, String content) {
-        final String userDomain = url.getHost();
+    protected ParseResult parsePostsIndexPage(URI uri, String content) {
+        final String userDomain = uri.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> commonContentMeta = new HashMap<String, Object>() {{
@@ -155,13 +156,13 @@ public class Vk extends AbstractParser {
                 parseResults[i++] = new ParseResult(urlPrefix + post.getId(), new HashMap<String, String>(), postParse, postContent);
             }
         }
-        return new ParseResult(url.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
+        return new ParseResult(uri.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
                 == null ? new HashMap<String, String>() : links), parseMeta, commonContentMeta);
     }
 
     @Override
-    protected ParseResult parsePost(URL url, String content) {
-        final String urlString = url.toString();
+    protected ParseResult parsePost(URI uri, String content) {
+        final String urlString = uri.toString();
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> contentMeta = new HashMap<>();
 
@@ -196,10 +197,10 @@ public class Vk extends AbstractParser {
     }
 
     @Override
-    protected ParseResult parseCommentPage(URL url, String content) {
-        final String user = url.getHost();
+    protected ParseResult parseCommentPage(URI uri, String content) {
+        final String user = uri.getHost();
         final int userId = Integer.parseInt(user.substring(2));
-        final String path = url.getPath();
+        final String path = uri.getPath();
         final String[] split = path.split("/");
         final int postId = Integer.parseInt(split[2]);
         final int page = Integer.parseInt(split[4]);
@@ -241,6 +242,6 @@ public class Vk extends AbstractParser {
             parseResults[i++] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta);
         }
 
-        return new ParseResult(url.toString(), user + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(parseResults), links, parseMeta, contentMeta);
+        return new ParseResult(uri.toString(), user + "|post=" + postId + "|page=" + page, Serializer.getInstance().toJson(parseResults), links, parseMeta, contentMeta);
     }
 }
