@@ -41,7 +41,7 @@ import java.util.*;
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
 @Scheme("vk")
-public class VKFetcher  {
+public class VKFetcher {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
@@ -94,18 +94,18 @@ public class VKFetcher  {
         return posts.getCount();
     }
 
-    @Path("id{userId}/index-posts/x{offset}/{limit}")
-    public FetchResponse getPostsData(@PathParam("userId") String userId, @PathParam("offset") long offset, @PathParam("limit") int limit) throws IOException {
+    @Path("id{userId}/index-posts/x{pageSize}/{page}")
+    public FetchResponse getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
 
-        if (offset >= 0) {
-            uriBuilder.setParameter("offset", String.valueOf(offset));
+        if (page > 0) {
+            uriBuilder.setParameter("offset", String.valueOf(pageSize * page));
         }
-        if (limit > 0) {
-            uriBuilder.setParameter("count", String.valueOf(limit));
+        if (pageSize > 0) {
+            uriBuilder.setParameter("count", String.valueOf(pageSize));
         }
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
@@ -146,13 +146,13 @@ public class VKFetcher  {
         return new FetchResponse(json, metaData);
     }
 
-    @Path("id{userId}/posts/{postId}/x{take}/{skip}")
-    public FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("take") int take, @PathParam("skip") int skip) throws IOException {
+    @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
+    public FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("pageSize") int pageSize, @PathParam("page") int page) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
-                .count(take)
-                .offset(skip)
+                .count(pageSize)
+                .offset(page * pageSize)
                 .build();
 
         Map<String, Object> metaData = new HashMap<String, Object>() {{
