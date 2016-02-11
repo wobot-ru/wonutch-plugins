@@ -20,12 +20,12 @@
                name="SMProtocol"
                point="org.apache.nutch.protocol.Protocol">
 
-        <implementation id="org.apache.nutch.protocol.sm.Vk"
-                        class="org.apache.nutch.protocol.sm.Vk">
+        <implementation id="org.apache.nutch.protocol.sm.SMProtocol"
+                        class="org.apache.nutch.protocol.sm.SMProtocol">
             <parameter name="protocolName" value="vk"/>
         </implementation>
-        <implementation id="org.apache.nutch.protocol.sm.Fb"
-                        class="org.apache.nutch.protocol.sm.Fb">
+        <implementation id="org.apache.nutch.protocol.sm.SMProtocol"
+                        class="org.apache.nutch.protocol.sm.SMProtocol">
             <parameter name="protocolName" value="fb"/>
         </implementation>
     </extension>

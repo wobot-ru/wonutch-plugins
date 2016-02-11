@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.social.vkontakte.api.ApiVersion;
@@ -25,6 +26,8 @@ import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.uri.Path;
+import ru.wobot.uri.PathParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.BufferedReader;
@@ -33,16 +36,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
 @Scheme("vk")
-public class VKFetcher implements SMFetcher {
+public class VKFetcher  {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
@@ -52,11 +51,6 @@ public class VKFetcher implements SMFetcher {
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
     }
 
-    protected static String toJson(Object obj) {
-        return getInstance().toJson(obj);
-    }
-
-    @Override
     public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
         String responseStr = getVKProfiles(userIds);
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
@@ -70,8 +64,8 @@ public class VKFetcher implements SMFetcher {
         return results;
     }
 
-    @Override
-    public List<String> getFriendIds(String userId) throws IOException {
+    @Path("id{userId}/friends")
+    public List<String> getFriendIds(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
@@ -84,11 +78,12 @@ public class VKFetcher implements SMFetcher {
         for (VKontakteProfile p : friends.getItems()) {
             ids.add("id" + p.getId());
         }
+        Collections.sort(ids);
         return ids;
     }
 
-    @Override
-    public int getPostCount(String userId) throws IOException {
+    @Path("id{userId}/index-posts")
+    public int getPostCount(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -99,8 +94,8 @@ public class VKFetcher implements SMFetcher {
         return posts.getCount();
     }
 
-    @Override
-    public FetchResponse getPostsData(String userId, long offset, int limit) throws IOException {
+    @Path("id{userId}/index-posts/x{offset}/{limit}")
+    public FetchResponse getPostsData(@PathParam("userId") String userId, @PathParam("offset") long offset, @PathParam("limit") int limit) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -121,8 +116,8 @@ public class VKFetcher implements SMFetcher {
         return new FetchResponse(toJson(posts), metaData);
     }
 
-    @Override
-    public FetchResponse getProfileData(String userId) throws IOException {
+    @Path("{userId}")
+    public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         String responseStr = getVKProfiles(Arrays.asList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
@@ -134,8 +129,8 @@ public class VKFetcher implements SMFetcher {
         return new FetchResponse(json, metaData);
     }
 
-    @Override
-    public FetchResponse getPostData(String userId, String postId) throws IOException {
+    @Path("id{userId}/posts/{postId}")
+    public FetchResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
@@ -151,8 +146,8 @@ public class VKFetcher implements SMFetcher {
         return new FetchResponse(json, metaData);
     }
 
-    @Override
-    public FetchResponse getPostCommentsData(String userId, String postId, int take, int skip) throws IOException {
+    @Path("id{userId}/posts/{postId}/x{take}/{skip}")
+    public FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("take") int take, @PathParam("skip") int skip) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
@@ -297,5 +292,9 @@ public class VKFetcher implements SMFetcher {
         if (toCheck.getError() != null) {
             throw new VKontakteErrorException(toCheck.getError());
         }
+    }
+
+    protected static String toJson(Object obj) {
+        return getInstance().toJson(obj);
     }
 }

@@ -1,5 +1,7 @@
 package ru.wobot.uri;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import ru.wobot.sm.core.reflect.MethodInvoker;
 import ru.wobot.uri.impl.*;
 
@@ -9,6 +11,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class UriTranslator {
+    private static final Log LOG = LogFactory.getLog(UriTranslator.class.getName());
     final Map<String, Collection<ParsedPath>> schemas;
 
     public UriTranslator(Object... objs) throws ClassNotFoundException {
@@ -84,6 +87,9 @@ public class UriTranslator {
                 if (base != null)
                     return findPathAnnotatedMethod(base);
             } catch (NoSuchMethodException e) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug(org.apache.hadoop.util.StringUtils.stringifyException(e));
+
             }
         }
         final Class<?> superclass = declaringClass.getSuperclass();
@@ -93,6 +99,8 @@ public class UriTranslator {
                 if (base != null)
                     return findPathAnnotatedMethod(base);
             } catch (NoSuchMethodException e) {
+                if (LOG.isDebugEnabled())
+                    LOG.debug(org.apache.hadoop.util.StringUtils.stringifyException(e));
             }
         }
 
@@ -131,6 +139,8 @@ public class UriTranslator {
                         Object[] allParams = concat(params.toArray(), path.convertQuery(u.getQuery()));
                         return path.invoke(allParams);
                     } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                        if (LOG.isErrorEnabled())
+                            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
                     }
             }
         }

@@ -1,5 +1,6 @@
 package org.apache.nutch.protocol.sm;
 
+import com.google.gson.GsonBuilder;
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -12,17 +13,30 @@ import org.apache.nutch.protocol.Protocol;
 import org.apache.nutch.protocol.ProtocolOutput;
 import org.apache.nutch.protocol.ProtocolStatus;
 import org.apache.nutch.protocol.RobotRulesParser;
+import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.auth.CredentialRepository;
+import ru.wobot.sm.core.auth.Proxy;
 import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.domain.service.DomainService;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.fetch.FbFetcher;
+import ru.wobot.sm.fetch.VKFetcher;
+import ru.wobot.uri.UriTranslator;
+import ru.wobot.uri.impl.ParsedUri;
 
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Properties;
 
-public abstract class SMProtocol implements Protocol {
+public class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
+    private static final com.google.gson.Gson Gson = new GsonBuilder().create();
     private DomainService domainService;
     private Configuration conf;
+    private UriTranslator translator;
 
     @Override
     public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
@@ -30,10 +44,25 @@ public abstract class SMProtocol implements Protocol {
         if (LOG.isInfoEnabled()) {
             LOG.info("Start fetching: " + urlString);
         }
-
         try {
-            SMContent response = domainService.request(urlString);
-            return new ProtocolOutput(convertToContent(response));
+            final URI uri = new URI(urlString);
+            if (uri.getScheme().equals(Sources.FACEBOOK)) {
+                SMContent response = domainService.request(urlString);
+                return new ProtocolOutput(convertToContent(response));
+            }
+            final Object o = translator.translate(ParsedUri.parse(urlString));
+
+            if (o instanceof List<?>) {
+                List<String> ids = (List<String>) o;
+                return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(ids).getBytes(StandardCharsets.UTF_8))));
+            }
+            if (o.getClass() == Integer.TYPE) {
+                int postsCount = (int) o;
+                return new ProtocolOutput(convertToContent(new SMContent(urlString, toJson(postsCount).getBytes(StandardCharsets.UTF_8))));
+            }
+            FetchResponse fetchResponse = (FetchResponse) o;
+            return new ProtocolOutput(convertToContent(new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse
+                    .getMetadata())));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return new ProtocolOutput(null, new ProtocolStatus(e));
@@ -53,7 +82,20 @@ public abstract class SMProtocol implements Protocol {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
-        domainService = new DomainService(createSMFetcher());
+        domainService = new DomainService(createFbFetcher());
+        try {
+            translator = new UriTranslator(new VKFetcher());
+        } catch (ClassNotFoundException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(e);
+            }
+        }
+    }
+
+    private SMFetcher createFbFetcher() {
+        CredentialRepository repository = Proxy.INSTANCE;
+        repository.setConf(getConf());
+        return new FbFetcher(repository);
     }
 
     protected Content convertToContent(SMContent response) {
@@ -70,5 +112,7 @@ public abstract class SMProtocol implements Protocol {
                 (ContentMetaConstants.MIME_TYPE).toString(), metadata, this.conf);
     }
 
-    protected abstract SMFetcher createSMFetcher();
+    private String toJson(Object obj) {
+        return Gson.toJson(obj);
+    }
 }

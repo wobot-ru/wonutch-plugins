@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 
 public class VKFetcher_Test {
     private UriTranslator translator;
-    private SMFetcher scheme;
+    private VKFetcher scheme;
 
     @Before
     public void setUp() throws ClassNotFoundException {
@@ -23,40 +23,40 @@ public class VKFetcher_Test {
     public void when_translate_index_posts_than_should_be_invoke_getPostCount() throws Exception {
         // given
         // when
-        translator.translate(ParsedUri.parse("vk://user/index-posts"));
+        translator.translate(ParsedUri.parse("vk://id5/index-posts"));
 
         //then
-        verify(scheme).getPostCount("user");
+        verify(scheme).getPostCount("5");
     }
 
     @Test
     public void when_translate_friends_than_should_be_invoke_getFriendIds() throws Exception {
         // given
         // when
-        translator.translate(ParsedUri.parse("vk://user/friends/"));
+        translator.translate(ParsedUri.parse("vk://id42/friends/"));
 
         //then
-        verify(scheme).getFriendIds("user");
+        verify(scheme).getFriendIds("42");
     }
 
     @Test
     public void when_translate_batch_of_posts_than_should_be_invoke_getPostsData() throws Exception {
         // given
         // when
-        translator.translate(ParsedUri.parse("vk://user/index-posts/x99/0000000001"));
+        translator.translate(ParsedUri.parse("vk://id10/index-posts/x99/0000000001"));
 
         //then
-        verify(scheme).getPostsData("user", 99, 1);
+        verify(scheme).getPostsData("10", 99, 1);
     }
 
     @Test
     public void when_translate_one_post_than_should_be_invoke_getFriendIds() throws Exception {
         // given
         // when
-        translator.translate(ParsedUri.parse("vk://user/posts/99"));
+        translator.translate(ParsedUri.parse("vk://id22/posts/99"));
 
         //then
-        verify(scheme).getPostData("user", "99");
+        verify(scheme).getPostData("22", "99");
     }
 
     @Test
@@ -76,6 +76,6 @@ public class VKFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112"));
 
         //then
-        verify(scheme).getPostCommentsData("id1", "531296", 77, 112);
+        verify(scheme).getPostCommentsData("1", "531296", 77, 112);
     }
 }
