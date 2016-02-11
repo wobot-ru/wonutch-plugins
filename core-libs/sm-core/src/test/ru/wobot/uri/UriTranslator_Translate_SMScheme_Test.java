@@ -23,7 +23,7 @@ public class UriTranslator_Translate_SMScheme_Test {
     public void add_when_translate_const_segment_than_defined_method_should_be_invoked() throws InvocationTargetException, IllegalAccessException {
         // given
         // when
-        translator.translate(ParsedUri.parse("sm://root"));
+        translator.translate(ParsedUri.parse("sm://root/brood"));
 
         // than
         verify(scheme).root();
@@ -61,7 +61,7 @@ public class UriTranslator_Translate_SMScheme_Test {
 
     @Scheme("sm")
     public interface SMScheme {
-        @Path("root")
+        @Path("root/brood")
         String root();
 
         @Path("{host}/{arg1}/{arg2}")
