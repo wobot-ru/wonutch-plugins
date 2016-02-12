@@ -11,7 +11,6 @@ import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -43,7 +41,7 @@ public class TestFbFetcher {
         objectMapper.registerModule(new FacebookModule());
     }
 
-    @Test
+    /*@Test
     public void shouldGetProfilesForDifferentIds() throws IOException {
         // given when
         List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia",
@@ -63,21 +61,21 @@ public class TestFbFetcher {
         assertThat(profiles.get(0).getId(), is(equalTo("165107853523677")));
         assertThat(profiles.get(0).getDomain(), is(equalTo("mastercardrussia")));
         assertThat(profiles.get(1).getFullName(), is(equalTo("World Food Programme")));
-    }
+    }*/
 
     @Test
     public void shouldGetFullPageDataForId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("mastercardrussia");
+        FetchResponse response = fbFetcher.getProfileData("mastercardrussia", null, null);
 
         // then
         assertThat(response.getData(), containsString("MasterCard"));
     }
 
     @Test
-    public void shouldGetFullPageDataForIdWithScope() throws IOException {
+    public void shouldGetFullPageDataForIdWithScopeAndCommentId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("1704938049732711?scope=user&comment_id=10154479526792506_10154481125912506");
+        FetchResponse response = fbFetcher.getProfileData("1704938049732711", "user", "10154479526792506_10154481125912506");
 
         // then
         assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
@@ -86,12 +84,13 @@ public class TestFbFetcher {
     }
 
     @Test
-    public void shouldGetFullUserDataForIdWithCommentId() throws IOException {
+    public void shouldGetFullUserDataForIdWithScopeAndCommentId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("892133830908265?scope=user&comment_id=1081856348515485_1082735698427550");
+        FetchResponse response = fbFetcher.getProfileData("892133830908265", "user", "1081856348515485_1082735698427550");
 
         // then
         assertThat(response.getData(), containsString("Лидия Мазурова"));
+        assertThat(response.getData(), not(containsString("\"type\":\"page\"")));
         assertThat(response.getData(), containsString("\"type\":\"user\""));
     }
 
@@ -99,7 +98,9 @@ public class TestFbFetcher {
     // get friends realisation for FB pages
     public void shouldGetWhoLikedPageForId() throws IOException {
         // given when
-        List<String> friendIds = fbFetcher.getFriendIds("24496278123");
+        FetchResponse response = fbFetcher.getFriendIds("24496278123");
+
+        List<String> friendIds = Arrays.asList(objectMapper.readValue(response.getData(), String[].class));
 
         // then
         assertThat(friendIds.size(), is(greaterThan(0)));
@@ -109,7 +110,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFirstPageOfPosts() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getPostsData("191234802505", 0L, 25);
+        FetchResponse response = fbFetcher.getPostsData("191234802505", 25, 0L);
 
         // when
         List<Post> posts = parsePosts(response.getData());
@@ -123,7 +124,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetLinkToPageOfOlderPosts() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getPostsData("165107853523677", 0L, 0);
+        FetchResponse response = fbFetcher.getPostsData("165107853523677", 0, 0L);
 
         // when
         List<Post> posts = parsePosts(response.getData());
@@ -138,7 +139,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetPageOfPostsNotAfterTimestamp() throws IOException {
         // given
-        FetchResponse response = fbFetcher.getPostsData("165107853523677", 1450780702L, 0); //Tue, 22 Dec 2015
+        FetchResponse response = fbFetcher.getPostsData("165107853523677", 0, 1450780702L); //Tue, 22 Dec 2015
         // 10:38:22 GMT
 
         // when
@@ -151,7 +152,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetTotalLikesCount() throws IOException {
         // given
-        FetchResponse response = fbFetcher.getPostsData("165107853523677", 1450780702L, 0); //Tue, 22 Dec 2015
+        FetchResponse response = fbFetcher.getPostsData("165107853523677", 0, 1450780702L); //Tue, 22 Dec 2015
         // 10:38:22 GMT
 
         // when
@@ -166,12 +167,12 @@ public class TestFbFetcher {
     @Test
     public void shouldGetCommentsPagesForPost() throws IOException {
         // given
-        FetchResponse response = fbFetcher.getPostCommentsData(null, "165107853523677_1081856348515485", 3, 0);
+        FetchResponse response = fbFetcher.getPostCommentsData(null, "165107853523677_1081856348515485", 3, "0");
 
         // when
         JsonNode comments = getRawData(response.getData());
         PagingParameters nextPage = parseNext(response.getData());
-        response = fbFetcher.getPostCommentsData(nextPage.getAfter(), "165107853523677_1081856348515485", 3, 0);
+        response = fbFetcher.getPostCommentsData(null, "165107853523677_1081856348515485", 3, nextPage.getAfter());
         JsonNode nextComments = getRawData(response.getData());
 
         // then

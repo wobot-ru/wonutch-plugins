@@ -147,7 +147,7 @@ public class UriTranslator {
         throw new UriNoMapException();
     }
 
-    private static <T> T[] concat(T[] first, T[] second) {
+    private <T> T[] concat(T[] first, T[] second) {
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;

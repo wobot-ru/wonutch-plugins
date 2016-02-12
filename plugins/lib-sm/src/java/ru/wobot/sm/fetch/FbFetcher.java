@@ -14,10 +14,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.uri.Path;
+import ru.wobot.uri.PathParam;
+import ru.wobot.uri.QueryParam;
+import ru.wobot.uri.Scheme;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class FbFetcher implements SMFetcher {
+@Scheme("fb")
+public class FbFetcher {
     //TODO: Add more fields
     static final String[] PROFILE_FIELDS = {
             "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website",
@@ -59,14 +62,14 @@ public class FbFetcher implements SMFetcher {
         this.repository = repository;
     }
 
-    private String getObjectType(String id) {
+    private String getObjectType(String id, String scope) {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         try {
-            if (id.contains("scope=user")) { //may be user or page (comment author)
+            if (scope != null && scope.equals("user")) { //may be user or page (comment author)
                 MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
                 queryParameters.set("fields", "metadata{type}");
                 queryParameters.set("metadata", "1");
-                User node = facebook.fetchObject(id.substring(0, id.indexOf("?")), User.class, queryParameters);
+                User node = facebook.fetchObject(id, User.class, queryParameters);
                 return ((Map) node.getExtraData().get("metadata")).get("type").toString();
             } else
                 return "page";
@@ -81,8 +84,7 @@ public class FbFetcher implements SMFetcher {
         return facebook.restOperations().getForObject(uriBuilder.queryParams(queryParameters).build(), JsonNode.class);
     }
 
-    @Override
-    public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
+    /*public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
         List<SMProfile> result = new ArrayList<>(userIds.size());
         for (String id : userIds) {
             String objectId = !id.contains("?") ? id : id.substring(0, id.indexOf("?"));
@@ -101,31 +103,38 @@ public class FbFetcher implements SMFetcher {
             }
         }
         return result;
-    }
+    }*/
 
-    @Override
-    public FetchResponse getProfileData(String userId) throws IOException {
+    // fb://mastercardrussia
+    // fb://96814974590
+    // fb://1704938049732711?scope=user&comment_id=10154479526792506_10154481125912506
+    @Path("{userId}")
+    public FetchResponse getProfileData(@PathParam("userId") String userId,
+                                        @QueryParam("scope") String scope,
+                                        @QueryParam("comment_id") String commentId) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-        String objectId = !userId.contains("?") ? userId : userId.substring(0, userId.indexOf("?"));
-        String objectType = getObjectType(userId);
+
+        //TODO: Think about refactor with redirect
+        String objectType = getObjectType(userId, scope);
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         if (objectType.equals("page")) {
             queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(PROFILE_FIELDS));
-            JsonNode user = getObject(queryParameters, objectId);
+            JsonNode user = getObject(queryParameters, userId);
             ((ObjectNode) user).put("type", "page");
             return new FetchResponse(user.toString(), metaData);
         } else {
             queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_PROFILE_FIELDS));
-            JsonNode user = getObject(queryParameters, userId.substring(userId.lastIndexOf("=") + 1)).get("from");
+            JsonNode user = getObject(queryParameters, commentId).get("from");
             ((ObjectNode) user).put("type", "user");
             return new FetchResponse(user.toString(), metaData);
         }
     }
 
-    @Override
-    public List<String> getFriendIds(String userId) throws IOException {
+    // fb://1704938049732711/friends
+    @Path("{userId}/friends")
+    public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         List<String> result = new ArrayList<>();
 
@@ -142,21 +151,24 @@ public class FbFetcher implements SMFetcher {
                 result.add(p.getId());
             params = pages.getNextPage();
         }
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_VERSION);
+        }};
 
-        return result;
+        return new FetchResponse(result.toString(), metaData);
     }
 
-    @Override
-    public int getPostCount(String userId) throws IOException {
-        throw new UnsupportedOperationException("Method not supported by Facebook API.");
-    }
-
-    @Override
-    public FetchResponse getPostsData(String userId, long offset, int limit) throws IOException {
+    // fb://191234802505/index-posts/x100/00000000
+    // fb://96814974590/index-posts/x100/1453725511
+    @Path("{userId}/index-posts/x{limit}/{until}")
+    public FetchResponse getPostsData(@PathParam("userId") String userId,
+                                      @PathParam("limit") int limit,
+                                      @PathParam("until") long until
+    ) throws IOException {
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(POST_FIELDS));
-        if (offset > 0)
-            queryParameters.set("until", String.valueOf(offset));
+        if (until > 0)
+            queryParameters.set("until", String.valueOf(until));
         if (limit > 0)
             queryParameters.set("limit", String.valueOf(limit));
 
@@ -167,20 +179,19 @@ public class FbFetcher implements SMFetcher {
         return new FetchResponse(responseNode.toString(), metaData);
     }
 
-    @Override
-    public FetchResponse getPostData(String userId, String postId) throws IOException {
-        return null;
-    }
-
-    @Override
-    public FetchResponse getPostCommentsData(String userId, String postId, int take, int skip) throws IOException {
+    // fb://165107853523677/posts/165107853523677_1081856348515485/x100/0
+    // fb://165107853523677/posts/165107853523677_1081856348515485/x10/WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE0TWpneU5qQXdOVEE0TlRFNE5qb3hORFV5TWpRd01qTTM=
+    @Path("{userId}/posts/{postId}/x{limit}/{pageToken}")
+    public FetchResponse getPostCommentsData(@PathParam("userId") @SuppressWarnings("unused") String userId, // TODO: Think about refactor
+                                             @PathParam("postId") String postId,
+                                             @PathParam("limit") int limit,
+                                             @PathParam("pageToken") String pageToken) throws IOException {
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));
-        //TODO: HACK - rewrite ASAP
-        if (userId != null)
-            queryParameters.set("after", userId);
-        if (take > 0)
-            queryParameters.set("limit", String.valueOf(take));
+        if (!pageToken.equals("0"))
+            queryParameters.set("after", pageToken);
+        if (limit > 0)
+            queryParameters.set("limit", String.valueOf(limit));
         queryParameters.set("order", "reverse_chronological");
 
         JsonNode responseNode = getObject(queryParameters, postId + "/comments");

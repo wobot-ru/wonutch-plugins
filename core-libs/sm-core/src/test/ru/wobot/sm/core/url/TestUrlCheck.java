@@ -44,8 +44,8 @@ public class TestUrlCheck {
     @Test
     public void is_isCommentPage_should_be_true_for_token_url() throws URISyntaxException {
         URI uri = new URI
-                ("http://user/posts/1_2/x100/0" +
-                        "?after=WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE0TXpFMk1qYzJNVGN4T0RFM056b3hORFV5TWpreE56YzQ%3D");
+                ("http://user/posts/1_2/x100/" +
+                        "WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE0TXpFMk1qYzJNVGN4T0RFM056b3hORFV5TWpreE56YzQ%3D");
         assertTrue(UrlCheck.isCommentPage(uri));
     }
 

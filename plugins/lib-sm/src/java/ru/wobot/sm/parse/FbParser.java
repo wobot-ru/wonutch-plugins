@@ -210,7 +210,7 @@ public class FbParser extends AbstractParser {
         Map<String, String> links = new IdentityHashMap<>(comments.size() * 2 + 1); // link for each commentor, replies and maybe next page
         if (after != null)
             // generate link <a href='fb://{user}/posts/{post}/x100/0?after={after}'>{post}-comments-index-x100-page-{after}</a>
-            links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + parentMessageId + "/x100/0?after=" + after,
+            links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + parentMessageId + "/x100/" + after,
                     parentMessageId + "comments-index-x100-page-" + after);
 
         ParseResult[] parseResults = new ParseResult[comments.size()];

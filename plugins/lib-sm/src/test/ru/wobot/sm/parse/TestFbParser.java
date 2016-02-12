@@ -114,7 +114,10 @@ public class TestFbParser {
             "      \"created_time\": \"2016-01-08T02:44:25+0000\",\n" +
             "      \"id\": \"1081856348515485_1082938725073914\"\n" +
             "    }\n" +
-            "  ]\n" +
+            "  ],\n" +
+            "  \"paging\": {" +
+            "     \"next\": \"https://graph.facebook.com/v2.5/1081856348515485_1082735698427550/comments?fields=id&limit=100&format=json&after=WTI5dGJXVnVkRjlqZFhKemIzSTZNVEF4TlRNME5EQTVNalUxT1RVNU5UUTZNVFExTkRrM01UTXdNZz09&order=reverse_chronological&access_token=717502605052808|vJSXEhRP-HhsrDcY-6qj4Q2vTYU\"" +
+            "    }" +
             "}";
 
     private final FbParser fbParser = new FbParser();
@@ -320,10 +323,11 @@ public class TestFbParser {
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0"), RAW_REPLY);
 
         // then
-        assertThat(result.getLinks().size(), is(2));
+        assertThat(result.getLinks().size(), is(3));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://1117812631564394?scope=user&comment_id=1081856348515485_1082938725073914",
-                        "fb://165107853523677/posts/1081856348515485_1082938725073914/x100/0"));
+                        "fb://165107853523677/posts/1081856348515485_1082938725073914/x100/0",
+                        "fb://165107853523677/posts/1081856348515485_1082735698427550/x100/WTI5dGJXVnVkRjlqZFhKemIzSTZNVEF4TlRNME5EQTVNalUxT1RVNU5UUTZNVFExTkRrM01UTXdNZz09"));
     }
 
     private JsonNode getJsonContent(ParseResult result) throws IOException {
