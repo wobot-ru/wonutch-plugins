@@ -1,7 +1,5 @@
 package ru.wobot.uri.impl;
 
-import com.google.protobuf.Internal;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import ru.wobot.uri.impl.stub.MethodInvokerStub;
 

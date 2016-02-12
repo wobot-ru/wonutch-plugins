@@ -13,7 +13,7 @@ public class UriTranslator_Initialize_Test {
     @Test
     public void add_when_argument_is_null_should_throw_exception() throws Exception {
         this.thrown.expect(NullPointerException.class);
-        new UriTranslator(null);
+        new UriTranslator((Object)null);
     }
 
     @Test

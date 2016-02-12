@@ -3,29 +3,21 @@ package ru.wobot.uri.impl;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ParsedUri {
     private final Collection<String> segments;
     private final String scheme;
-    private Map<String, String> query;
+    private final Map<String, String> query;
 
     private ParsedUri(String scheme, Collection<String> segments, Map<String, String> query) {
         this.segments = segments;
         this.scheme = scheme;
         this.query = query;
-    }
-
-    public Collection<String> getSegments() {
-        return segments;
-    }
-
-    public String getScheme() {
-        return scheme;
-    }
-
-    public Map<String, String> getQuery() {
-        return query;
     }
 
     public static ParsedUri parse(final String uri) {
@@ -42,18 +34,31 @@ public class ParsedUri {
         return new ParsedUri(uri.getScheme(), segments, splitQuery(uri));
     }
 
-    public static Map<String, String> splitQuery(final URI uri) {
-        Map<String, String> query_pairs = new LinkedHashMap<>();
+    private static Map<String, String> splitQuery(final URI uri) {
+        Map<String, String> queryPairs = new LinkedHashMap<>();
         if (uri.getQuery() == null)
-            return query_pairs;
+            return queryPairs;
 
         try {
             for (String pair : uri.getQuery().split("&")) {
                 int idx = pair.indexOf("=");
-                query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+                queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
             }
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException shouldNotHappens) {
+            throw new RuntimeException("Broken VM doesn't support UTF-8.");
         }
-        return query_pairs;
+        return queryPairs;
+    }
+
+    public Collection<String> getSegments() {
+        return segments;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public Map<String, String> getQuery() {
+        return query;
     }
 }

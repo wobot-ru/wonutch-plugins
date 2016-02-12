@@ -2,7 +2,7 @@ package ru.wobot.uri.impl;
 
 public class ConvertResult {
     private final boolean isConvertSuccess;
-    private Object result;
+    private final Object result;
 
     ConvertResult(Object result) {
         this.result = result;
@@ -11,6 +11,11 @@ public class ConvertResult {
 
     private ConvertResult() {
         isConvertSuccess = false;
+        result = null;
+    }
+
+    public static ConvertResult getFailedConvertResult() {
+        return new ConvertResult();
     }
 
     public Object getResult() {
@@ -19,9 +24,5 @@ public class ConvertResult {
 
     public boolean isConvertSuccess() {
         return isConvertSuccess;
-    }
-
-    public static ConvertResult getFailedConvertResult(){
-        return new ConvertResult();
     }
 }

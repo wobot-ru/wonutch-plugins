@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.springframework.social.vkontakte.api.ApiVersion;
@@ -22,10 +21,8 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
-import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
@@ -37,8 +34,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
@@ -51,6 +51,10 @@ public class VKFetcher {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VKontakteModule());
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+    }
+
+    protected static String toJson(Object obj) {
+        return getInstance().toJson(obj);
     }
 
     public List<SMProfile> getProfiles(List<String> userIds) throws IOException {
@@ -126,7 +130,7 @@ public class VKFetcher {
 
     @Path("{userId}")
     public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
-        String responseStr = getVKProfiles(Arrays.asList(userId));
+        String responseStr = getVKProfiles(Collections.singletonList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
 
@@ -300,9 +304,5 @@ public class VKFetcher {
         if (toCheck.getError() != null) {
             throw new VKontakteErrorException(toCheck.getError());
         }
-    }
-
-    protected static String toJson(Object obj) {
-        return getInstance().toJson(obj);
     }
 }

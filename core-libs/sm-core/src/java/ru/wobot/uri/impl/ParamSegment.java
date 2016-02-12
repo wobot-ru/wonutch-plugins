@@ -14,11 +14,6 @@ public class ParamSegment implements Segment {
     }
 
     public ConvertResult convert(String from) {
-        try {
-            return converter.convert(from.substring(start, end - (pattern.length() - from.length())));
-        } catch (IndexOutOfBoundsException ex) {
-
-        }
-        return ConvertResult.getFailedConvertResult();
+        return converter.convert(from.substring(start, end - (pattern.length() - from.length())));
     }
 }

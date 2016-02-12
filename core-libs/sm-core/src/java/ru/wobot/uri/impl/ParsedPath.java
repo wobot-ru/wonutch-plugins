@@ -3,7 +3,6 @@ package ru.wobot.uri.impl;
 import ru.wobot.sm.core.reflect.MethodInvoker;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;

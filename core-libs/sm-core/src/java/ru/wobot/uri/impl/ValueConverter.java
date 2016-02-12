@@ -9,7 +9,7 @@ public class ValueConverter {
     public ValueConverter(Class aClass) {
         this.aClass = aClass;
         if (Boolean.TYPE == aClass) isPrimitiveType = true;
-        if (Boolean.TYPE == aClass) isPrimitiveType = true;
+        if (Character.TYPE == aClass) isPrimitiveType = true;
         if (Byte.TYPE == aClass) isPrimitiveType = true;
         if (Short.TYPE == aClass) isPrimitiveType = true;
         if (Integer.TYPE == aClass) isPrimitiveType = true;
@@ -39,6 +39,7 @@ public class ValueConverter {
 
     private Object convertPrimitive(String value) {
         if (Boolean.TYPE == aClass) return Boolean.parseBoolean(value);
+        if (Character.TYPE == aClass) return value.toCharArray()[0];
         if (Byte.TYPE == aClass) return Byte.parseByte(value);
         if (Short.TYPE == aClass) return Short.parseShort(value);
         if (Integer.TYPE == aClass) return Integer.parseInt(value);
