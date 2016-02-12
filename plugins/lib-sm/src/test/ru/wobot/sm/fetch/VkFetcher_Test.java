@@ -2,20 +2,19 @@ package ru.wobot.sm.fetch;
 
 import org.junit.Before;
 import org.junit.Test;
-import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.uri.UriTranslator;
 import ru.wobot.uri.impl.ParsedUri;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class VKFetcher_Test {
+public class VkFetcher_Test {
     private UriTranslator translator;
-    private VKFetcher scheme;
+    private VkFetcher scheme;
 
     @Before
     public void setUp() throws ClassNotFoundException {
-        scheme = mock(VKFetcher.class);
+        scheme = mock(VkFetcher.class);
         translator = new UriTranslator(scheme);
     }
 

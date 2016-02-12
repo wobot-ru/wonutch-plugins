@@ -16,7 +16,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
 
 public class TestVkService {
-    private VKFetcher vkFetcher = new VKFetcher();
+    private VkFetcher vkFetcher = new VkFetcher();
 
     @Test
     public void is_getSMProfiles_return_SMProfiles() throws IOException {

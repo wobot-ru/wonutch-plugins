@@ -43,11 +43,11 @@ import java.util.Map;
 import static ru.wobot.sm.serialize.Serializer.getInstance;
 
 @Scheme("vk")
-public class VKFetcher {
+public class VkFetcher {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
 
-    public VKFetcher() {
+    public VkFetcher() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VKontakteModule());
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);

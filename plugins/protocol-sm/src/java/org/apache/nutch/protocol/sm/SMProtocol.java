@@ -17,7 +17,7 @@ import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SMFetcher;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.fetch.FbFetcher;
-import ru.wobot.sm.fetch.VKFetcher;
+import ru.wobot.sm.fetch.VkFetcher;
 import ru.wobot.uri.UriTranslator;
 import ru.wobot.uri.impl.ParsedUri;
 
@@ -66,7 +66,7 @@ public class SMProtocol implements Protocol {
         this.conf = conf;
         domainService = new DomainService(createFbFetcher());
         try {
-            translator = new UriTranslator(new VKFetcher());
+            translator = new UriTranslator(new VkFetcher());
         } catch (ClassNotFoundException e) {
             if (LOG.isErrorEnabled()) {
                 LOG.error(e);
