@@ -41,28 +41,6 @@ public class TestFbFetcher {
         objectMapper.registerModule(new FacebookModule());
     }
 
-    /*@Test
-    public void shouldGetProfilesForDifferentIds() throws IOException {
-        // given when
-        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia",
-                "884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"));
-
-        // then
-        assertThat(profiles.get(0).getId(), is("165107853523677"));
-        assertThat(profiles.get(1).getFullName(), is("Лидия Мазурова"));
-    }
-
-    @Test
-    public void shouldGetProfileDataFor2Ids() throws IOException {
-        // given when
-        List<SMProfile> profiles = fbFetcher.getProfiles(Arrays.asList("mastercardrussia", "28312410177"));
-
-        // then
-        assertThat(profiles.get(0).getId(), is(equalTo("165107853523677")));
-        assertThat(profiles.get(0).getDomain(), is(equalTo("mastercardrussia")));
-        assertThat(profiles.get(1).getFullName(), is(equalTo("World Food Programme")));
-    }*/
-
     @Test
     public void shouldGetFullPageDataForId() throws IOException {
         // given when
