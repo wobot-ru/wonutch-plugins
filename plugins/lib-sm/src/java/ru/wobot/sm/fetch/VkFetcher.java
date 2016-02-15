@@ -28,6 +28,7 @@ import ru.wobot.sm.core.fetch.Response;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
+import ru.wobot.uri.QueryParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.BufferedReader;
@@ -94,18 +95,21 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts")
-    public Response getPostCount(@PathParam("userId") String userId) throws IOException {
+    public Response getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
 
+        if (auth != null) {
+            preProcessURI(uriBuilder);
+        }
         VKGenericResponse vkResponse = null;
         try {
             vkResponse = getGenericResponse(uriBuilder.toString());
         } catch (VKontakteErrorException e) {
             if (e.getError().getCode().equals("15"))
-                return new Redirect("vk://id" + userId + "/index-posts?scope=auth");
+                return new Redirect("vk://id" + userId + "/index-posts?auth");
         }
 
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
@@ -116,12 +120,14 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
-    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page) throws IOException {
+    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
-
+        if (auth != null) {
+            preProcessURI(uriBuilder);
+        }
         if (page > 0) {
             uriBuilder.setParameter("offset", String.valueOf(pageSize * page));
         }
@@ -286,6 +292,11 @@ public class VkFetcher {
         VKGenericResponse response = objectMapper.readValue(responseStr, VKGenericResponse.class);
         checkForError(response);
         return response;
+    }
+
+    protected void preProcessURI(URIBuilder uri) {
+        uri.setScheme("https");
+        uri.addParameter("access_token", "baf5615410b3b0de5b5851483b67d15b41a0aefcfb3a623c07aa835656619ad1582fd04cae8015a3d0be6");
     }
 
     protected String readUrlToString(String urlStr) throws IOException {

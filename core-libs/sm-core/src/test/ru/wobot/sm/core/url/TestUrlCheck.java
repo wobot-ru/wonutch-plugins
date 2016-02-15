@@ -13,13 +13,13 @@ import static org.junit.Assert.assertTrue;
 public class TestUrlCheck {
     @Test
     public void is_postsIndex_should_be_true_for_postIndex_url() throws URISyntaxException {
-        URI uri = new URI("http://user/index-posts");
+        URI uri = new URI("http://user/index-posts?auth");
         assertTrue(UrlCheck.isPostsIndex(uri));
     }
 
     @Test
     public void is_postsIndex_should_be_false_for_postIndexPage_url() throws URISyntaxException {
-        URI uri = new URI("http://user/index-posts/x100/0000000001");
+        URI uri = new URI("http://user/index-posts/x100/0000000001?auth");
         assertFalse(UrlCheck.isPostsIndex(uri));
     }
 

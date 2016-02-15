@@ -45,7 +45,7 @@ public class TestVkService {
 
     @Test
     public void is_getPostsForUser_return_posts() throws IOException {
-        FetchResponse r = (FetchResponse) vkFetcher.getPostsData("1", 0, 100);
+        FetchResponse r = (FetchResponse) vkFetcher.getPostsData("1", 0, 100, null);
         assertThat(r.getData(), is(not(nullValue())));
     }
 

@@ -33,11 +33,11 @@ public class UriTranslator {
                     final Map<String, ValueConverter> converters = new HashMap<>();
                     final Map<String, ValueConverter> queryConverters = new LinkedHashMap<>();
                     int i = 0;
-                    PathParam pathParam = null;
-                    QueryParam queryParam = null;
                     final Class<?>[] parameterTypes = method.getParameterTypes();
                     for (Class parameter : parameterTypes) {
                         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+                        PathParam pathParam = null;
+                        QueryParam queryParam = null;
                         for (Annotation annotation : parameterAnnotations[i++]) {
                             if (annotation instanceof PathParam)
                                 pathParam = (PathParam) annotation;
@@ -46,17 +46,12 @@ public class UriTranslator {
                             if (pathParam != null && queryParam != null)
                                 break;
                         }
-/*
-                        if (pathParam == null)
-                            throw new IllegalArgumentException(parameter.toString() + " should be annotated by PathParam");
-*/
+
                         if (pathParam != null) {
                             if (pathParam.value().isEmpty())
                                 throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
                             converters.put(pathParam.value(), new ValueConverter(parameter));
-                        }
-
-                        if (queryParam != null) {
+                        } else if (queryParam != null) {
                             if (queryParam.value().isEmpty())
                                 throw new IllegalArgumentException(parameter.toString() + " QueryParam can't be empty");
                             queryConverters.put(queryParam.value(), new ValueConverter(parameter));

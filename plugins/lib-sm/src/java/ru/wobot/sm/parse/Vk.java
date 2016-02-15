@@ -98,12 +98,18 @@ public class Vk extends AbstractParser {
 
         final int postsCount = Serializer.getInstance().fromJson(content, int.class);
         final int indexPageCount = postsCount / 100;
-
         final HashMap<String, String> links = new HashMap<>(indexPageCount);
+        final boolean isAuth = uri.getQuery().contains("auth");
         for (long i = 0; i <= indexPageCount; i++) {
             String blockNumber = String.format("%08d", i);
             // generate link <a href='vk://user/index-posts/x100/00000001'>user-index-posts-x100-page-1</a>
-            links.put(urlString + "/x100/" + blockNumber, userDomain + "-index-posts-x100-page-" + i);
+            final String link;
+
+            if (isAuth)
+                link = uri.getScheme() + "://" + uri.getHost() + uri.getPath() + "/x100/" + blockNumber + "?" + uri.getQuery();
+            else
+                link = uri.getScheme() + "://" + uri.getHost() + uri.getPath() + "/x100/" + blockNumber;
+            links.put(link, userDomain + "-index-posts-x100-page-" + i);
         }
         return new ParseResult(urlString, userDomain + "-index-posts", content, links, parseMeta, contentMeta);
     }
