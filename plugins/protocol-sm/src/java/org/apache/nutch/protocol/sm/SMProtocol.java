@@ -65,17 +65,25 @@ public class SMProtocol implements Protocol {
     @Override
     public void setConf(Configuration conf) {
         this.conf = conf;
+        translator = createUriTranslator(createVkFetcher(), createFbFetcher());
+    }
+
+    protected UriTranslator createUriTranslator(Object... objects) {
         try {
-            translator = new UriTranslator(new VkFetcher(), createFbFetcher());
+            return new UriTranslator(objects);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Could not instantiate translator.", e);
         }
     }
 
-    private FbFetcher createFbFetcher() {
+    protected FbFetcher createFbFetcher() {
         CredentialRepository repository = Proxy.INSTANCE;
         repository.setConf(getConf());
         return new FbFetcher(repository);
+    }
+
+    protected VkFetcher createVkFetcher() {
+        return new VkFetcher();
     }
 
     private Content convertToContent(SMContent response) {

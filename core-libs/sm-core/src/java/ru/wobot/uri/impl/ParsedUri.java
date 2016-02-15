@@ -42,7 +42,11 @@ public class ParsedUri {
         try {
             for (String pair : uri.getQuery().split("&")) {
                 int idx = pair.indexOf("=");
-                queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+                if (idx < 0)
+                    queryPairs.put(URLDecoder.decode(pair, "UTF-8"), "");
+
+                else
+                    queryPairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
             }
         } catch (UnsupportedEncodingException shouldNotHappens) {
             throw new RuntimeException("Broken VM doesn't support UTF-8.");

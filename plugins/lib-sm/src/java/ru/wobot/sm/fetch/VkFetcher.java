@@ -100,7 +100,14 @@ public class VkFetcher {
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
 
-        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+        VKGenericResponse vkResponse = null;
+        try {
+            vkResponse = getGenericResponse(uriBuilder.toString());
+        } catch (VKontakteErrorException e) {
+            if (e.getError().getCode().equals("15"))
+                return new Redirect("vk://id" + userId + "/index-posts?scope=auth");
+        }
+
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);

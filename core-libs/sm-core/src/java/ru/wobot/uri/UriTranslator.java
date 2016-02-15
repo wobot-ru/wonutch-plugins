@@ -46,11 +46,15 @@ public class UriTranslator {
                             if (pathParam != null && queryParam != null)
                                 break;
                         }
+/*
                         if (pathParam == null)
                             throw new IllegalArgumentException(parameter.toString() + " should be annotated by PathParam");
-                        if (pathParam.value().isEmpty())
-                            throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
-                        converters.put(pathParam.value(), new ValueConverter(parameter));
+*/
+                        if (pathParam != null) {
+                            if (pathParam.value().isEmpty())
+                                throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
+                            converters.put(pathParam.value(), new ValueConverter(parameter));
+                        }
 
                         if (queryParam != null) {
                             if (queryParam.value().isEmpty())
