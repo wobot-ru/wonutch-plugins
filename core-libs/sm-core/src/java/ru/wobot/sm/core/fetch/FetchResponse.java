@@ -2,7 +2,8 @@ package ru.wobot.sm.core.fetch;
 
 import java.util.Map;
 
-public class FetchResponse {
+//todo: rename to something like OkResponce or SuccessResponse
+public class FetchResponse implements Response {
     private final String data;
     //todo: Maybe should be replaced "metadata" type with something like Guava's Multimap.
     private final Map<String, Object> metadata;

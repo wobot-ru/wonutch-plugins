@@ -16,6 +16,8 @@ import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.Proxy;
 import ru.wobot.sm.core.domain.SMContent;
 import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.Redirect;
+import ru.wobot.sm.core.fetch.Response;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.fetch.VkFetcher;
@@ -37,7 +39,12 @@ public class SMProtocol implements Protocol {
             LOG.info("Start fetching: " + urlString);
         }
         try {
-            FetchResponse fetchResponse = translator.translate(ParsedUri.parse(urlString));
+            Response response = translator.translate(ParsedUri.parse(urlString));
+            if (response instanceof Redirect) {
+                Redirect redirect = (Redirect) response;
+                return new ProtocolOutput(new Content(urlString, urlString, new byte[]{}, null, new Metadata(), this.conf), new ProtocolStatus(ProtocolStatus.MOVED, redirect.getLocation()));
+            }
+            FetchResponse fetchResponse = (FetchResponse) response;
             return new ProtocolOutput(convertToContent(new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata())));
         } catch (Exception e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));

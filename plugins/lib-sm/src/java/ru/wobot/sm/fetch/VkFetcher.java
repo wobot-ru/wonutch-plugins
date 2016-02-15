@@ -23,6 +23,8 @@ import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.Redirect;
+import ru.wobot.sm.core.fetch.Response;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
@@ -71,7 +73,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/friends")
-    public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
+    public Response getFriendIds(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
@@ -92,7 +94,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts")
-    public FetchResponse getPostCount(@PathParam("userId") String userId) throws IOException {
+    public Response getPostCount(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -107,7 +109,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
-    public FetchResponse getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page) throws IOException {
+    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -129,20 +131,24 @@ public class VkFetcher {
     }
 
     @Path("{userId}")
-    public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
+    public Response getProfileData(@PathParam("userId") String userId) throws IOException {
         String responseStr = getVKProfiles(Collections.singletonList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
+        final VKontakteProfile profile = profiles.getProfiles().get(0);
+        if (!userId.startsWith("id")) {
+            return new Redirect("vk://id" + profile.getId());
+        }
 
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
-        String json = toJson(profiles.getProfiles().get(0));
+        String json = toJson(profile);
         return new FetchResponse(json, metaData);
     }
 
     @Path("id{userId}/posts/{postId}")
-    public FetchResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
+    public Response getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
@@ -159,7 +165,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
-    public FetchResponse getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("pageSize") int pageSize, @PathParam("page") int page) throws IOException {
+    public Response getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("pageSize") int pageSize, @PathParam("page") int page) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
