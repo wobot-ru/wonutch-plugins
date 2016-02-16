@@ -26,7 +26,7 @@ public class UriTranslator_Translate_SMScheme_Test {
         translator.translate(ParsedUri.parse("sm://root/brood/1"));
 
         // than
-        verify(scheme).root();
+        verify(scheme).root(null);
     }
 
     @Test
@@ -59,10 +59,20 @@ public class UriTranslator_Translate_SMScheme_Test {
         verify(scheme).method3("durov", "auth");
     }
 
+    @Test
+    public void given_with_epty_queryParam_and_when_translate_uri_than_invocation_should_be_correct() throws InvocationTargetException, IllegalAccessException {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("sm://root/brood/1?auth"));
+
+        // than
+        verify(scheme).root("");
+    }
+
     @Scheme("sm")
     public interface SMScheme {
         @Path("root/brood/1")
-        String root();
+        String root(@QueryParam("auth") String auth);
 
         @Path("{host}/{arg1}/{arg2}")
         String method1(@PathParam("host") String host, @PathParam("arg1") String arg1, @PathParam("arg2") String arg2);

@@ -25,7 +25,17 @@ public class VkFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id5/index-posts"));
 
         //then
-        verify(scheme).getPostCount("5");
+        verify(scheme).getPostCount("5", null);
+    }
+
+    @Test
+    public void when_translate_index_posts_wth_auth_than_should_be_invoke_getPostCount() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id5/index-posts?auth"));
+
+        //then
+        verify(scheme).getPostCount("5", "");
     }
 
     @Test
@@ -45,7 +55,17 @@ public class VkFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id10/index-posts/x99/0000000001"));
 
         //then
-        verify(scheme).getPostsData("10", 99, 1);
+        verify(scheme).getPostsData("10", 99, 1, null);
+    }
+
+    @Test
+    public void when_translate_batch_of_posts_with_auth_than_should_be_invoke_getPostsData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id10/index-posts/x99/0000000001?auth"));
+
+        //then
+        verify(scheme).getPostsData("10", 99, 1, "");
     }
 
     @Test
@@ -75,6 +95,16 @@ public class VkFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112"));
 
         //then
-        verify(scheme).getPostCommentsData("1", "531296", 77, 112);
+        verify(scheme).getPostCommentsData("1", "531296", 77, 112, null);
+    }
+
+    @Test
+    public void when_translate_comments_page_with_auth_than_should_be_invoke_getProfileData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112?auth"));
+
+        //then
+        verify(scheme).getPostCommentsData("1", "531296", 77, 112, "");
     }
 }

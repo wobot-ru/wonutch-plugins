@@ -21,6 +21,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
+import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
@@ -28,6 +29,7 @@ import ru.wobot.sm.core.fetch.Response;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
+import ru.wobot.uri.QueryParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.BufferedReader;
@@ -94,13 +96,23 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts")
-    public Response getPostCount(@PathParam("userId") String userId) throws IOException {
+    public Response getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
 
-        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+        if (auth != null) {
+            preProcessURI(uriBuilder);
+        }
+        VKGenericResponse vkResponse = null;
+        try {
+            vkResponse = getGenericResponse(uriBuilder.toString());
+        } catch (VKontakteErrorException e) {
+            if (e.getError().getCode().equals("15"))
+                return new Redirect("vk://id" + userId + "/index-posts?auth");
+        }
+
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
@@ -109,12 +121,14 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
-    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page) throws IOException {
+    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
-
+        if (auth != null) {
+            preProcessURI(uriBuilder);
+        }
         if (page > 0) {
             uriBuilder.setParameter("offset", String.valueOf(pageSize * page));
         }
@@ -165,7 +179,12 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
-    public Response getPostCommentsData(@PathParam("userId") String userId, @PathParam("postId") String postId, @PathParam("pageSize") int pageSize, @PathParam("page") int page) throws IOException {
+    public Response getPostCommentsData(
+            @PathParam("userId") String userId,
+            @PathParam("postId") String postId,
+            @PathParam("pageSize") int pageSize,
+            @PathParam("page") int page,
+            @QueryParam("auth") String auth) throws IOException {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
@@ -176,14 +195,27 @@ public class VkFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
-        String json = toJson(getComments(query));
-        return new FetchResponse(json, metaData);
+
+        VKontakteErrorException s;
+        try {
+            String json = toJson(getComments(query, auth != null));
+            return new FetchResponse(json, metaData);
+        } catch (VKontakteErrorException e) {
+            s = e;
+            if (e.getError().getCode().equals("212"))
+                return new AccessDenied(e.getMessage());
+        }
+
+        throw new RuntimeException("Unexpected result");
     }
 
-    protected CommentsResponse getComments(CommentsQuery query) throws IOException {
+    protected CommentsResponse getComments(CommentsQuery query, boolean needAuth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getComments")
                 .setParameter("v", String.valueOf(ApiVersion.VERSION_5_33));
+
+        if (needAuth)
+            preProcessURI(uriBuilder);
 
         if (query.owner instanceof CommunityWall) {
             uriBuilder.setParameter("owner_id", "-" + String.valueOf(query.owner.getId()));
@@ -281,6 +313,11 @@ public class VkFetcher {
         return response;
     }
 
+    protected void preProcessURI(URIBuilder uri) {
+        uri.setScheme("https");
+        uri.addParameter("access_token", "baf5615410b3b0de5b5851483b67d15b41a0aefcfb3a623c07aa835656619ad1582fd04cae8015a3d0be6");
+    }
+
     protected String readUrlToString(String urlStr) throws IOException {
         InputStream is = null;
         try {
@@ -308,7 +345,10 @@ public class VkFetcher {
     //       like for error code 113 that would be let's say InvalidUserIdVKException
     protected <T extends VKResponse> void checkForError(T toCheck) {
         if (toCheck.getError() != null) {
-            throw new VKontakteErrorException(toCheck.getError());
+            if (toCheck.getError().getCode().equals("6"))
+                throw new TooManyRequestsException(1000);
+            else
+                throw new VKontakteErrorException(toCheck.getError());
         }
     }
 }

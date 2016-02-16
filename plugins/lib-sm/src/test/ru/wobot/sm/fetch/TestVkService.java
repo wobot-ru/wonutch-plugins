@@ -45,13 +45,13 @@ public class TestVkService {
 
     @Test
     public void is_getPostsForUser_return_posts() throws IOException {
-        FetchResponse r = (FetchResponse) vkFetcher.getPostsData("1", 0, 100);
+        FetchResponse r = (FetchResponse) vkFetcher.getPostsData("1", 0, 100, null);
         assertThat(r.getData(), is(not(nullValue())));
     }
 
     @Test
     public void is_getComments_return_comments() throws IOException {
-        FetchResponse r = (FetchResponse) vkFetcher.getPostCommentsData("1", "593585", 100, 0);
+        FetchResponse r = (FetchResponse) vkFetcher.getPostCommentsData("1", "593585", 100, 0, null);
         assertThat(r.getData(), is(not(nullValue())));
     }
 }

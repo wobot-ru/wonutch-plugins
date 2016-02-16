@@ -2,6 +2,7 @@ package ru.wobot.uri;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.reflect.MethodInvoker;
 import ru.wobot.uri.impl.*;
 
@@ -33,11 +34,11 @@ public class UriTranslator {
                     final Map<String, ValueConverter> converters = new HashMap<>();
                     final Map<String, ValueConverter> queryConverters = new LinkedHashMap<>();
                     int i = 0;
-                    PathParam pathParam = null;
-                    QueryParam queryParam = null;
                     final Class<?>[] parameterTypes = method.getParameterTypes();
                     for (Class parameter : parameterTypes) {
                         final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+                        PathParam pathParam = null;
+                        QueryParam queryParam = null;
                         for (Annotation annotation : parameterAnnotations[i++]) {
                             if (annotation instanceof PathParam)
                                 pathParam = (PathParam) annotation;
@@ -46,13 +47,12 @@ public class UriTranslator {
                             if (pathParam != null && queryParam != null)
                                 break;
                         }
-                        if (pathParam == null)
-                            throw new IllegalArgumentException(parameter.toString() + " should be annotated by PathParam");
-                        if (pathParam.value().isEmpty())
-                            throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
-                        converters.put(pathParam.value(), new ValueConverter(parameter));
 
-                        if (queryParam != null) {
+                        if (pathParam != null) {
+                            if (pathParam.value().isEmpty())
+                                throw new IllegalArgumentException(parameter.toString() + " PathParam can't be empty");
+                            converters.put(pathParam.value(), new ValueConverter(parameter));
+                        } else if (queryParam != null) {
                             if (queryParam.value().isEmpty())
                                 throw new IllegalArgumentException(parameter.toString() + " QueryParam can't be empty");
                             queryConverters.put(queryParam.value(), new ValueConverter(parameter));
@@ -141,6 +141,8 @@ public class UriTranslator {
                     } catch (InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
                         if (LOG.isErrorEnabled())
                             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
+                        if (e.getCause() instanceof TooManyRequestsException)
+                            throw (TooManyRequestsException)e.getCause();
                     }
             }
         }
