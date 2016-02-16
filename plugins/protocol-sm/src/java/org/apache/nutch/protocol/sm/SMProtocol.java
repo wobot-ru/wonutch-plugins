@@ -19,6 +19,7 @@ import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.Response;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.fetch.AccessDenied;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.fetch.VkFetcher;
 import ru.wobot.uri.UriTranslator;
@@ -29,6 +30,7 @@ import java.util.Properties;
 
 public class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
+    private static final byte[] EMPTY_CONTENT = new byte[]{};
     private Configuration conf;
     private UriTranslator translator;
 
@@ -41,8 +43,16 @@ public class SMProtocol implements Protocol {
         try {
             Response response = translator.translate(ParsedUri.parse(urlString));
             if (response instanceof Redirect) {
+                final Metadata metadata = new Metadata();
+                metadata.add(ContentMetaConstants.FETCH_TIME, String.valueOf(System.currentTimeMillis()));
                 Redirect redirect = (Redirect) response;
-                return new ProtocolOutput(new Content(urlString, urlString, new byte[]{}, null, new Metadata(), this.conf), new ProtocolStatus(ProtocolStatus.MOVED, redirect.getLocation()));
+                return new ProtocolOutput(new Content(urlString, urlString, EMPTY_CONTENT, null, metadata, this.conf), new ProtocolStatus(ProtocolStatus.MOVED, redirect.getLocation()));
+            }
+            if (response instanceof AccessDenied) {
+                final Metadata metadata = new Metadata();
+                metadata.add(ContentMetaConstants.FETCH_TIME, String.valueOf(System.currentTimeMillis()));
+                AccessDenied denied = (AccessDenied) response;
+                return new ProtocolOutput(new Content(urlString, urlString, EMPTY_CONTENT, null, metadata, this.conf), new ProtocolStatus(ProtocolStatus.ACCESS_DENIED, denied.getMessage()));
             }
             FetchResponse fetchResponse = (FetchResponse) response;
             return new ProtocolOutput(convertToContent(new SMContent(url.toString(), fetchResponse.getData().getBytes(StandardCharsets.UTF_8), fetchResponse.getMetadata())));

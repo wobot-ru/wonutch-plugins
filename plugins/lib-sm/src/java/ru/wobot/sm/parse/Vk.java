@@ -118,6 +118,7 @@ public class Vk extends AbstractParser {
     protected ParseResult parsePostsIndexPage(URI uri, String content) {
         final String userDomain = uri.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
+        final boolean isAuth = uri.getQuery().contains("auth");
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> commonContentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
@@ -137,7 +138,11 @@ public class Vk extends AbstractParser {
                 final int commentPageCount = post.getComments().getCount() / 100;
                 for (long block = 0; block <= commentPageCount; block++) {
                     String blockNumber = String.format("%06d", block);
-                    links.put(urlPrefix + post.getId() + "/x100/" + blockNumber, "comment-index-x100-page-" + block);
+
+                    if (isAuth)
+                        links.put(urlPrefix + post.getId() + "/x100/" + blockNumber + "?auth", "comment-index-x100-page-" + block);
+                    else
+                        links.put(urlPrefix + post.getId() + "/x100/" + blockNumber, "comment-index-x100-page-" + block);
                 }
                 Map<String, Object> postContent = new HashMap<>();
                 Map<String, Object> postParse = new HashMap<>();

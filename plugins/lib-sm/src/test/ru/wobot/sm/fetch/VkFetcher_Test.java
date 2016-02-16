@@ -95,6 +95,16 @@ public class VkFetcher_Test {
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112"));
 
         //then
-        verify(scheme).getPostCommentsData("1", "531296", 77, 112);
+        verify(scheme).getPostCommentsData("1", "531296", 77, 112, null);
+    }
+
+    @Test
+    public void when_translate_comments_page_with_auth_than_should_be_invoke_getProfileData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112?auth"));
+
+        //then
+        verify(scheme).getPostCommentsData("1", "531296", 77, 112, "");
     }
 }
