@@ -6,7 +6,7 @@
 
     <name>lib-sm</name>
     <description>
-        Apache Nutch library for working with vk.com API
+        Apache Nutch library for working with social media API
     </description>
 
     <parent>
@@ -15,19 +15,6 @@
         <version>0.2.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
-
-    <repositories>
-        <repository>
-            <id>snapshots</id>
-            <url>http://artifactory.wobot.local/artifactory/libs-snapshot</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>

@@ -57,6 +57,7 @@
         <jackson.version>2.5.3</jackson.version>
         <ssvk.version>1.1.0.RELEASE</ssvk.version>
         <ssfb.version>2.0.3.RELEASE</ssfb.version>
+        <selenium.version>2.52.0</selenium.version>
     </properties>
 
     <dependencies>
@@ -100,7 +101,16 @@
                     <groupId>org.apache.cxf</groupId>
                     <artifactId>cxf</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.nutch</groupId>
+            <artifactId>lib-http</artifactId>
+            <version>1.10</version>
         </dependency>
     </dependencies>
 
@@ -207,8 +217,10 @@
         <module>plugins/indexer-multielastic2</module>
         <module>plugins/indexer-sm-elastic-2</module>
         <module>plugins/lib-sm</module>
+        <module>plugins/lib-sm-selenium</module>
         <module>plugins/parse-sm</module>
         <module>plugins/protocol-sm</module>
+        <module>plugins/protocol-sm-selenium</module>
         <module>distribution</module>
         <module>core-libs</module>
     </modules>

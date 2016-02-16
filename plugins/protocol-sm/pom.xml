@@ -6,7 +6,7 @@
 
     <name>protocol-sm</name>
     <description>
-        Apache Nutch plugin for vk.com crawling
+        Apache Nutch plugin for social media crawling via provided API
     </description>
 
     <parent>
