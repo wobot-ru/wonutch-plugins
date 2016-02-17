@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
 public class TestProxy {
-    private static Proxy proxy = Proxy.INSTANCE;
+    private static Proxy proxy = new Proxy("fb");
 
     static {
         Logger rootLogger = Logger.getRootLogger();
@@ -35,7 +35,7 @@ public class TestProxy {
     }
 
     public void setup(int maxRequests, Collection<String> credentialsSource) {
-        conf.setInt("sm.requests.persecond", maxRequests);
+        conf.setInt("sm.requests.persecond.fb", maxRequests);
         proxy.setCredentialsSource(credentialsSource);
     }
 

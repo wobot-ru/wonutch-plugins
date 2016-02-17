@@ -87,7 +87,7 @@ public class SMProtocol implements Protocol {
     }
 
     protected FbFetcher createFbFetcher() {
-        CredentialRepository repository = Proxy.INSTANCE;
+        CredentialRepository repository = new Proxy("fb");
         repository.setConf(getConf());
         return new FbFetcher(repository);
     }

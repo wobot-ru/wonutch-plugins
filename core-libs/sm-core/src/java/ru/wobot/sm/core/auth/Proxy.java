@@ -15,15 +15,20 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 
-public enum Proxy implements CredentialRepository {
-    INSTANCE;
-
-    private static final String REQUESTS_PERSECOND = "sm.requests.persecond";
-    private static final String ACCOUNTS_FILE = "sm.accounts";
+public class Proxy implements CredentialRepository {
     private static final Log LOG = LogFactory.getLog(Proxy.class.getName());
+    private final String REQUESTS_PERSECOND;
+    private final String ACCOUNTS_FILE;
     private final BlockingQueue<DelayedCredential> credentials = new DelayQueue<>();
     private Configuration conf;
     private Collection<String> credentialsSource;
+    private String scheme;
+
+    public Proxy(String scheme) {
+        REQUESTS_PERSECOND = "sm.requests.persecond." + scheme;
+        ACCOUNTS_FILE = "sm.accounts." + scheme;
+        this.scheme = scheme;
+    }
 
     public void setCredentialsSource(Collection<String> credentialsSource) {
         this.credentialsSource = Objects.requireNonNull(credentialsSource);
