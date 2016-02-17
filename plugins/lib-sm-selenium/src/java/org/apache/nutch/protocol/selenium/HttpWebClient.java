@@ -22,6 +22,8 @@ import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -40,14 +41,15 @@ public class HttpWebClient {
     public static ThreadLocal<WebDriver> threadWebDriver = new ThreadLocal<WebDriver>() {
         @Override
         protected WebDriver initialValue() {
-            /*FirefoxProfile profile = new FirefoxProfile();
+            FirefoxProfile profile = new FirefoxProfile();
             profile.setPreference("permissions.default.stylesheet", 2);
             profile.setPreference("permissions.default.image", 2);
             profile.setPreference("dom.ipc.plugins.enabled.libflashplayer.so", "false");
             WebDriver driver = new FirefoxDriver(profile);
-            return driver;*/
-            System.setProperty("webdriver.chrome.driver", "src/testresources/chromedriver.exe");
-            return new ChromeDriver();
+            return driver;
+
+            //System.setProperty("webdriver.chrome.driver", "src/testresources/chromedriver.exe");
+            //return new ChromeDriver();
         }
     };
 
@@ -60,11 +62,13 @@ public class HttpWebClient {
             for (Cookie loadedCookie : driver.manage().getCookies()) {
                 cookies.add(String.format("%s,%s", loadedCookie.getName(), loadedCookie.getValue()));
             }
+/*
             try {
                 Files.write(FileSystems.getDefault().getPath("src/testresources/cookies.txt"), cookies, StandardOpenOption.CREATE_NEW);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+*/
 
             try {
                 for (String s : Files.readAllLines(FileSystems.getDefault().getPath("src/testresources/cookies.txt"), StandardCharsets.UTF_8)) {
