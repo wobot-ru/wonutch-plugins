@@ -19,9 +19,13 @@ package org.apache.nutch.protocol.selenium;
 // JDK imports
 import java.io.IOException;
 import java.net.URL;
+
+import crawlercommons.robots.BaseRobotRules;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.net.protocols.Response;
+import org.apache.nutch.protocol.RobotRulesParser;
 import org.apache.nutch.protocol.http.api.HttpBase;
 import org.apache.nutch.protocol.ProtocolException;
 import org.apache.nutch.util.NutchConfiguration;
@@ -56,4 +60,8 @@ public class Http extends HttpBase {
     return new HttpResponse(this, url, datum);
   }
 
+  @Override
+  public BaseRobotRules getRobotRules(Text url, CrawlDatum datum) {
+    return RobotRulesParser.EMPTY_RULES;
+  }
 }
