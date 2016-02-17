@@ -1,6 +1,7 @@
 package ru.wobot.sm.fetch;
 
 import org.junit.Test;
+import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Response;
@@ -15,9 +16,11 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 public class TestVkService {
-    private VkFetcher vkFetcher = new VkFetcher();
+    private CredentialRepository mockRepository = mock(CredentialRepository.class);
+    private VkFetcher vkFetcher = new VkFetcher(mockRepository);
 
     @Test
     public void is_getSMProfiles_return_SMProfiles() throws IOException {

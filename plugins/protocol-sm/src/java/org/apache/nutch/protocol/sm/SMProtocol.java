@@ -93,7 +93,9 @@ public class SMProtocol implements Protocol {
     }
 
     protected VkFetcher createVkFetcher() {
-        return new VkFetcher();
+        CredentialRepository repository = new Proxy("vk");
+        repository.setConf(getConf());
+        return new VkFetcher(repository);
     }
 
     private Content convertToContent(SMContent response) {
