@@ -21,6 +21,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
+import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -50,11 +51,13 @@ import static ru.wobot.sm.serialize.Serializer.getInstance;
 public class VkFetcher {
     public static final String API_v5_40 = "5.40";
     private final ObjectMapper objectMapper;
+    private final CredentialRepository repository;
 
-    public VkFetcher() {
+    public VkFetcher(CredentialRepository repository) {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new VKontakteModule());
         objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_ARRAY_AS_NULL_OBJECT, true);
+        this.repository = repository;
     }
 
     protected static String toJson(Object obj) {
@@ -315,7 +318,7 @@ public class VkFetcher {
 
     protected void preProcessURI(URIBuilder uri) {
         uri.setScheme("https");
-        uri.addParameter("access_token", "baf5615410b3b0de5b5851483b67d15b41a0aefcfb3a623c07aa835656619ad1582fd04cae8015a3d0be6");
+        uri.addParameter("access_token", repository.getInstance().getAccessToken());
     }
 
     protected String readUrlToString(String urlStr) throws IOException {
@@ -346,7 +349,8 @@ public class VkFetcher {
     protected <T extends VKResponse> void checkForError(T toCheck) {
         if (toCheck.getError() != null) {
             if (toCheck.getError().getCode().equals("6"))
-                throw new TooManyRequestsException(1000);
+                //todo: replace to something smart
+                throw new TooManyRequestsException(-1);
             else
                 throw new VKontakteErrorException(toCheck.getError());
         }
