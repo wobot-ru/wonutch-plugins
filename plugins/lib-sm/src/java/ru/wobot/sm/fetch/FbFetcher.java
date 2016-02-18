@@ -11,6 +11,7 @@ import org.springframework.social.support.URIBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.fetch.ApiResponse;
 import ru.wobot.sm.core.fetch.Redirect;
@@ -64,6 +65,7 @@ public class FbFetcher {
     public ApiResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.PROFILE);
         }};
 
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
@@ -96,6 +98,7 @@ public class FbFetcher {
         }
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.FRIEND_LIST_OF_ID);
         }};
 
         return new SuccessResponse(result.toString(), metaData);
@@ -118,6 +121,7 @@ public class FbFetcher {
         JsonNode responseNode = getObject(queryParameters, userId + "/feed");
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.POST_BULK);
         }};
         return new SuccessResponse(responseNode.toString(), metaData);
     }
@@ -140,6 +144,7 @@ public class FbFetcher {
         JsonNode responseNode = getObject(queryParameters, postId + "/comments");
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.COMMENT_BULK);
         }};
         return new SuccessResponse(responseNode.toString(), metaData);
     }

@@ -11,8 +11,9 @@ import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.protocol.Content;
 import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.parse.FbParser;
-import ru.wobot.sm.parse.Vk;
+import ru.wobot.sm.parse.VkParser;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -36,7 +37,7 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
         this.conf = conf;
         if (parsers.isEmpty()) {
             //TODO: make this configurable (maybe reflection or config file)
-            parsers.put(Sources.VKONTAKTE, new Vk());
+            parsers.put(Sources.VKONTAKTE, new VkParser());
             parsers.put(Sources.FACEBOOK, new FbParser());
         }
     }
@@ -50,10 +51,13 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
 
         try {
             URI url = new URI(urlString);
+            final Metadata metadata = content.getMetadata();
+            final String apiType = metadata.get(ContentMetaConstants.API_TYPE);
+            final String apiVersion = metadata.get(ContentMetaConstants.API_VER);
             ru.wobot.sm.core.parse.Parser parser = parsers.get(url.getScheme());
-            ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(url, new String(content.getContent(),
-                    StandardCharsets.UTF_8));
-            return convert(parseResult, content.getMetadata(), new Metadata());
+            final String data = new String(content.getContent(),StandardCharsets.UTF_8);
+            ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(url, data, apiType, apiVersion);
+            return convert(parseResult, metadata, new Metadata());
 
         } catch (MalformedURLException | URISyntaxException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));

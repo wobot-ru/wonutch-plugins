@@ -21,6 +21,7 @@ import org.springframework.social.vkontakte.api.impl.json.VKontakteModule;
 import org.springframework.social.vkontakte.api.impl.wall.CommentsQuery;
 import org.springframework.social.vkontakte.api.impl.wall.CommunityWall;
 import org.springframework.social.vkontakte.api.impl.wall.UserWall;
+import ru.wobot.sm.core.api.VkApiTypes;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.domain.SMProfile;
@@ -95,6 +96,7 @@ public class VkFetcher {
         Collections.sort(ids);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.FRIEND_LIST_OF_ID);
         }};
         return new SuccessResponse(toJson(ids), metaData);
     }
@@ -112,6 +114,7 @@ public class VkFetcher {
         VKGenericResponse vkResponse = null;
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.POST_COUNT);
         }};
         try {
             vkResponse = getGenericResponse(uriBuilder.toString());
@@ -144,6 +147,7 @@ public class VkFetcher {
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.POST_BULK);
         }};
         return new SuccessResponse(toJson(posts), metaData);
     }
@@ -156,6 +160,7 @@ public class VkFetcher {
         final VKontakteProfile profile = profiles.getProfiles().get(0);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.PROFILE);
         }};
         if (!userId.startsWith("id")) {
             return new Redirect("vk://id" + profile.getId(), metaData);
@@ -177,6 +182,7 @@ public class VkFetcher {
 
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.POST);
         }};
         String json = toJson(post);
         return new SuccessResponse(json, metaData);
@@ -198,6 +204,7 @@ public class VkFetcher {
 
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.COMMENT_BULK);
         }};
 
         VKontakteErrorException s;

@@ -9,26 +9,44 @@ import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
 import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.api.VkApiTypes;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
-import ru.wobot.sm.core.parse.AbstractParser;
 import ru.wobot.sm.core.parse.ParseResult;
+import ru.wobot.sm.core.parse.Parser;
 import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public class Vk extends AbstractParser {
+public class VkParser implements Parser {
     @Override
+    public ParseResult parse(URI uri, String content, String apiType, String apiVersion) {
+        switch (apiType) {
+            case VkApiTypes.PROFILE:
+                return parseProfile(uri, content);
+            case VkApiTypes.FRIEND_LIST_OF_ID:
+                return parseFriends(uri, content);
+            case VkApiTypes.POST:
+                return parsePost(uri, content);
+            case VkApiTypes.POST_COUNT:
+                return parsePostsIndex(uri, content);
+            case VkApiTypes.POST_BULK:
+                return parsePostsIndexPage(uri, content);
+            case VkApiTypes.COMMENT_BULK:
+                return parseCommentPage(uri, content);
+        }
+        throw new UnsupportedOperationException("Parser for this content not found.");
+    }
+
     protected ParseResult parseProfile(URI uri, String content) {
         final String urlString = uri.toString();
         final String userDomain = uri.getHost();
@@ -72,7 +90,6 @@ public class Vk extends AbstractParser {
         return new ParseResult(urlString, fullName, content, links, parseMeta, contentMeta);
     }
 
-    @Override
     protected ParseResult parseFriends(URI uri, String content) {
         final String userDomain = uri.getHost();
         final Map<String, Object> parseMeta = new HashMap<>();
@@ -89,7 +106,6 @@ public class Vk extends AbstractParser {
         return new ParseResult(uri.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
     }
 
-    @Override
     protected ParseResult parsePostsIndex(URI uri, String content) {
         final String userDomain = uri.getHost();
         final String urlString = uri.toString();
@@ -114,7 +130,6 @@ public class Vk extends AbstractParser {
         return new ParseResult(urlString, userDomain + "-index-posts", content, links, parseMeta, contentMeta);
     }
 
-    @Override
     protected ParseResult parsePostsIndexPage(URI uri, String content) {
         final String userDomain = uri.getHost();
         final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
@@ -171,7 +186,6 @@ public class Vk extends AbstractParser {
                 == null ? new HashMap<String, String>() : links), parseMeta, commonContentMeta);
     }
 
-    @Override
     protected ParseResult parsePost(URI uri, String content) {
         final String urlString = uri.toString();
         final Map<String, Object> parseMeta = new HashMap<>();
@@ -207,7 +221,6 @@ public class Vk extends AbstractParser {
         return new ParseResult(urlString, links, parseMeta, contentMeta);
     }
 
-    @Override
     protected ParseResult parseCommentPage(URI uri, String content) {
         final String user = uri.getHost();
         final int userId = Integer.parseInt(user.substring(2));
