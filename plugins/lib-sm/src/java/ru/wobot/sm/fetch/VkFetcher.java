@@ -24,9 +24,10 @@ import org.springframework.social.vkontakte.api.impl.wall.UserWall;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.domain.SMProfile;
-import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.AccessDenied;
+import ru.wobot.sm.core.fetch.ApiResponse;
 import ru.wobot.sm.core.fetch.Redirect;
-import ru.wobot.sm.core.fetch.Response;
+import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
@@ -78,7 +79,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/friends")
-    public Response getFriendIds(@PathParam("userId") String userId) throws IOException {
+    public ApiResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
@@ -95,11 +96,11 @@ public class VkFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
-        return new FetchResponse(toJson(ids), metaData);
+        return new SuccessResponse(toJson(ids), metaData);
     }
 
     @Path("id{userId}/index-posts")
-    public Response getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
+    public ApiResponse getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -109,22 +110,22 @@ public class VkFetcher {
             preProcessURI(uriBuilder);
         }
         VKGenericResponse vkResponse = null;
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+        }};
         try {
             vkResponse = getGenericResponse(uriBuilder.toString());
         } catch (VKontakteErrorException e) {
             if (e.getError().getCode().equals("15"))
-                return new Redirect("vk://id" + userId + "/index-posts?auth");
+                return new Redirect("vk://id" + userId + "/index-posts?auth", metaData);
         }
 
         VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-        }};
-        return new FetchResponse(toJson(posts.getCount()), metaData);
+        return new SuccessResponse(toJson(posts.getCount()), metaData);
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
-    public Response getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
+    public ApiResponse getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -144,28 +145,28 @@ public class VkFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
-        return new FetchResponse(toJson(posts), metaData);
+        return new SuccessResponse(toJson(posts), metaData);
     }
 
     @Path("{userId}")
-    public Response getProfileData(@PathParam("userId") String userId) throws IOException {
+    public ApiResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         String responseStr = getVKProfiles(Collections.singletonList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
         final VKontakteProfile profile = profiles.getProfiles().get(0);
-        if (!userId.startsWith("id")) {
-            return new Redirect("vk://id" + profile.getId());
-        }
-
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
+        if (!userId.startsWith("id")) {
+            return new Redirect("vk://id" + profile.getId(), metaData);
+        }
+
         String json = toJson(profile);
-        return new FetchResponse(json, metaData);
+        return new SuccessResponse(json, metaData);
     }
 
     @Path("id{userId}/posts/{postId}")
-    public Response getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
+    public ApiResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
@@ -178,11 +179,11 @@ public class VkFetcher {
             put(ContentMetaConstants.API_VER, API_v5_40);
         }};
         String json = toJson(post);
-        return new FetchResponse(json, metaData);
+        return new SuccessResponse(json, metaData);
     }
 
     @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
-    public Response getPostCommentsData(
+    public ApiResponse getPostCommentsData(
             @PathParam("userId") String userId,
             @PathParam("postId") String postId,
             @PathParam("pageSize") int pageSize,
@@ -202,14 +203,13 @@ public class VkFetcher {
         VKontakteErrorException s;
         try {
             String json = toJson(getComments(query, auth != null));
-            return new FetchResponse(json, metaData);
+            return new SuccessResponse(json, metaData);
         } catch (VKontakteErrorException e) {
-            s = e;
             if (e.getError().getCode().equals("212"))
-                return new AccessDenied(e.getMessage());
+                return new AccessDenied(e.getMessage(), metaData);
+            else
+                throw e;
         }
-
-        throw new RuntimeException("Unexpected result");
     }
 
     protected CommentsResponse getComments(CommentsQuery query, boolean needAuth) throws IOException {

@@ -1,13 +1,22 @@
 package ru.wobot.sm.core.fetch;
 
-public class Redirect implements Response {
-    private String location;
+import java.util.Map;
 
-    public Redirect(String location) {
+public final class Redirect extends AbstractResponse {
+    private final String location;
+
+    public Redirect(String location, Map<String, Object> metadata) {
+        super(metadata);
         this.location = location;
     }
 
-    public String getLocation() {
+    @Override
+    public String getData() {
+        return "";
+    }
+
+    @Override
+    public Object getMessage() {
         return location;
     }
 }

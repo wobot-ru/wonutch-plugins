@@ -22,12 +22,10 @@ public class Proxy implements CredentialRepository {
     private final BlockingQueue<DelayedCredential> credentials = new DelayQueue<>();
     private Configuration conf;
     private Collection<String> credentialsSource;
-    private String scheme;
 
     public Proxy(String scheme) {
         REQUESTS_PERSECOND = "sm.requests.persecond." + scheme;
         ACCOUNTS_FILE = "sm.accounts." + scheme;
-        this.scheme = scheme;
     }
 
     public void setCredentialsSource(Collection<String> credentialsSource) {

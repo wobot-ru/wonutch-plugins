@@ -5,7 +5,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.parse.FbParser;
@@ -38,8 +38,8 @@ public class TestFbService {
     }
 
     private ParseResult getParseResult(String uri) throws URISyntaxException {
-        FetchResponse fetchResponse = translator.translate(ParsedUri.parse(uri));
-        String content = fetchResponse.getData();
+        SuccessResponse successResponse = translator.translate(ParsedUri.parse(uri));
+        String content = successResponse.getData();
         return new FbParser().parse(new URI(uri), content);
     }
 

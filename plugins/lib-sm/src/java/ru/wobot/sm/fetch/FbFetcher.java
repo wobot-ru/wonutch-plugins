@@ -14,7 +14,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
@@ -109,9 +109,9 @@ public class FbFetcher {
     // fb://96814974590
     // fb://1704938049732711?scope=user&comment_id=10154479526792506_10154481125912506
     @Path("{userId}")
-    public FetchResponse getProfileData(@PathParam("userId") String userId,
-                                        @QueryParam("scope") String scope,
-                                        @QueryParam("comment_id") String commentId) throws IOException {
+    public SuccessResponse getProfileData(@PathParam("userId") String userId,
+                                          @QueryParam("scope") String scope,
+                                          @QueryParam("comment_id") String commentId) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
@@ -123,18 +123,18 @@ public class FbFetcher {
             queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(PROFILE_FIELDS));
             JsonNode user = getObject(queryParameters, userId);
             ((ObjectNode) user).put("type", "page");
-            return new FetchResponse(user.toString(), metaData);
+            return new SuccessResponse(user.toString(), metaData);
         } else {
             queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_PROFILE_FIELDS));
             JsonNode user = getObject(queryParameters, commentId).get("from");
             ((ObjectNode) user).put("type", "user");
-            return new FetchResponse(user.toString(), metaData);
+            return new SuccessResponse(user.toString(), metaData);
         }
     }
 
     // fb://1704938049732711/friends
     @Path("{userId}/friends")
-    public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
+    public SuccessResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         List<String> result = new ArrayList<>();
 
@@ -155,15 +155,15 @@ public class FbFetcher {
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
 
-        return new FetchResponse(result.toString(), metaData);
+        return new SuccessResponse(result.toString(), metaData);
     }
 
     // fb://191234802505/index-posts/x100/00000000
     // fb://96814974590/index-posts/x100/1453725511
     @Path("{userId}/index-posts/x{limit}/{until}")
-    public FetchResponse getPostsData(@PathParam("userId") String userId,
-                                      @PathParam("limit") int limit,
-                                      @PathParam("until") long until
+    public SuccessResponse getPostsData(@PathParam("userId") String userId,
+                                        @PathParam("limit") int limit,
+                                        @PathParam("until") long until
     ) throws IOException {
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(POST_FIELDS));
@@ -176,16 +176,16 @@ public class FbFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-        return new FetchResponse(responseNode.toString(), metaData);
+        return new SuccessResponse(responseNode.toString(), metaData);
     }
 
     // fb://165107853523677/posts/165107853523677_1081856348515485/x100/0
     // fb://165107853523677/posts/165107853523677_1081856348515485/x10/WTI5dGJXVnVkRjlqZFhKemIzSTZNVEE0TWpneU5qQXdOVEE0TlRFNE5qb3hORFV5TWpRd01qTTM=
     @Path("{userId}/posts/{postId}/x{limit}/{pageToken}")
-    public FetchResponse getPostCommentsData(@PathParam("userId") @SuppressWarnings("unused") String userId, // TODO: Think about refactor
-                                             @PathParam("postId") String postId,
-                                             @PathParam("limit") int limit,
-                                             @PathParam("pageToken") String pageToken) throws IOException {
+    public SuccessResponse getPostCommentsData(@PathParam("userId") @SuppressWarnings("unused") String userId, // TODO: Think about refactor
+                                               @PathParam("postId") String postId,
+                                               @PathParam("limit") int limit,
+                                               @PathParam("pageToken") String pageToken) throws IOException {
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         queryParameters.set("fields", StringUtils.arrayToCommaDelimitedString(COMMENT_FIELDS));
         if (!pageToken.equals("0"))
@@ -198,6 +198,6 @@ public class FbFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
         }};
-        return new FetchResponse(responseNode.toString(), metaData);
+        return new SuccessResponse(responseNode.toString(), metaData);
     }
 }
