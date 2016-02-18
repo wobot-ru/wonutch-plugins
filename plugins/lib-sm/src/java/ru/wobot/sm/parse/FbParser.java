@@ -140,9 +140,8 @@ public class FbParser extends AbstractParser {
                 // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
                 if (!post.getFrom().getId().equals(userDomain)) {
-                    // generate link <a href='fb://{user}?scope=user&comment_id={post}'>{user}?scope=user&comment_id={post}</a>
-                    links.put(UrlSchemaConstants.FACEBOOK + post.getFrom().getId() + "?scope=user&comment_id=" + postId,
-                            "");
+                    // generate link <a href='fb://{user}'>{user}</a>
+                    links.put(UrlSchemaConstants.FACEBOOK + post.getFrom().getId(), "");
                 }
 
                 Map<String, Object> postParse = new HashMap<>();

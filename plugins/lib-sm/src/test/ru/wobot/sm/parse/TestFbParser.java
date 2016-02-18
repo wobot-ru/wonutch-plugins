@@ -165,7 +165,7 @@ public class TestFbParser {
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/165107853523677_1095411087160011/x100/0",
                         "fb://165107853523677/posts/165107853523677_1094750970559356/x100/0",
-                        "fb://900662163382117?scope=user&comment_id=165107853523677_1094750970559356"));
+                        "fb://900662163382117"));
     }
 
     @Test
