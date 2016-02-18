@@ -11,6 +11,7 @@ import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
+import ru.wobot.sm.core.fetch.ApiResponse;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 
 import java.io.IOException;
@@ -24,6 +25,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -36,7 +38,7 @@ public class TestFbFetcher {
 
     {
         Credential credential = mock(Credential.class);
-        given(credential.getAccessToken()).willReturn("1673845006238395|FkqeRkmP1kT_Ae42i8IkZx8KxBM");
+        given(credential.getAccessToken()).willReturn("717502605052808|vJSXEhRP-HhsrDcY-6qj4Q2vTYU");
         given(repository.getInstance()).willReturn(credential);
         objectMapper.registerModule(new FacebookModule());
     }
@@ -44,7 +46,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFullPageDataForId() throws IOException {
         // given when
-        SuccessResponse response = fbFetcher.getProfileData("mastercardrussia", null, null);
+        ApiResponse response = fbFetcher.getProfileData("mastercardrussia");
 
         // then
         assertThat(response.getData(), containsString("MasterCard"));
@@ -53,23 +55,20 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFullPageDataForIdWithScopeAndCommentId() throws IOException {
         // given when
-        SuccessResponse response = fbFetcher.getProfileData("1704938049732711", "user", "10154479526792506_10154481125912506");
+        ApiResponse response = fbFetcher.getProfileData("1704938049732711");
 
         // then
         assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
-        assertThat(response.getData(), not(containsString("\"type\":\"user\"")));
-        assertThat(response.getData(), containsString("\"type\":\"page\""));
     }
 
     @Test
     public void shouldGetFullUserDataForIdWithScopeAndCommentId() throws IOException {
         // given when
-        SuccessResponse response = fbFetcher.getProfileData("892133830908265", "user", "1081856348515485_1082735698427550");
+        ApiResponse response = fbFetcher.getProfileData("892133830908265");
 
         // then
-        assertThat(response.getData(), containsString("Лидия Мазурова"));
-        assertThat(response.getData(), not(containsString("\"type\":\"page\"")));
-        assertThat(response.getData(), containsString("\"type\":\"user\""));
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/892133830908265"));
     }
 
     @Test
@@ -157,7 +156,7 @@ public class TestFbFetcher {
         assertThat(comments.size(), is(3));
         assertThat(nextComments.size(), is(3));
         assertThat(comments.get(0).get("created_time").asText(), is(greaterThan(nextComments.get(0).get
-                        ("created_time").asText()
+                ("created_time").asText()
         )));
     }
 

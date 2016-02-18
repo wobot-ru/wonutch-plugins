@@ -53,14 +53,12 @@ public class FbParser extends AbstractParser {
 
         String userId = profile.get("id").asText();
         Map<String, String> links = new HashMap<>();
-        //TODO: HACK-REWRITE ASAP
-        if (profile.get("type") != null && !profile.get("type").asText().equals("user")) {
-            // generate link <a href='fb://{user}/friends'>user-friends</a>
-            links.put(UrlSchemaConstants.FACEBOOK + userId + "/friends", userId + "-friends");
 
-            // generate link <a href='fb://{user}/index-posts/x100/00000000'>user-index-posts-x100-page-0</a>
-            links.put(UrlSchemaConstants.FACEBOOK + userId + "/index-posts/x100/00000000", userId + "-index-posts-x100-page-0");
-        }
+        // generate link <a href='fb://{user}/friends'>user-friends</a>
+        links.put(UrlSchemaConstants.FACEBOOK + userId + "/friends", userId + "-friends");
+
+        // generate link <a href='fb://{user}/index-posts/x100/00000000'>user-index-posts-x100-page-0</a>
+        links.put(UrlSchemaConstants.FACEBOOK + userId + "/index-posts/x100/00000000", userId + "-index-posts-x100-page-0");
 
         // fill parse metadata
         final String fullName = profile.get("name").asText();
@@ -227,8 +225,8 @@ public class FbParser extends AbstractParser {
             final String postUrl = UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + userDomain + "_" + postObjectId;
             final String commentOwnerProfile = UrlSchemaConstants.FACEBOOK + comment.get("from").get("id")
                     .asText();
-            // generate link <a href='fb://{user}?scope=user&comment_id={comment}'>{user}?scope=user&comment_id={comment}</a>
-            links.put(commentOwnerProfile + "?scope=user&comment_id=" + id, "");
+            // generate link <a href='fb://{user}'>{user}</a>
+            links.put(commentOwnerProfile, "");
 
             //TODO: Think about another link for replies, to not to confuse with posts
             // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>

@@ -15,8 +15,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class TestFbParser {
-    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"type\":\"page\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
-    private static final String RAW_USER_PROFILE = "{\"id\":\"884167345038247\",\"type\":\"user\",\"likes\":0,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"Лидия Мазурова\"}";
+    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
+
     private static final String RAW_POSTS = "{\n" +
             "  \"data\": [\n" +
             "    {\n" +
@@ -144,16 +144,6 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldNotCreateUserOutLinks() throws IOException, URISyntaxException {
-        // given when
-        ParseResult result = fbParser.parseProfile(new URI("fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"),
-                RAW_USER_PROFILE);
-
-        // then
-        assertThat(result.getLinks().size(), is(0));
-    }
-
-    @Test
     public void shouldCreateFriendsOutLinks() throws IOException, URISyntaxException {
         // given when
         ParseResult result = fbParser.parseFriends(new URI("fb://165107853523677/friends"), //mastercardrussia
@@ -268,7 +258,7 @@ public class TestFbParser {
         assertThat(result.getLinks().size(), is(2));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0",
-                        "fb://884167345038247?scope=user&comment_id=1081856348515485_1082735698427550"));
+                        "fb://884167345038247"));
     }
 
     @Test
@@ -325,7 +315,7 @@ public class TestFbParser {
         // then
         assertThat(result.getLinks().size(), is(3));
         assertThat(result.getLinks().keySet(), hasItems
-                ("fb://1117812631564394?scope=user&comment_id=1081856348515485_1082938725073914",
+                ("fb://1117812631564394",
                         "fb://165107853523677/posts/1081856348515485_1082938725073914/x100/0",
                         "fb://165107853523677/posts/1081856348515485_1082735698427550/x100/WTI5dGJXVnVkRjlqZFhKemIzSTZNVEF4TlRNME5EQTVNalUxT1RVNU5UUTZNVFExTkRrM01UTXdNZz09"));
     }
