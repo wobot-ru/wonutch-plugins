@@ -99,6 +99,7 @@ public class FbFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
             put(ContentMetaConstants.API_TYPE, FbApiTypes.FRIEND_LIST_OF_ID);
+            put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
         }};
 
         return new SuccessResponse(result.toString(), metaData);

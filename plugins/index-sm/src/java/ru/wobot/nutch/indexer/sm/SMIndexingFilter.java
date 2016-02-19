@@ -13,7 +13,6 @@ import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Parse;
 import org.apache.nutch.util.StringUtil;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.core.url.UrlCheck;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -33,16 +32,16 @@ public class SMIndexingFilter implements IndexingFilter {
             return null;
         }
 
-        // skip system's API calls from an index
-        if (url == null || UrlCheck.isFriends(url) || UrlCheck.isPostsIndex(url))
-            return null;
-
-        if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
+        if (url == null || parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
             return doc;
 
         LOG.info("SMIndexingFilter: filter(\"" + textUrl.toString() + "\")");
 
         Metadata contentMeta = parse.getData().getContentMeta();
+        // skip system's API calls from an index
+        if (contentMeta.get(ContentMetaConstants.SKIP_FROM_INDEX)!=null && contentMeta.get(ContentMetaConstants.SKIP_FROM_INDEX).equals(1))
+            return null;
+
         Metadata documentMeta = doc.getDocumentMeta();
         copyMetaKey(ContentMetaConstants.TYPE, contentMeta, documentMeta);
         copyMetaKey(ContentMetaConstants.PARENT, contentMeta, documentMeta);
