@@ -23,6 +23,7 @@ import ru.wobot.sm.fetch.VkFetcher;
 import ru.wobot.uri.UriTranslator;
 import ru.wobot.uri.impl.ParsedUri;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
 
@@ -100,7 +101,7 @@ public class SMProtocol implements Protocol {
         p.putAll(responseMetadata);
         metadata.setAll(p);
         metadata.add("nutch.fetch.time", String.valueOf(responseMetadata.get(ContentMetaConstants.FETCH_TIME)));
-        return new Content(uri, uri, response.getData().getBytes(),
+        return new Content(uri, uri, response.getData().getBytes(StandardCharsets.UTF_8),
                 String.valueOf(responseMetadata.get(ContentMetaConstants.MIME_TYPE)), metadata, this.conf);
     }
 }
