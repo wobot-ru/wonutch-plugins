@@ -17,7 +17,6 @@ import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.parse.Parser;
-import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.lang.reflect.Type;
@@ -65,7 +64,7 @@ public class VkParser implements Parser {
             }
         };
         if (profile.getFacebook() != null) {
-            links.put(UrlSchemaConstants.FACEBOOK + profile.getFacebook(), userDomain + "-facebook");
+            links.put(Sources.FACEBOOK + "://" + profile.getFacebook(), userDomain + "-facebook");
         }
 
         // fill parse metadata
@@ -99,7 +98,7 @@ public class VkParser implements Parser {
 
         Map<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
-            String friendHref = UrlSchemaConstants.VKONTAKTE + friendId;
+            String friendHref = Sources.VKONTAKTE + "://" + friendId;
             links.put(friendHref, friendId);
         }
 
@@ -132,7 +131,7 @@ public class VkParser implements Parser {
 
     protected ParseResult parsePostsIndexPage(URI uri, String content) {
         final String userDomain = uri.getHost();
-        final String urlPrefix = UrlSchemaConstants.VKONTAKTE + userDomain + "/posts/";
+        final String urlPrefix = Sources.VKONTAKTE + "://" + userDomain + "/posts/";
         final boolean isAuth = uri.getQuery() != null && uri.getQuery().contains("auth");
         final Map<String, Object> parseMeta = new HashMap<>();
         final Map<String, Object> commonContentMeta = new HashMap<String, Object>() {{
@@ -162,7 +161,7 @@ public class VkParser implements Parser {
                 Map<String, Object> postContent = new HashMap<>();
                 Map<String, Object> postParse = new HashMap<>();
 
-                final String ownerProfile = UrlSchemaConstants.VKONTAKTE + "id" + post.getOwnerId();
+                final String ownerProfile = Sources.VKONTAKTE + "://" + "id" + post.getOwnerId();
                 postParse.put(PostProperties.SOURCE, Sources.VKONTAKTE);
                 postParse.put(PostProperties.PROFILE_ID, ownerProfile);
                 postParse.put(PostProperties.HREF, "http://vk.com/wall" + post.getOwnerId() + "_" + post.getId()); //like http://vk.com/wall1_730207
@@ -201,7 +200,7 @@ public class VkParser implements Parser {
             links.put(urlString + "/x100/" + blockNumber, "post-index-x100-page-" + i);
         }
 
-        final String ownerProfile = UrlSchemaConstants.VKONTAKTE + "id" + post.getOwnerId();
+        final String ownerProfile = Sources.VKONTAKTE + "://" + "id" + post.getOwnerId();
         parseMeta.put(PostProperties.SOURCE, Sources.VKONTAKTE);
         parseMeta.put(PostProperties.PROFILE_ID, ownerProfile);
         parseMeta.put(PostProperties.HREF, "http://vk.com/wall" + post.getOwnerId() + "_" + post.getId()); //like http://vk.com/wall1_730207
@@ -240,8 +239,8 @@ public class VkParser implements Parser {
         final ParseResult[] parseResults = new ParseResult[response.getComments().size()];
         int i = 0;
         for (final Comment comment : response.getComments()) {
-            final String postUrl = UrlSchemaConstants.VKONTAKTE + user + "/posts/" + postId;
-            final String commentOwnerProfile = UrlSchemaConstants.VKONTAKTE + "id" + comment.getFromId();
+            final String postUrl = Sources.VKONTAKTE + "://" + user + "/posts/" + postId;
+            final String commentOwnerProfile = Sources.VKONTAKTE + "://id" + comment.getFromId();
             links.put(commentOwnerProfile, "");
 
             String commentUrl = postUrl + "/comments/" + comment.getId();

@@ -18,7 +18,6 @@ import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.parse.Parser;
-import ru.wobot.sm.core.url.UrlSchemaConstants;
 import ru.wobot.sm.serialize.Serializer;
 
 import java.io.IOException;
@@ -70,10 +69,10 @@ public class FbParser implements Parser {
         Map<String, String> links = new HashMap<>();
 
         // generate link <a href='fb://{user}/friends'>user-friends</a>
-        links.put(UrlSchemaConstants.FACEBOOK + userId + "/friends", userId + "-friends");
+        links.put(Sources.FACEBOOK + "://" + userId + "/friends", userId + "-friends");
 
         // generate link <a href='fb://{user}/index-posts/x100/00000000'>user-index-posts-x100-page-0</a>
-        links.put(UrlSchemaConstants.FACEBOOK + userId + "/index-posts/x100/00000000", userId + "-index-posts-x100-page-0");
+        links.put(Sources.FACEBOOK + "://" + userId + "/index-posts/x100/00000000", userId + "-index-posts-x100-page-0");
 
         // fill parse metadata
         final String fullName = profile.get("name").asText();
@@ -103,7 +102,7 @@ public class FbParser implements Parser {
         Map<String, String> links = new HashMap<>(friendIds.length);
         for (String friendId : friendIds) {
             // generate link <a href='fb://{user}'>user</a>
-            links.put(UrlSchemaConstants.FACEBOOK + friendId, friendId);
+            links.put(Sources.FACEBOOK + "://" + friendId, friendId);
         }
 
         return new ParseResult(uri.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
@@ -112,7 +111,7 @@ public class FbParser implements Parser {
 
     protected ParseResult parsePostsIndexPage(URI uri, String content) {
         String userDomain = uri.getHost();
-        String urlPrefix = UrlSchemaConstants.FACEBOOK + userDomain + "/posts/";
+        String urlPrefix = Sources.FACEBOOK + "://" + userDomain + "/posts/";
         Map<String, Object> contentMeta = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MULTIPLE_PARSE_RESULT, true);
         }};
@@ -139,7 +138,7 @@ public class FbParser implements Parser {
             links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page
             if (nextPage != null)
                 // generate link <a href='fb://{user}/index-posts/x100/{until}'>{user}-index-posts-x100-page-{until}</a>
-                links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
+                links.put(Sources.FACEBOOK + "://" + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
                         userDomain + "-index-posts-x100-page-" + nextPage.getUntil());
             for (int i = 0; i < posts.size(); i++) {
                 Post post = posts.get(i);
@@ -150,14 +149,14 @@ public class FbParser implements Parser {
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
                 if (!post.getFrom().getId().equals(userDomain)) {
                     // generate link <a href='fb://{user}'>{user}</a>
-                    links.put(UrlSchemaConstants.FACEBOOK + post.getFrom().getId(), "");
+                    links.put(Sources.FACEBOOK + "://" + post.getFrom().getId(), "");
                 }
 
                 Map<String, Object> postParse = new HashMap<>();
                 Map<String, Object> postContent = new HashMap<>();
 
                 postParse.put(PostProperties.SOURCE, Sources.FACEBOOK);
-                postParse.put(PostProperties.PROFILE_ID, UrlSchemaConstants.FACEBOOK + post.getFrom().getId());
+                postParse.put(PostProperties.PROFILE_ID, Sources.FACEBOOK + "://" + post.getFrom().getId());
                 postParse.put(PostProperties.HREF, "https://www.facebook.com/" + userDomain + "/posts/" +
                         postId.substring(postId.lastIndexOf('_') + 1));
                 postParse.put(PostProperties.SM_POST_ID, postId);
@@ -176,7 +175,7 @@ public class FbParser implements Parser {
 
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
-                postContent.put(ContentMetaConstants.PARENT, UrlSchemaConstants.FACEBOOK + post.getFrom().getId());
+                postContent.put(ContentMetaConstants.PARENT, Sources.FACEBOOK + "://" + post.getFrom().getId());
                 postContent.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
                 parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
             }
@@ -210,7 +209,7 @@ public class FbParser implements Parser {
         Map<String, String> links = new IdentityHashMap<>(comments.size() * 2 + 1); // link for each commentor, replies and maybe next page
         if (after != null)
             // generate link <a href='fb://{user}/posts/{post}/x100/0?after={after}'>{post}-comments-index-x100-page-{after}</a>
-            links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + parentMessageId + "/x100/" + after,
+            links.put(Sources.FACEBOOK + "://" + userDomain + "/posts/" + parentMessageId + "/x100/" + after,
                     parentMessageId + "comments-index-x100-page-" + after);
 
         ParseResult[] parseResults = new ParseResult[comments.size()];
@@ -224,15 +223,15 @@ public class FbParser implements Parser {
             } else
                 postObjectId = id.substring(0, id.indexOf('_'));
 
-            final String postUrl = UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + userDomain + "_" + postObjectId;
-            final String commentOwnerProfile = UrlSchemaConstants.FACEBOOK + comment.get("from").get("id")
+            final String postUrl = Sources.FACEBOOK + "://" + userDomain + "/posts/" + userDomain + "_" + postObjectId;
+            final String commentOwnerProfile = Sources.FACEBOOK + "://" + comment.get("from").get("id")
                     .asText();
             // generate link <a href='fb://{user}'>{user}</a>
             links.put(commentOwnerProfile, "");
 
             //TODO: Think about another link for replies, to not to confuse with posts
             // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>
-            links.put(UrlSchemaConstants.FACEBOOK + userDomain + "/posts/" + id + "/x100/0",
+            links.put(Sources.FACEBOOK + "://" + userDomain + "/posts/" + id + "/x100/0",
                     id + "comments-index-x100-page-0");
             String commentUrl = postUrl + "/comments/" + id;
             Map<String, Object> commentParse = new HashMap<String, Object>() {{
