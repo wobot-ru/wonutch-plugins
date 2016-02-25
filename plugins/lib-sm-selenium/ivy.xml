@@ -38,11 +38,10 @@
   <dependencies>
     <!-- begin selenium dependencies -->
     <dependency org="org.seleniumhq.selenium" name="selenium-java" rev="2.44.0" />
-    
-    <dependency org="com.opera" name="operadriver" rev="1.5">
-      <exclude org="org.seleniumhq.selenium" name="selenium-remote-driver" />
-    </dependency>
+    <dependency org="com.github.detro" name="phantomjsdriver" rev="1.2.0" />
     <!-- end selenium dependencies -->
+    <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.5.3" />
+    <dependency org="ru.wobot" name="sm-core" rev="0.2.0-SNAPSHOT"/>
   </dependencies>
   
 </ivy-module>

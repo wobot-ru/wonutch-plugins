@@ -6,7 +6,7 @@ import org.junit.Test;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.SuccessResponse;
+import ru.wobot.sm.core.fetch.ApiResponse;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.parse.FbParser;
@@ -20,6 +20,7 @@ import java.net.URISyntaxException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -39,8 +40,8 @@ public class TestFbService {
     }
 
     private ParseResult getParseResult(String uri, String apiType, String apiVersion) throws URISyntaxException {
-        SuccessResponse successResponse = translator.translate(ParsedUri.parse(uri));
-        String content = successResponse.getData();
+        ApiResponse response = translator.translate(ParsedUri.parse(uri));
+        String content = response.getData();
         return new FbParser().parse(new URI(uri), content, apiType, apiVersion);
     }
 
@@ -53,9 +54,9 @@ public class TestFbService {
 
     @Test
     public void check_that_request_and_parse_is_success_for_fb_user() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://1704938049732711?scope=user&comment_id=10154479526792506_10154481125912506", FbApiTypes.PROFILE, API_VERSION);
+        ParseResult parse = getParseResult("fb://892133830908265");
 
-        Assert.assertNotNull(parse.getContent());
+        assertThat(parse.getContent(), isEmptyString());
     }
 
     @Test
@@ -96,7 +97,6 @@ public class TestFbService {
         Assert.assertNotNull(parse);
         assertThat(parse.getLinks().size(), is(greaterThan(101)));
     }
-
 
     @Test
     public void check_that_request_get_and_parse_fb_comments_page_for_status_posts() throws IOException, URISyntaxException {

@@ -18,6 +18,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.nutch</groupId>
+            <artifactId>lib-http</artifactId>
+            <version>1.10</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>ru.wobot</groupId>
             <artifactId>lib-sm-selenium</artifactId>
             <version>${project.version}</version>

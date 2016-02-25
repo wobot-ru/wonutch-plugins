@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ru.wobot</groupId>
@@ -58,6 +59,7 @@
         <ssvk.version>1.1.0.RELEASE</ssvk.version>
         <ssfb.version>2.0.3.RELEASE</ssfb.version>
         <selenium.version>2.52.0</selenium.version>
+        <phantomjs.version>1.2.1</phantomjs.version>
     </properties>
 
     <dependencies>
@@ -108,19 +110,10 @@
                     <artifactId>cxf</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>xml-apis</groupId>
-                    <artifactId>xml-apis</artifactId>
-                </exclusion>
-                <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.nutch</groupId>
-            <artifactId>lib-http</artifactId>
-            <version>1.10</version>
         </dependency>
     </dependencies>
 
@@ -185,9 +178,9 @@
                         <configuration>
                             <target>
                                 <copy todir="${env.NUTCH_HOME}/plugins/${project.name}">
-                                    <fileset dir="${project.build.directory}/${project.name}" includes="**" />
+                                    <fileset dir="${project.build.directory}/${project.name}" includes="**"/>
                                 </copy>
-                                <delete dir="${env.NUTCH_HOME}/plugins/${project.parent.artifactId}" />
+                                <delete dir="${env.NUTCH_HOME}/plugins/${project.parent.artifactId}"/>
                             </target>
                         </configuration>
                     </execution>
@@ -203,6 +196,17 @@
                     <preparationGoals>clean test</preparationGoals>
                 </configuration>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <argLine>-Dfile.encoding=UTF-8 -Djava.protocol.handler.pkgs=ru.wobot.sm.protocols</argLine>
+                    <forkedProcessTimeoutInSeconds>30</forkedProcessTimeoutInSeconds>
+                    <parallel>methods</parallel>
+                    <threadCount>5</threadCount>
+                </configuration>
+            </plugin>
+
         </plugins>
         <finalName>${project.artifactId}</finalName>
     </build>

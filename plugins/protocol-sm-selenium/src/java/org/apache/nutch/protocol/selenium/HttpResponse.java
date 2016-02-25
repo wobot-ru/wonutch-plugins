@@ -49,23 +49,24 @@ public class HttpResponse implements Response {
     private byte[] content;
     private int code;
     private Metadata headers = new SpellCheckedMetadata();
+    private HttpWebClient webClient;
 
-    /** The nutch configuration */
+    /**
+     * The nutch configuration
+     */
     private Configuration conf = null;
 
-    public HttpResponse(Http http, URL url, CrawlDatum datum) throws ProtocolException, IOException {
+    public HttpResponse(Http http, URL url, CrawlDatum datum, HttpWebClient webClient) throws ProtocolException, IOException {
 
         this.conf = http.getConf();
         this.http = http;
         this.url = url;
         this.orig = url.toString();
         this.base = url.toString();
+        this.webClient = webClient;
 
-        if (!"http".equals(url.getProtocol()))
-            throw new HttpException("Not an HTTP url:" + url);
-
-        if (Http.LOG.isTraceEnabled()) {
-            Http.LOG.trace("fetching " + url);
+        if (Http.LOG.isInfoEnabled()) {
+            Http.LOG.info("Start fetching: " + url);
         }
 
         String path = "".equals(url.getFile()) ? "/" : url.getFile();
@@ -206,6 +207,9 @@ public class HttpResponse implements Response {
                     }
                 }
             }
+            if (Http.LOG.isInfoEnabled()) {
+                Http.LOG.info("Finish fetching: " + url);
+            }
 
         } finally {
             if (socket != null)
@@ -277,8 +281,7 @@ public class HttpResponse implements Response {
     }
 
     private void readPlainContent(URL url) throws IOException {
-        String page = HttpWebClient.getHtmlPage(url.toString(), conf);
-
+        String page = webClient.getHtmlPage(url.toString());
         content = page.getBytes("UTF-8");
     }
 

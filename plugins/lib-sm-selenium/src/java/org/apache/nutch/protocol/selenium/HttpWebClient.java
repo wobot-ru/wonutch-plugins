@@ -16,109 +16,89 @@
  */
 package org.apache.nutch.protocol.selenium;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.util.StringUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriver;
-import org.openqa.selenium.phantomjs.PhantomJSDriverService;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.wobot.sm.core.auth.CookieRepository;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class HttpWebClient {
-    public static final String PHANTOMJS_EXECUTABLE_FILE = "sm.phantomjs.file";
-    public static final String COOKIES_FILE = "sm.cookies.file";
+    public static final String SELENIUM_HUB_URL = "sm.selenium.hub";
     private static final Logger LOG = LoggerFactory.getLogger(HttpWebClient.class);
-    private static Configuration conf;
-    private static ThreadLocal<WebDriver> threadWebDriver = new ThreadLocal<WebDriver>() {
+
+    private Configuration conf;
+    private CookieRepository cookieRepository;
+
+    private ThreadLocal<WebDriver> threadWebDriver = new ThreadLocal<WebDriver>() {
         @Override
         protected WebDriver initialValue() {
-            String phantomPath = conf.get(PHANTOMJS_EXECUTABLE_FILE);
-            if (phantomPath != null && !phantomPath.isEmpty()) {
-                Capabilities caps = DesiredCapabilities.phantomjs();
-                ((DesiredCapabilities) caps).setCapability(
-                        PhantomJSDriverService.PHANTOMJS_EXECUTABLE_PATH_PROPERTY,
-                        conf.getResource(phantomPath).getFile()
-                );
-                ((DesiredCapabilities) caps).setJavascriptEnabled(true);
-                ((DesiredCapabilities) caps).setCapability("takesScreenshot", true);
-                return new PhantomJSDriver(caps);
+            String hubUrl = conf.get(SELENIUM_HUB_URL, "http://localhost:4444/wd/hub");
+            if (hubUrl != null && !hubUrl.isEmpty()) {
+                DesiredCapabilities caps = DesiredCapabilities.phantomjs();
+                caps.setJavascriptEnabled(true);
+                WebDriver driver;
+                try {
+                    driver = new RemoteWebDriver(new URL(hubUrl), caps);
+                } catch (MalformedURLException e) {
+                    throw new IllegalStateException("Malformed Selenium grid hub URL found in config.", e);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Browser start-up failure.", e);
+                }
+                return driver;
             } else
-                throw new IllegalStateException("No PhantomJS binary path found in config.");
+                throw new IllegalStateException("No Selenium grid hub URL found in config.");
         }
     };
 
-    public static String getHtmlPage(String url, Configuration conf) {
-        HttpWebClient.conf = Objects.requireNonNull(conf);
-        WebDriver driver = threadWebDriver.get();
-        try {
-            driver.get(url);
-            Collection<String> cookies = getCookies();
-            if (cookies == null || cookies.isEmpty())
-                throw new IllegalStateException("No cookies found in cookies file. Can't authorize web driver.");
-            for (String c : cookies) {
-                String[] cs = c.split(";");
-                String name, value, domain;
-                name = value = domain = null;
-                for (int i = 0; i < cs.length; i++) {
-                    String part = cs[i];
-                    if (i == 0) {
-                        name = part.split("=")[0];
-                        value = part.split("=")[1];
-                    } else if (part.split("=")[0].trim().equals("domain")) {
-                        domain = part.split("=")[1];
-                    }
-                }
-                Cookie cookie = new Cookie.Builder(name, value).domain(domain).build();
-                driver.manage().addCookie(cookie);
-            }
-            driver.get(url);
-
-            return driver.findElement(By.tagName("html")).getAttribute("innerHTML");
-        } finally {
-            if (driver != null) try {
-                driver.quit();
-            } catch (Exception e) {
-                LOG.error(StringUtils.stringifyException(e));
-            }
-        }
+    public HttpWebClient(Configuration conf, CookieRepository cookieRepository) {
+        this.conf = conf;
+        this.cookieRepository = cookieRepository;
     }
 
-    private static Collection<String> getCookies() {
-        String cookiesPath = conf.get(COOKIES_FILE);
-        if (cookiesPath == null || cookiesPath.isEmpty())
-            throw new IllegalStateException("No cookies file found in config.");
-        Collection<String> result = new ArrayList<>();
-        try (BufferedReader br = new BufferedReader(conf.getConfResourceAsReader(cookiesPath))) {
-            String line;
-            line = br.readLine();
-            while (line != null && !line.isEmpty()) {
-                result.add(line);
-                line = br.readLine();
-            }
-        } catch (IOException e) {
-            LOG.error(StringUtils.stringifyException(e));
-            return null;
+    public String getHtmlPage(String url) {
+        WebDriver driver = threadWebDriver.get();
+        driver.get(url);
+        if (driver.getCurrentUrl().contains("login")) { //TODO: AFAIK every SM contains 'login' substring in login URL
+            Collection<Cookie> cookies = getCookies();
+            if (cookies.isEmpty())
+                throw new IllegalStateException("No cookies found in cookies file. Can't authorize web driver.");
+
+            for (Cookie cookie : cookies)
+                driver.manage().addCookie(cookie);
         }
+        // TODO: Consider other conditions for other SM
+        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.findElement(By.cssSelector("div._5nb8")); // facebook only
+
+        return driver.findElement(By.tagName("html")).getAttribute("innerHTML");
+    }
+
+    private Collection<Cookie> getCookies() {
+        Collection<Cookie> result = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
+        for (String line : cookieRepository.getCookies()) {
+            JsonNode cookie;
+            try {
+                cookie = mapper.readValue(line, JsonNode.class);
+            } catch (IOException e) {
+                throw new RuntimeException("Couldn't deserialize cookie string [" + line + "] from repository", e);
+            }
+            result.add(new Cookie.Builder(cookie.get("name").asText(), cookie.get("value").asText()).domain(cookie.get("domain").asText()).build());
+        }
+
         return result;
     }
-
-    /*Collection<String> cookies = new ArrayList<>();
-            for (Cookie loadedCookie : driver.manage().getCookies()) {
-                cookies.add(loadedCookie.toString());
-            }
-            try {
-                Files.write(FileSystems.getDefault().getPath("src/testresources/cookies.txt"), cookies, StandardOpenOption.CREATE);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/
 }
