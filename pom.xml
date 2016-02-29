@@ -201,7 +201,7 @@
                 <version>2.19.1</version>
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8 -Djava.protocol.handler.pkgs=ru.wobot.sm.protocols</argLine>
-                    <forkedProcessTimeoutInSeconds>30</forkedProcessTimeoutInSeconds>
+                    <forkedProcessTimeoutInSeconds>45</forkedProcessTimeoutInSeconds>
                     <parallel>methods</parallel>
                     <threadCount>5</threadCount>
                 </configuration>
@@ -231,7 +231,6 @@
         <module>plugins/indexer-multielastic2</module>
         <module>plugins/indexer-sm-elastic-2</module>
         <module>plugins/lib-sm</module>
-        <module>plugins/lib-sm-selenium</module>
         <module>plugins/parse-sm</module>
         <module>plugins/protocol-sm</module>
         <module>plugins/protocol-sm-selenium</module>

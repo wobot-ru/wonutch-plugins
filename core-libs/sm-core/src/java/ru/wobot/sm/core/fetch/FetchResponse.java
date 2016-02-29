@@ -3,9 +3,9 @@ package ru.wobot.sm.core.fetch;
 import java.util.Map;
 
 /**
- * Response returned from fetchers, that fetch social media via API provided
+ * Response returned from fetchers, that fetch social media
  */
-public interface ApiResponse {
+public interface FetchResponse {
     /**
      * Raw data
      * @return String, containing fetched data

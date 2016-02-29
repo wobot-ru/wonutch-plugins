@@ -26,7 +26,7 @@ import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.AccessDenied;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
@@ -80,7 +80,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/friends")
-    public ApiResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
+    public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
                 .setParameter("user_id", userId)
@@ -103,7 +103,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts")
-    public ApiResponse getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
+    public FetchResponse getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -130,7 +130,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
-    public ApiResponse getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
+    public FetchResponse getPostsData(@PathParam("userId") String userId, @PathParam("pageSize") long pageSize, @PathParam("page") int page, @QueryParam("auth") String auth) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
@@ -155,7 +155,7 @@ public class VkFetcher {
     }
 
     @Path("{userId}")
-    public ApiResponse getProfileData(@PathParam("userId") String userId) throws IOException {
+    public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         String responseStr = getVKProfiles(Collections.singletonList(userId));
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
@@ -173,7 +173,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/posts/{postId}")
-    public ApiResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
+    public FetchResponse getPostData(@PathParam("userId") String userId, @PathParam("postId") String postId) throws IOException {
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.getById")
                 .setParameter("posts", userId + "_" + postId)
@@ -191,7 +191,7 @@ public class VkFetcher {
     }
 
     @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
-    public ApiResponse getPostCommentsData(
+    public FetchResponse getPostCommentsData(
             @PathParam("userId") String userId,
             @PathParam("postId") String postId,
             @PathParam("pageSize") int pageSize,

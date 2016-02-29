@@ -16,50 +16,60 @@
  */
 package org.apache.nutch.protocol.selenium;
 
-// JDK imports
-
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
-import org.apache.nutch.net.protocols.Response;
-import org.apache.nutch.protocol.ProtocolException;
+import org.apache.nutch.metadata.Metadata;
+import org.apache.nutch.protocol.Content;
+import org.apache.nutch.protocol.Protocol;
+import org.apache.nutch.protocol.ProtocolOutput;
+import org.apache.nutch.protocol.ProtocolStatus;
 import org.apache.nutch.protocol.RobotRulesParser;
-import org.apache.nutch.protocol.http.api.HttpBase;
-import org.apache.nutch.util.NutchConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.auth.CookieRepository;
+import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.Redirect;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
+import ru.wobot.sm.fetch.HttpWebFetcher;
 
-import java.io.IOException;
-import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
-public class Http extends HttpBase {
-
+public class Http implements Protocol {
     public static final Logger LOG = LoggerFactory.getLogger(Http.class);
-    private HttpWebClient webClient;
+    private HttpWebFetcher webClient;
+    private Configuration conf;
 
-    public Http() {
-        super(LOG);
-    }
-
-    public static void main(String[] args) throws Exception {
-        Http http = new Http();
-        http.setConf(NutchConfiguration.create());
-        main(http, args);
+    @Override
+    public Configuration getConf() {
+        return this.conf;
     }
 
     @Override
     public void setConf(Configuration conf) {
-        super.setConf(conf);
+        this.conf = conf;
         CookieRepository cookieRepository = new CookieRepository(conf);
-        this.webClient = new HttpWebClient(conf, cookieRepository);
+        this.webClient = new HttpWebFetcher(conf, cookieRepository);
     }
 
     @Override
-    protected Response getResponse(URL url, CrawlDatum datum, boolean redirect)
-            throws ProtocolException, IOException {
-        return new HttpResponse(this, url, datum, webClient);
+    public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
+        String urlString = url.toString();
+        FetchResponse fetchResponse = webClient.getHtmlPage(urlString);
+        Metadata metadata = new Metadata();
+        metadata.add("nutch.fetch.time", String.valueOf(fetchResponse.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
+        Content c = new Content(urlString, urlString, fetchResponse.getData().getBytes(StandardCharsets.UTF_8),
+                String.valueOf(fetchResponse.getMetadata().get(ContentMetaConstants.MIME_TYPE)), metadata, this.conf);
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("Finish fetching: " + urlString + " [fetchTime=" + fetchResponse.getMetadata().get(ContentMetaConstants.FETCH_TIME) + "]");
+        }
+
+        if (fetchResponse instanceof Redirect)
+            return new ProtocolOutput(c, new ProtocolStatus(ProtocolStatus.MOVED, fetchResponse.getMessage()));
+        else
+            return new ProtocolOutput(c);
     }
 
     @Override

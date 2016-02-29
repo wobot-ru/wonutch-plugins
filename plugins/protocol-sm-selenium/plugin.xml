@@ -29,8 +29,7 @@
 
    <requires>
       <import plugin="nutch-extensionpoints"/>
-      <import plugin="lib-http"/>
-      <import plugin="lib-sm-selenium"/>
+      <import plugin="lib-sm"/>
    </requires>
 
    <extension id="org.apache.nutch.protocol.selenium"

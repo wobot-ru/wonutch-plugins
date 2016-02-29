@@ -15,7 +15,7 @@ import org.apache.nutch.protocol.RobotRulesParser;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.Proxy;
 import ru.wobot.sm.core.fetch.AccessDenied;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.fetch.FbFetcher;
@@ -39,7 +39,7 @@ public class SMProtocol implements Protocol {
             LOG.info("Start fetching: " + urlString);
         }
         try {
-            ApiResponse response = translator.translate(ParsedUri.parse(urlString));
+            FetchResponse response = translator.translate(ParsedUri.parse(urlString));
             Content content = convertToContent(response, urlString);
             if (response instanceof Redirect) {
                 return new ProtocolOutput(content, new ProtocolStatus(ProtocolStatus.MOVED, response.getMessage()));
@@ -90,7 +90,7 @@ public class SMProtocol implements Protocol {
         return new VkFetcher(repository);
     }
 
-    private Content convertToContent(ApiResponse response, String uri) {
+    private Content convertToContent(FetchResponse response, String uri) {
         if (LOG.isInfoEnabled()) {
             LOG.info("Finish fetching: " + uri + " [fetchTime=" + response.getMetadata().get(ContentMetaConstants.FETCH_TIME) + "]");
         }

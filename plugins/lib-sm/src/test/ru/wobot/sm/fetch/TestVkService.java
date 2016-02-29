@@ -4,7 +4,7 @@ import org.junit.Test;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.domain.SMProfile;
 import ru.wobot.sm.core.fetch.SuccessResponse;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -30,13 +30,13 @@ public class TestVkService {
 
     @Test
     public void is_getUsers_return_user_profile() throws IOException {
-        ApiResponse r = vkFetcher.getProfileData("id1");
+        FetchResponse r = vkFetcher.getProfileData("id1");
         assertThat(r, is(not(nullValue())));
     }
 
     @Test
     public void is_getFriends_return_users_friends() throws IOException {
-        ApiResponse response = vkFetcher.getFriendIds("1");
+        FetchResponse response = vkFetcher.getFriendIds("1");
         assertThat(response, is(not(nullValue())));
     }
 

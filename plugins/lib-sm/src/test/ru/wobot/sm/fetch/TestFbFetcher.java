@@ -11,7 +11,7 @@ import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 
 import java.io.IOException;
@@ -44,31 +44,31 @@ public class TestFbFetcher {
     }
 
     @Test
-    public void shouldGetFullPageDataForId() throws IOException {
+    public void shouldGetFullPageDataForUsername() throws IOException {
         // given when
-        ApiResponse response = fbFetcher.getProfileData("mastercardrussia");
+        FetchResponse response = fbFetcher.getProfileData("mastercardrussia");
 
         // then
         assertThat(response.getData(), containsString("MasterCard"));
     }
 
     @Test
-    public void shouldGetFullPageDataForIdWithScopeAndCommentId() throws IOException {
+    public void shouldGetFullPageDataForId() throws IOException {
         // given when
-        ApiResponse response = fbFetcher.getProfileData("1704938049732711");
+        FetchResponse response = fbFetcher.getProfileData("1704938049732711");
 
         // then
         assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
     }
 
     @Test
-    public void shouldGetFullUserDataForIdWithScopeAndCommentId() throws IOException {
+    public void shouldRedirectForUserId() throws IOException {
         // given when
-        ApiResponse response = fbFetcher.getProfileData("892133830908265");
+        FetchResponse response = fbFetcher.getProfileData("892133830908265");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/892133830908265"));
+        assertThat(response.getMessage().toString(), is("https://graph.facebook.com/v2.5/892133830908265/picture"));
     }
 
     @Test

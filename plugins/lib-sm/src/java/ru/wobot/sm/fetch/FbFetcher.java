@@ -13,7 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
@@ -46,7 +46,7 @@ public class FbFetcher {
             "parent{id}", "object{id}"};
 
     private static final String API_VERSION = "2.5";
-    private static final String FACEBOOK_URI = "https://www.facebook.com";
+    private static final String FACEBOOK_URI = "https://graph.facebook.com/v" + API_VERSION;
     private final CredentialRepository repository;
 
     public FbFetcher(CredentialRepository repository) {
@@ -62,7 +62,7 @@ public class FbFetcher {
     // fb://mastercardrussia
     // fb://96814974590
     @Path("{userId}")
-    public ApiResponse getProfileData(@PathParam("userId") String userId) throws IOException {
+    public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
             put(ContentMetaConstants.API_TYPE, FbApiTypes.PROFILE);
@@ -73,7 +73,7 @@ public class FbFetcher {
         try {
             return new SuccessResponse(getObject(queryParameters, userId).toString(), metaData);
         } catch (UncategorizedApiException e) {
-            return new Redirect(FACEBOOK_URI + "/" + userId, metaData);
+            return new Redirect(FACEBOOK_URI + "/" + userId + "/picture", metaData);
         }
     }
 

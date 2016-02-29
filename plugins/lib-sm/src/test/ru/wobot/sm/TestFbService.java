@@ -6,7 +6,7 @@ import org.junit.Test;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
-import ru.wobot.sm.core.fetch.ApiResponse;
+import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.parse.FbParser;
@@ -27,6 +27,7 @@ import static org.mockito.Mockito.mock;
 public class TestFbService {
     private static final String API_VERSION = "2.5";
     private UriTranslator translator;
+
     public TestFbService() throws ClassNotFoundException {
         translator = new UriTranslator(fetcher());
     }
@@ -40,7 +41,7 @@ public class TestFbService {
     }
 
     private ParseResult getParseResult(String uri, String apiType, String apiVersion) throws URISyntaxException {
-        ApiResponse response = translator.translate(ParsedUri.parse(uri));
+        FetchResponse response = translator.translate(ParsedUri.parse(uri));
         String content = response.getData();
         return new FbParser().parse(new URI(uri), content, apiType, apiVersion);
     }
@@ -54,7 +55,7 @@ public class TestFbService {
 
     @Test
     public void check_that_request_and_parse_is_success_for_fb_user() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://892133830908265");
+        ParseResult parse = getParseResult("fb://892133830908265", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
     }
@@ -85,7 +86,7 @@ public class TestFbService {
 
     @Test
     public void check_that_request_get_and_parse_fb_comments_page() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0",  FbApiTypes.COMMENT_BULK, API_VERSION);
+        ParseResult parse = getParseResult("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0", FbApiTypes.COMMENT_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
     }
