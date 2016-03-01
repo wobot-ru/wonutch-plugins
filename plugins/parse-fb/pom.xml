@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>parse-fb</artifactId>
+    <packaging>jar</packaging>
+
+    <name>parse-fb</name>
+    <description>
+        Apache Nutch plugin for parsing facebook.com
+    </description>
+
+    <parent>
+        <groupId>ru.wobot</groupId>
+        <artifactId>wonutch-plugins</artifactId>
+        <version>0.2.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <repositories />
+
+    <dependencies>
+        <dependency>
+            <groupId>ru.wobot</groupId>
+            <artifactId>lib-sm</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/java</sourceDirectory>
+        <testSourceDirectory>src/test</testSourceDirectory>
+    </build>
+</project>

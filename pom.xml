@@ -232,6 +232,7 @@
         <module>plugins/indexer-sm-elastic-2</module>
         <module>plugins/lib-sm</module>
         <module>plugins/parse-sm</module>
+        <module>plugins/parse-fb</module>
         <module>plugins/protocol-sm</module>
         <module>plugins/protocol-sm-selenium</module>
         <module>distribution</module>

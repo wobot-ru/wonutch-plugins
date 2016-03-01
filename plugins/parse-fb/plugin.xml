@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin
+        id="parse-fb"
+        name="Nutch plugin for parsing scrapped facebook content"
+        version="1.0"
+        provider-name="wobot.ru">
+
+    <runtime>
+        <library name="parse-fb.jar">
+            <export name="*"/>
+        </library>
+    </runtime>
+
+    <requires>
+        <import plugin="nutch-extensionpoints"/>
+        <import plugin="lib-sm"/>
+    </requires>
+
+    <extension id="org.apache.nutch.parse.fb"
+               name="FbParser"
+               point="org.apache.nutch.parse.Parser">
+        <implementation id="org.apache.nutch.parse.fb.FbParser"
+                        class="org.apache.nutch.parse.fb.FbParser">
+            <parameter name="contentType" value="text/html"/>
+            <parameter name="pathSuffix" value=""/>
+        </implementation>
+    </extension>
+</plugin>
