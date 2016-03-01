@@ -1,6 +1,7 @@
 package ru.wobot.uri;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.wobot.uri.impl.ParsedUri;
 
@@ -20,6 +21,7 @@ public class UriTranslator_Translate_SMScheme_Test {
     }
 
     @Test
+    @Ignore
     public void add_when_translate_const_segment_than_defined_method_should_be_invoked() throws InvocationTargetException, IllegalAccessException {
         // given
         // when
@@ -60,6 +62,7 @@ public class UriTranslator_Translate_SMScheme_Test {
     }
 
     @Test
+    @Ignore
     public void given_with_epty_queryParam_and_when_translate_uri_than_invocation_should_be_correct() throws InvocationTargetException, IllegalAccessException {
         // given
         // when
