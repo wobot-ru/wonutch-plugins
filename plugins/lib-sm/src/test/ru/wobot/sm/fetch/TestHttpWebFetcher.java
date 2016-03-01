@@ -1,7 +1,10 @@
 package ru.wobot.sm.fetch;
 
 import org.apache.hadoop.conf.Configuration;
-import org.junit.Ignore;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.junit.Test;
 import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -18,10 +21,16 @@ public class TestHttpWebFetcher {
     private static CookieRepository cookieRepository = new CookieRepository(conf);
     private static HttpWebFetcher webFetcher = new HttpWebFetcher(conf, cookieRepository);
 
+    static {
+        Logger rootLogger = Logger.getRootLogger();
+        rootLogger.setLevel(Level.INFO);
+        rootLogger.addAppender(new ConsoleAppender(
+                new PatternLayout("%d{ISO8601} %-5p %c{2} - %m%n")));
+    }
+
     private FetchResponse response(String url) {
         return webFetcher.getHtmlPage(url);
     }
-
     @Test
     public void shouldRedirectFromUrlIfNoUserPhoto() {
         // given

@@ -201,7 +201,7 @@
                 <version>2.19.1</version>
                 <configuration>
                     <argLine>-Dfile.encoding=UTF-8 -Djava.protocol.handler.pkgs=ru.wobot.sm.protocols</argLine>
-                    <forkedProcessTimeoutInSeconds>45</forkedProcessTimeoutInSeconds>
+                    <forkedProcessTimeoutInSeconds>120</forkedProcessTimeoutInSeconds>
                     <parallel>methods</parallel>
                     <threadCount>5</threadCount>
                 </configuration>

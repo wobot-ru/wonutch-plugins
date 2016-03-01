@@ -46,7 +46,7 @@ public class HttpWebFetcher {
             if (hubUrl != null && !hubUrl.isEmpty()) {
                 DesiredCapabilities caps = DesiredCapabilities.phantomjs();
                 caps.setJavascriptEnabled(true);
-                caps.setCapability("phantomjs.page.customHeaders." + "Accept-Language", "en-EN");
+                caps.setCapability("phantomjs.page.customHeaders." + "Accept-Language", "en-US");
                 WebDriver driver;
                 try {
                     driver = new RemoteWebDriver(new URL(hubUrl), caps);
