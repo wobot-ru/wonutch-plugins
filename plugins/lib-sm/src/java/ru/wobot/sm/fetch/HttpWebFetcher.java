@@ -103,7 +103,8 @@ public class HttpWebFetcher {
         }
         // TODO: Consider other conditions for other SM
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        driver.findElement(By.cssSelector("div._e4b")); // wait for this facebook only element
+        //driver.findElement(By.cssSelector("div._e4b")); // wait for this facebook only element
+        driver.findElement(By.cssSelector("div._5vf._2pie._2pip.sectionHeader"));
         return new SuccessResponse(driver.findElement(By.tagName("html")).getAttribute("innerHTML"), metaData);
     }
 

@@ -56,4 +56,16 @@ public class TestHttpWebFetcher {
         // then
         assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Friends", "Lives in", "From")));
     }
+
+    @Test
+    public void shouldGetFullPageDataForEmptyProfile() {
+        // given
+        String url = "https://www.facebook.com/profile.php?id=100010198925638";
+
+        // when
+
+        // then
+        assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Timeline", "About", "Friends")));
+    }
+
 }
