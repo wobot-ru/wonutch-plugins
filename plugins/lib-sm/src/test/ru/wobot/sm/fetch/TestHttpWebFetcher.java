@@ -1,6 +1,7 @@
 package ru.wobot.sm.fetch;
 
 import org.apache.hadoop.conf.Configuration;
+import org.junit.Ignore;
 import org.junit.Test;
 import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -55,18 +56,4 @@ public class TestHttpWebFetcher {
         // then
         assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Friends", "Lives in", "From")));
     }
-
-    @Test
-    public void shouldGetFullPageDataForIdWithHiddenPhoto() {
-        // given
-        String url = "https://graph.facebook.com/v2.5/990538281016665/picture";
-
-        // when
-        FetchResponse response = response(url);
-
-        // then
-        assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/990538281016665"));
-    }
-
 }
