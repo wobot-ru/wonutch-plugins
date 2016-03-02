@@ -10,7 +10,7 @@ import org.apache.nutch.parse.ParseImpl;
 import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.parse.FbParser;
 import ru.wobot.sm.parse.VkParser;

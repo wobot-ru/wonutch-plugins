@@ -17,10 +17,6 @@ import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.Is.is;
 
 public class TestHttpWebFetcher {
-    private static Configuration conf = new Configuration();
-    private static CookieRepository cookieRepository = new CookieRepository(conf);
-    private static HttpWebFetcher webFetcher = new HttpWebFetcher(conf, cookieRepository);
-
     static {
         Logger rootLogger = Logger.getRootLogger();
         rootLogger.setLevel(Level.INFO);
@@ -28,9 +24,14 @@ public class TestHttpWebFetcher {
                 new PatternLayout("%d{ISO8601} %-5p %c{2} - %m%n")));
     }
 
+    private static Configuration conf = new Configuration();
+    private static CookieRepository cookieRepository = new CookieRepository(conf);
+    private static HttpWebFetcher webFetcher = new HttpWebFetcher(conf, cookieRepository);
+
     private FetchResponse response(String url) {
         return webFetcher.getHtmlPage(url);
     }
+
     @Test
     public void shouldRedirectFromUrlIfNoUserPhoto() {
         // given
@@ -41,7 +42,7 @@ public class TestHttpWebFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/548469171978134"));
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/app_scoped_user_id/548469171978134"));
     }
 
     @Test
@@ -76,5 +77,4 @@ public class TestHttpWebFetcher {
         // then
         assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Timeline", "About", "Friends")));
     }
-
 }

@@ -8,13 +8,12 @@ import org.springframework.social.vkontakte.api.Counters;
 import org.springframework.social.vkontakte.api.Post;
 import org.springframework.social.vkontakte.api.VKontakteProfile;
 import org.springframework.social.vkontakte.api.impl.json.VKArray;
-import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.api.VkApiTypes;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.parse.Parser;
 import ru.wobot.sm.serialize.Serializer;
@@ -27,6 +26,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public class VkParser implements Parser {
+    private static final String DIGEST = "digest";
     @Override
     public ParseResult parse(URI uri, String content, String apiType, String apiVersion) {
         switch (apiType) {
@@ -177,7 +177,7 @@ public class VkParser implements Parser {
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
                 postContent.put(ContentMetaConstants.PARENT, ownerProfile);
-                postContent.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
+                postContent.put(DIGEST, DigestUtils.md5Hex(post.toString()));
                 parseResults[i++] = new ParseResult(urlPrefix + post.getId(), new HashMap<String, String>(), postParse, postContent);
             }
         }
@@ -216,7 +216,7 @@ public class VkParser implements Parser {
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.POST);
         contentMeta.put(ContentMetaConstants.PARENT, ownerProfile);
-        contentMeta.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
+        contentMeta.put(DIGEST, DigestUtils.md5Hex(post.toString()));
         return new ParseResult(urlString, links, parseMeta, contentMeta);
     }
 
@@ -255,7 +255,7 @@ public class VkParser implements Parser {
                 //todo: is only one number?
                 put(PostProperties.ENGAGEMENT, comment.getLikes().getCount());
                 put(PostProperties.IS_COMMENT, true);
-                put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(comment.toString()));
+                put(DIGEST, DigestUtils.md5Hex(comment.toString()));
             }};
 
             Map<String, Object> commentContentMeta = new HashMap<String, Object>() {{

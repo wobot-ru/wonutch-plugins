@@ -9,13 +9,12 @@ import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
-import ru.wobot.sm.core.Sources;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.core.parse.Parser;
 import ru.wobot.sm.serialize.Serializer;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 public class FbParser implements Parser {
+    private static final String DIGEST = "digest";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public FbParser() {
@@ -176,7 +176,7 @@ public class FbParser implements Parser {
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
                 postContent.put(ContentMetaConstants.PARENT, Sources.FACEBOOK + "://" + post.getFrom().getId());
-                postContent.put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(post.toString()));
+                postContent.put(DIGEST, DigestUtils.md5Hex(post.toString()));
                 parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
             }
         }
@@ -246,7 +246,7 @@ public class FbParser implements Parser {
                 //todo: is only one number?
                 put(PostProperties.ENGAGEMENT, comment.get("like_count").asText());
                 put(PostProperties.IS_COMMENT, true);
-                put(NutchDocumentMetaConstants.DIGEST, DigestUtils.md5Hex(comment.toString()));
+                put(DIGEST, DigestUtils.md5Hex(comment.toString()));
             }};
 
             Map<String, Object> commentContentMeta = new HashMap<String, Object>() {{

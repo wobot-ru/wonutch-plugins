@@ -22,7 +22,6 @@ import org.elasticsearch.node.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
-import ru.wobot.sm.core.meta.NutchDocumentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 
 import java.io.BufferedReader;
@@ -158,8 +157,8 @@ public class SMIndexWriter implements IndexWriter {
         } else {
             // for indexing documents more than one
             String content = (String) doc.getFieldValue("content");
-            String segment = (String) doc.getFieldValue(NutchDocumentMetaConstants.SEGMENT);
-            String boost = (String) doc.getFieldValue(NutchDocumentMetaConstants.BOOST);
+            String segment = (String) doc.getFieldValue("segment");
+            String boost = (String) doc.getFieldValue("boost");
             Float score = (Float) doc.getFieldValue("score");
             ParseResult[] parseResults = fromJson(content, ParseResult[].class);
             if (parseResults != null) {
