@@ -95,7 +95,16 @@ public class HttpWebFetcher {
             }
         }
 
-        if (currentUrl.contains("login") || driver.getTitle().toLowerCase().contains("facebook")) { //TODO: AFAIK every SM contains 'login' substring in login URL
+        boolean needToLogIn = false;
+        driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
+        try {
+            driver.findElement(By.linkText("Log In"));
+            needToLogIn = true;
+        } catch (NoSuchElementException alreadyLoggedIn) {
+            // Already logged in to FB
+        }
+
+        if (needToLogIn || currentUrl.contains("login") || driver.getTitle().toLowerCase().contains("facebook")) { //TODO: AFAIK every SM contains 'login' substring in login URL
             Collection<Cookie> cookies = getCookies();
             if (cookies.isEmpty())
                 throw new IllegalStateException("No cookies found in cookies file. Can't authorize web driver.");
