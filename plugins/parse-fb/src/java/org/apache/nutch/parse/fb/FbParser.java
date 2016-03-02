@@ -10,7 +10,6 @@ import org.apache.nutch.parse.ParseImpl;
 import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.protocol.Content;
-import ru.wobot.sm.core.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.net.MalformedURLException;
@@ -46,7 +45,7 @@ public final class FbParser implements org.apache.nutch.parse.Parser {
             final Metadata metadata = content.getMetadata();
             final String apiType = metadata.get(ContentMetaConstants.API_TYPE);
             final String apiVersion = metadata.get(ContentMetaConstants.API_VER);
-            final String data = new String(content.getContent(),StandardCharsets.UTF_8);
+            final String data = new String(content.getContent(), StandardCharsets.UTF_8);
             ru.wobot.sm.core.parse.ParseResult parseResult =
                     new ru.wobot.sm.core.parse.ParseResult(urlString, "", data, new HashMap<String, String>(), new HashMap<String, Object>(), new HashMap<String, Object>());
             return convert(parseResult, metadata, new Metadata());
