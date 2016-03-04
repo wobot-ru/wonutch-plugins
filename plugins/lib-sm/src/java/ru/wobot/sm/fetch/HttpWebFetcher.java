@@ -5,38 +5,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class HttpWebFetcher {
     public static final String SELENIUM_HUB_URL = "sm.selenium.hub";
-    private static final String FACEBOOK_URI = "https://www.facebook.com";
     private static final Log LOG = LogFactory.getLog(HttpWebFetcher.class.getName());
 
     private Configuration conf;
@@ -72,28 +62,6 @@ public class HttpWebFetcher {
     public FetchResponse getHtmlPage(String url) {
         WebDriver driver = threadWebDriver.get();
         driver.get(url);
-        String currentUrl = driver.getCurrentUrl();
-
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.MIME_TYPE, "text/html");
-        }};
-
-        if (currentUrl.contains("scontent.xx.fbcdn.net")) { // Profile picture. Trying to find user profile URL
-            try {
-                driver.get(retrieveFbProfileUrl(currentUrl));
-            } catch (TimeoutException e) {
-                return redirectToAppScopedUrl(url, metaData);
-            }
-            currentUrl = driver.getCurrentUrl();
-            try {
-                if (currentUrl.contains("will.chengberg") ||  // I don't know who is this, but his profile has default pictures
-                        currentUrl.contains("499829591") /*||
-                        driver.findElement(By.cssSelector("h2._4-dp")).getText().contains("this page isn't available")*/)
-                    return redirectToAppScopedUrl(url, metaData);
-            } catch (NoSuchElementException e) {
-                // profile URL is correct
-            }
-        }
 
         boolean needToLogIn = false;
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
@@ -104,6 +72,9 @@ public class HttpWebFetcher {
             // Already logged in to FB
         }
 
+        String currentUrl = driver.getCurrentUrl();
+        LOG.info("Thread: " + Thread.currentThread().getId() + "; needToLogin: " + needToLogIn + "; Current URL: " + currentUrl
+                + "; Title: " + driver.getTitle());
         if (needToLogIn || currentUrl.contains("login") || driver.getTitle().toLowerCase().contains("facebook")) { //TODO: AFAIK every SM contains 'login' substring in login URL
             Collection<Cookie> cookies = getCookies();
             if (cookies.isEmpty())
@@ -121,34 +92,13 @@ public class HttpWebFetcher {
         try {
             driver.findElement(By.cssSelector("div._5vf._2pie._2pip.sectionHeader")); // wait for this facebook only element
         } catch (NoSuchElementException e) {
-            LOG.error("No desired element for URL: " + currentUrl + "; Original URL: " + url);
+            LOG.error("Thread: " + Thread.currentThread().getId() + "; No desired element for URL: " + currentUrl + "; Original URL: " + url);
         }
+
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.MIME_TYPE, "text/html");
+        }};
         return new SuccessResponse(driver.findElement(By.tagName("html")).getAttribute("innerHTML"), metaData);
-    }
-
-    private FetchResponse redirectToAppScopedUrl(String originalUrl, Map<String, Object> metaData) {
-        String url = FACEBOOK_URI + "/app_scoped_user_id/" + originalUrl.split("/")[4];
-        LOG.info("Thread: " + Thread.currentThread().getId() + "; Redirected to app scoped URL: " + url);
-        return new Redirect(url, metaData);
-    }
-
-    private String retrieveFbProfileUrl(String url) {
-        WebDriver driver = threadWebDriver.get();
-        URI uri = URI.create(url);
-        String part = uri.getPath();
-        String[] parts = part.substring(part.lastIndexOf("/") + 1).split("_");
-        if (parts.length < 2)
-            throw new IllegalStateException("Unsupported URL [" + url + "].");
-
-        driver.get(FACEBOOK_URI + "/" + parts[0] + "_" + parts[1]);
-        (new WebDriverWait(driver, 5)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return d.getCurrentUrl().contains("photo");
-            }
-        });
-        List<NameValuePair> params = URLEncodedUtils.parse(driver.getCurrentUrl(), StandardCharsets.UTF_8);
-        String paramValue = params.get(1).getValue();
-        return FACEBOOK_URI + "/profile.php?id=" + paramValue.substring(paramValue.lastIndexOf(".") + 1);
     }
 
     private Collection<Cookie> getCookies() {
@@ -163,7 +113,6 @@ public class HttpWebFetcher {
             }
             result.add(new Cookie.Builder(cookie.get("name").asText(), cookie.get("value").asText()).domain(cookie.get("domain").asText()).build());
         }
-
         return result;
     }
 }

@@ -3,12 +3,14 @@ package ru.wobot.sm.fetch;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hadoop.conf.Configuration;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
+import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -31,10 +33,10 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 public class TestFbFetcher {
-
     private ObjectMapper objectMapper = new ObjectMapper();
     private CredentialRepository repository = mock(CredentialRepository.class);
-    private FbFetcher fbFetcher = new FbFetcher(repository);
+    private CookieRepository cookieRepository = new CookieRepository(new Configuration());
+    private FbFetcher fbFetcher = new FbFetcher(repository, cookieRepository);
 
     {
         Credential credential = mock(Credential.class);
@@ -68,7 +70,47 @@ public class TestFbFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://graph.facebook.com/v2.5/892133830908265/picture"));
+        assertThat(response.getMessage().toString(), is("fb://profile/892133830908265"));
+    }
+
+    @Test
+    public void shouldRedirectToRealUrlForUserWithPhoto() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getUserProfileData("892133830908265");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100003349701954"));
+    }
+
+    @Test
+    public void shouldRedirectToAppScopedUrlForUserWithNoPhoto() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getUserProfileData("1153183591398867");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("fb://profile/auth/1153183591398867"));
+    }
+
+    @Test
+    public void shouldRedirectToAppScopedUrlForUserWithDefaultPhoto() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getUserProfileData("548469171978134");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("fb://profile/auth/548469171978134"));
+    }
+
+    @Test
+    public void shouldRedirectToRealUrlForAppScopedUrl() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getUserProfileDataAuth("548469171978134");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100004451677809"));
     }
 
     @Test

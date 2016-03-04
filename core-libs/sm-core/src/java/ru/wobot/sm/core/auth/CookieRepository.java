@@ -38,16 +38,28 @@ public class CookieRepository {
     }
 
     public Collection<String> getCookies() {
-        Collection<JsonNode> next;
         Collection<String> result = new ArrayList<>();
-        synchronized (iterator) {
-            next = iterator.next();
-            // for debug only
-            LOG.info("Thread: " + Thread.currentThread().getId() + "; Cookie used: " + ((List<JsonNode>)next).get(2).get("value").asText());
-        }
-        for (JsonNode n : next)
+        for (JsonNode n : getNext())
             result.add(String.valueOf(n));
 
         return result;
+    }
+
+    public Collection<String> getCookiesAsNameValuePairs() {
+        Collection<String> result = new ArrayList<>();
+        for (JsonNode n : getNext()) {
+            result.add(n.get("name").asText() + "=" + n.get("value").asText());
+        }
+        return result;
+    }
+
+    private Collection<JsonNode> getNext() {
+        Collection<JsonNode> next;
+        synchronized (iterator) {
+            next = iterator.next();
+            // for debug only
+            LOG.info("Thread: " + Thread.currentThread().getId() + "; Cookie used: " + ((List<JsonNode>) next).get(2).get("value").asText());
+        }
+        return next;
     }
 }

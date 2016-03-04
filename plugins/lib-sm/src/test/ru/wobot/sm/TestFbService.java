@@ -1,9 +1,11 @@
 package ru.wobot.sm;
 
+import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import ru.wobot.sm.core.api.FbApiTypes;
+import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
@@ -24,6 +26,9 @@ import static org.hamcrest.Matchers.isEmptyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+/**
+ * Integration tests for API fetching and parsing
+ */
 public class TestFbService {
     private static final String API_VERSION = "2.5";
     private UriTranslator translator;
@@ -37,7 +42,8 @@ public class TestFbService {
         Credential credential = mock(Credential.class);
         given(credential.getAccessToken()).willReturn("1673845006238395|FkqeRkmP1kT_Ae42i8IkZx8KxBM");
         given(repository.getInstance()).willReturn(credential);
-        return new FbFetcher(repository);
+        CookieRepository cookieRepository = new CookieRepository(new Configuration());
+        return new FbFetcher(repository, cookieRepository);
     }
 
     private ParseResult getParseResult(String uri, String apiType, String apiVersion) throws URISyntaxException {
@@ -56,6 +62,20 @@ public class TestFbService {
     @Test
     public void check_that_request_and_parse_is_success_for_fb_user() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://892133830908265", FbApiTypes.PROFILE, API_VERSION);
+
+        assertThat(parse.getContent(), isEmptyString());
+    }
+
+    @Test
+    public void check_that_request_and_parse_is_success_for_fb_user_profile() throws IOException, URISyntaxException {
+        ParseResult parse = getParseResult("fb://profile/892133830908265", FbApiTypes.PROFILE, API_VERSION);
+
+        assertThat(parse.getContent(), isEmptyString());
+    }
+
+    @Test
+    public void check_that_request_and_parse_is_success_for_fb_user_profile_auth() throws IOException, URISyntaxException {
+        ParseResult parse = getParseResult("fb://profile/auth/1153183591398867", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
     }

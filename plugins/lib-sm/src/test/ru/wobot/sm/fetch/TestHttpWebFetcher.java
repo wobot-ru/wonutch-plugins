@@ -12,9 +12,7 @@ import ru.wobot.sm.core.fetch.FetchResponse;
 import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.hamcrest.core.Is.is;
 
 public class TestHttpWebFetcher {
     static {
@@ -33,22 +31,9 @@ public class TestHttpWebFetcher {
     }
 
     @Test
-    public void shouldRedirectFromUrlIfNoUserPhoto() {
-        // given
-        String url = "https://graph.facebook.com/v2.5/548469171978134/picture";
-
-        // when
-        FetchResponse response = response(url);
-
-        // then
-        assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/app_scoped_user_id/548469171978134"));
-    }
-
-    @Test
     public void shouldGetFullPageDataForIdWithNoUsernameAndNoPhoto() {
         // given
-        String url = "https://www.facebook.com/548469171978134";
+        String url = "https://www.facebook.com/profile.php?id=100004451677809";
 
         // when
 
@@ -59,7 +44,7 @@ public class TestHttpWebFetcher {
     @Test
     public void shouldGetFullPageDataForIdWithScreenNameAndPhoto() {
         // given
-        String url = "https://graph.facebook.com/v2.5/1015732591831073/picture";
+        String url = "https://www.facebook.com/profile.php?id=100001830254956";
 
         // when
 

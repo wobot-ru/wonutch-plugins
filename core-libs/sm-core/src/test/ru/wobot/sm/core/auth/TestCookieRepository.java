@@ -74,4 +74,15 @@ public class TestCookieRepository {
         // then
         assertThat(cookies.get(2), containsString("6uDOVuoYfrMqczTtQGCgnjoE")); // 'datr' cookie value
     }
+
+    @Test
+    public void shouldReturnFirstCookieSetAsNameValuePairs() {
+        // given
+
+        //when
+        List<String> cookies = (List<String>) cookieRepository.getCookiesAsNameValuePairs(); // first again
+
+        // then
+        assertThat(cookies.get(2), is("datr=6uDOVuoYfrMqczTtQGCgnjoE")); // 'datr' cookie
+    }
 }

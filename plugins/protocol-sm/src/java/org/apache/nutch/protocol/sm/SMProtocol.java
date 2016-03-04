@@ -12,6 +12,7 @@ import org.apache.nutch.protocol.Protocol;
 import org.apache.nutch.protocol.ProtocolOutput;
 import org.apache.nutch.protocol.ProtocolStatus;
 import org.apache.nutch.protocol.RobotRulesParser;
+import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.Proxy;
 import ru.wobot.sm.core.fetch.AccessDenied;
@@ -81,7 +82,8 @@ public class SMProtocol implements Protocol {
     protected FbFetcher createFbFetcher() {
         CredentialRepository repository = new Proxy("fb");
         repository.setConf(getConf());
-        return new FbFetcher(repository);
+        CookieRepository cookieRepository = new CookieRepository(getConf());
+        return new FbFetcher(repository, cookieRepository);
     }
 
     protected VkFetcher createVkFetcher() {

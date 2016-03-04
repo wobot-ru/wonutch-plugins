@@ -1,6 +1,15 @@
 package ru.wobot.sm.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.Page;
@@ -11,17 +20,22 @@ import org.springframework.social.support.URIBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 import ru.wobot.sm.core.api.FbApiTypes;
+import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.SuccessResponse;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.uri.Path;
 import ru.wobot.uri.PathParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,11 +60,15 @@ public class FbFetcher {
             "parent{id}", "object{id}"};
 
     private static final String API_VERSION = "2.5";
-    private static final String FACEBOOK_URI = "https://graph.facebook.com/v" + API_VERSION;
-    private final CredentialRepository repository;
+    private static final String FACEBOOK_API_URI = "https://graph.facebook.com/v" + API_VERSION;
+    private static final String FACEBOOK_URI = "https://www.facebook.com";
 
-    public FbFetcher(CredentialRepository repository) {
+    private final CredentialRepository repository;
+    private final CookieRepository cookieRepository;
+
+    public FbFetcher(CredentialRepository repository, CookieRepository cookieRepository) {
         this.repository = repository;
+        this.cookieRepository = cookieRepository;
     }
 
     private JsonNode getObject(MultiValueMap<String, String> queryParameters, String path) {
@@ -73,8 +91,65 @@ public class FbFetcher {
         try {
             return new SuccessResponse(getObject(queryParameters, userId).toString(), metaData);
         } catch (UncategorizedApiException e) {
-            return new Redirect(FACEBOOK_URI + "/" + userId + "/picture", metaData);
+            return new Redirect(Sources.FACEBOOK + "://profile/" + userId, metaData);
         }
+    }
+
+    // fb://profile/1001830254956
+    @Path("profile/{userId}")
+    public FetchResponse getUserProfileData(@PathParam("userId") String userId) throws IOException {
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.PROFILE);
+        }};
+
+        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
+        emptyList.add(new MappingJackson2HttpMessageConverter());
+        RestOperations restOperations = new RestTemplate(emptyList);
+
+        URI pictureLocation = restOperations.headForHeaders(FACEBOOK_API_URI + "/" + userId + "/picture").getLocation();
+        String part = pictureLocation.getPath();
+        String[] parts = part.substring(part.lastIndexOf("/") + 1).split("_");
+        if (parts.length >= 2) {
+            try {
+                pictureLocation = restOperations.headForHeaders(FACEBOOK_URI + "/" + parts[0] + "_" + parts[1]).getLocation();
+                if (pictureLocation.getPath().contains("photo")) {
+                    List<NameValuePair> params = URLEncodedUtils.parse(pictureLocation, "UTF-8");
+                    if (params.get(1).getName().equals("set")) {
+                        String[] paramValues = params.get(1).getValue().split("\\.");
+                        String factUserId = paramValues[paramValues.length - 1];
+                        if (!factUserId.equals("499829591"))  // I don't know who is this (his name is Will Chengberg), but his profile has default pictures
+                            return new Redirect(FACEBOOK_URI + "/profile.php?id=" + factUserId, metaData);
+                    }
+                }
+            } catch (Exception e) {
+                // Any way, return redirect to app scoped URL
+            }
+        }
+        return new Redirect(Sources.FACEBOOK + "://profile/auth/" + userId, metaData);
+    }
+
+    // fb://profile/auth/1153183591398867
+    @Path("profile/auth/{userId}")
+    public FetchResponse getUserProfileDataAuth(@PathParam("userId") String userId) throws IOException {
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_VERSION);
+            put(ContentMetaConstants.API_TYPE, FbApiTypes.PROFILE);
+        }};
+
+        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
+        emptyList.add(new StringHttpMessageConverter());
+        RestOperations restOperations = new RestTemplate(emptyList);
+
+        String cookies = StringUtils.collectionToDelimitedString(cookieRepository.getCookiesAsNameValuePairs(), "; ");
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Cookie", cookies);
+
+        HttpEntity<String> request = new HttpEntity<>(null, headers);
+        ResponseEntity<String> response = restOperations.exchange(FACEBOOK_URI + "/app_scoped_user_id/" + userId,
+                HttpMethod.HEAD, request, String.class);
+
+        return new Redirect(response.getHeaders().getLocation().toString(), metaData);
     }
 
     // fb://1704938049732711/friends
