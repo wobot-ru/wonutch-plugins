@@ -14,6 +14,6 @@ public class TestSMProtocol {
     @Test
     @Ignore
     public void shouldReturnProfileSMContent() throws IOException {
-       //TODO Think about how to test protocol
+        //TODO Think about how to test protocol
     }
 }

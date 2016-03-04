@@ -16,6 +16,9 @@ public abstract class AbstractResponse implements FetchResponse {
 
         if (!this.metadata.containsKey(ContentMetaConstants.FETCH_TIME))
             this.metadata.put(ContentMetaConstants.FETCH_TIME, System.currentTimeMillis());
+
+        if (!this.metadata.containsKey(ContentMetaConstants.FETCH_VER))
+            this.metadata.put(ContentMetaConstants.FETCH_VER, this.getClass().getPackage().getImplementationVersion());
     }
 
     @Override

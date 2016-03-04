@@ -4,6 +4,7 @@ public interface ContentMetaConstants {
     String TYPE = "nutch.content.type";
     String API_TYPE = "nutch.content.api.type";
     String API_VER = "nutch.content.api.v";
+    String FETCH_VER = "nutch.content.fetch.v";
     String SKIP_FROM_INDEX = "nutch.content.index.skip";
     String PARENT = "nutch.content.parent";
     String MULTIPLE_PARSE_RESULT = "nutch.parse.result.is_multiple";
