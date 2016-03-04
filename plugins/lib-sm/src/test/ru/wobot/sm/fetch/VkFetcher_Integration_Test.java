@@ -18,7 +18,7 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-public class TestVkService {
+public class VkFetcher_Integration_Test {
     private CredentialRepository mockRepository = mock(CredentialRepository.class);
     private VkFetcher vkFetcher = new VkFetcher(mockRepository);
 
