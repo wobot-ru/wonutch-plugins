@@ -84,7 +84,7 @@ public class VkFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
             put(ContentMetaConstants.API_TYPE, VkApiTypes.FRIEND_LIST_OF_ID);
-            put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
+            put(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX, 1);
         }};
 
         URIBuilder uriBuilder = new URIBuilder()
@@ -116,7 +116,7 @@ public class VkFetcher {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
             put(ContentMetaConstants.API_TYPE, VkApiTypes.POST_COUNT);
-            put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
+            put(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX, 1);
         }};
 
         URIBuilder uriBuilder = new URIBuilder()
