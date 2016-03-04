@@ -81,52 +81,69 @@ public class VkFetcher {
 
     @Path("id{userId}/friends")
     public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
-        URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/friends.get")
-                .setParameter("user_id", userId)
-                .setParameter("fields", "domain")
-                .setParameter("v", API_v5_40);
-
-        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
-        VKArray<VKontakteProfile> friends = deserializeVK50ItemsResponse(vkResponse, VKontakteProfile.class);
-        List<String> ids = new ArrayList<>(friends.getItems().size());
-        for (VKontakteProfile p : friends.getItems()) {
-            ids.add("id" + p.getId());
-        }
-        Collections.sort(ids);
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_v5_40);
             put(ContentMetaConstants.API_TYPE, VkApiTypes.FRIEND_LIST_OF_ID);
             put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
         }};
-        return new SuccessResponse(toJson(ids), metaData);
+
+        URIBuilder uriBuilder = new URIBuilder()
+                .setScheme("http")
+                .setHost("api.vk.com")
+                .setPath("/method/friends.get")
+                .setParameter("user_id", userId)
+                .setParameter("fields", "domain")
+                .setParameter("v", API_v5_40);
+
+        try {
+            VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+            VKArray<VKontakteProfile> friends = deserializeVK50ItemsResponse(vkResponse, VKontakteProfile.class);
+            List<String> ids = new ArrayList<>(friends.getItems().size());
+            for (VKontakteProfile p : friends.getItems()) {
+                ids.add("id" + p.getId());
+            }
+            Collections.sort(ids);
+            return new SuccessResponse(toJson(ids), metaData);
+        } catch (VKontakteErrorException e) {
+            if (e.getError().getCode().equals("15"))
+                return new AccessDenied(e.getMessage(), metaData);
+            else throw e;
+        }
     }
 
     @Path("id{userId}/index-posts")
     public FetchResponse getPostCount(@PathParam("userId") String userId, @QueryParam("auth") String auth) throws IOException {
-        URIBuilder uriBuilder = new URIBuilder();
-        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/wall.get")
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.POST_COUNT);
+            put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
+        }};
+
+        URIBuilder uriBuilder = new URIBuilder()
+                .setScheme("http")
+                .setHost("api.vk.com")
+                .setPath("/method/wall.get")
                 .setParameter("owner_id", userId)
                 .setParameter("v", API_v5_40);
 
         if (auth != null) {
             preProcessURI(uriBuilder);
         }
-        VKGenericResponse vkResponse = null;
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.POST_COUNT);
-            put(ContentMetaConstants.SKIP_FROM_INDEX, 1);
-        }};
-        try {
-            vkResponse = getGenericResponse(uriBuilder.toString());
-        } catch (VKontakteErrorException e) {
-            if (e.getError().getCode().equals("15"))
-                return new Redirect("vk://id" + userId + "/index-posts?auth", metaData);
-        }
 
-        VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
-        return new SuccessResponse(toJson(posts.getCount()), metaData);
+        try {
+            VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+            VKArray<Post> posts = deserializeVK50ItemsResponse(vkResponse, Post.class);
+            return new SuccessResponse(toJson(posts.getCount()), metaData);
+        } catch (VKontakteErrorException e) {
+            switch (e.getError().getCode()) {
+                case "15":
+                    return new Redirect("vk://id" + userId + "/index-posts?auth", metaData);
+                case "18":
+                    return new AccessDenied(e.getMessage(), metaData);
+                default:
+                    throw e;
+            }
+        }
     }
 
     @Path("id{userId}/index-posts/x{pageSize}/{page}")
