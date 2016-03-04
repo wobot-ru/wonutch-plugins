@@ -12,5 +12,7 @@ public interface ProfileProperties {
      * @see <a href="https://wobot-ru.atlassian.net/wiki/x/FAAq">Охват</a>
      */
     String REACH = "reach";
+    String FRIEND_COUNT = "friend_count";
+    String FOLLOWER_COUNT = "follower_count";
     String GENDER = "gender";
 }
