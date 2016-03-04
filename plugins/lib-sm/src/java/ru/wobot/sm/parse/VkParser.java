@@ -27,6 +27,7 @@ import java.util.Map;
 
 public class VkParser implements Parser {
     private static final String DIGEST = "digest";
+
     @Override
     public ParseResult parse(URI uri, String content, String apiType, String apiVersion) {
         switch (apiType) {
@@ -63,8 +64,17 @@ public class VkParser implements Parser {
                 put(urlString + "/index-posts", userDomain + "-index-posts");
             }
         };
-        if (profile.getFacebook() != null) {
-            links.put(Sources.FACEBOOK + "://" + profile.getFacebook(), userDomain + "-facebook");
+        String facebook = profile.getFacebook();
+        if (facebook != null) {
+            //hack: user http://vk.com/id16812401
+            // contains facebook link to http://facebook.com/app_scoped_user_id/100008451725336
+            // than VK API return json property facebook: '+100008451725336'
+            // in that case we trim it
+            if (facebook.startsWith("+"))
+                facebook = facebook.substring(1);
+
+            String anchor = profile.getFacebookName();
+            links.put("https://www.facebook.com/profile.php?id=" + facebook, anchor == null ? userDomain + "-facebook" : anchor);
         }
 
         // fill parse metadata
