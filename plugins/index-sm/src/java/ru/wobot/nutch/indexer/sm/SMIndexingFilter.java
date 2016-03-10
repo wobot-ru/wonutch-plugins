@@ -39,7 +39,8 @@ public class SMIndexingFilter implements IndexingFilter {
 
         Metadata contentMeta = parse.getData().getContentMeta();
         // skip system's API calls from an index
-        if (contentMeta.get(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX)!=null && contentMeta.get(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX).equals(1))
+        if (contentMeta.get(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX) != null
+                && contentMeta.get(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX).equals("1"))
             return null;
 
         Metadata documentMeta = doc.getDocumentMeta();

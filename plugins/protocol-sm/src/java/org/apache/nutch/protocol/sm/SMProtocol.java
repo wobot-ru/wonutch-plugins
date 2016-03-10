@@ -93,16 +93,15 @@ public class SMProtocol implements Protocol {
     }
 
     private Content convertToContent(FetchResponse response, String uri) {
+        Map<String, Object> responseMetadata = response.getMetadata();
         if (LOG.isInfoEnabled()) {
-            LOG.info("Finish fetching: " + uri + " [fetchTime=" + response.getMetadata().get(ContentMetaConstants.FETCH_TIME) + "]");
+            LOG.info("Finish fetching: " + uri + " [fetchTime=" + responseMetadata.get(ContentMetaConstants.FETCH_TIME) + "]");
         }
 
         Metadata metadata = new Metadata();
-        Properties p = new Properties();
-        Map<String, Object> responseMetadata = response.getMetadata();
-        p.putAll(responseMetadata);
-        metadata.setAll(p);
-        metadata.add("nutch.fetch.time", String.valueOf(responseMetadata.get(ContentMetaConstants.FETCH_TIME)));
+        for (Map.Entry<String, Object> entry : responseMetadata.entrySet()) {
+            metadata.add(entry.getKey(), String.valueOf(entry.getValue()));
+        }
         return new Content(uri, uri, response.getData().getBytes(StandardCharsets.UTF_8),
                 String.valueOf(responseMetadata.get(ContentMetaConstants.MIME_TYPE)), metadata, this.conf);
     }
