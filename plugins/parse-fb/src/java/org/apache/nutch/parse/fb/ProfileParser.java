@@ -1,7 +1,12 @@
 package org.apache.nutch.parse.fb;
 
 import org.apache.nutch.metadata.Metadata;
-import org.apache.nutch.parse.*;
+import org.apache.nutch.parse.Outlink;
+import org.apache.nutch.parse.ParseData;
+import org.apache.nutch.parse.ParseImpl;
+import org.apache.nutch.parse.ParseResult;
+import org.apache.nutch.parse.ParseStatus;
+import org.apache.nutch.parse.ParseText;
 import org.apache.nutch.protocol.Content;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

@@ -9,6 +9,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import ru.wobot.sm.core.auth.CookieRepository;
@@ -45,8 +46,6 @@ public class HttpWebFetcher {
                     driver = new RemoteWebDriver(new URL(hubUrl), caps);
                 } catch (MalformedURLException e) {
                     throw new IllegalStateException("Malformed Selenium grid hub URL found in config.", e);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Browser start-up failure.", e);
                 }
                 return driver;
             } else
@@ -66,7 +65,7 @@ public class HttpWebFetcher {
         boolean needToLogIn = false;
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
         try {
-            driver.findElement(By.linkText("Log In"));
+            driver.findElement(By.id("loginbutton"));
             needToLogIn = true;
         } catch (NoSuchElementException alreadyLoggedIn) {
             // Already logged in to FB

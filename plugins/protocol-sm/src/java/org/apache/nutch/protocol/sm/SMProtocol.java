@@ -24,6 +24,7 @@ import ru.wobot.sm.fetch.VkFetcher;
 import ru.wobot.uri.UriTranslator;
 import ru.wobot.uri.impl.ParsedUri;
 
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Properties;
@@ -43,7 +44,7 @@ public class SMProtocol implements Protocol {
             FetchResponse response = translator.translate(ParsedUri.parse(urlString));
             Content content = convertToContent(response, urlString);
             if (response instanceof Redirect) {
-                return new ProtocolOutput(content, new ProtocolStatus(ProtocolStatus.MOVED, response.getMessage()));
+                return new ProtocolOutput(content, new ProtocolStatus(ProtocolStatus.MOVED, new URL(new URL(urlString), (String) response.getMessage())));
             }
             if (response instanceof AccessDenied) {
                 return new ProtocolOutput(content, new ProtocolStatus(ProtocolStatus.ACCESS_DENIED, response.getMessage()));
