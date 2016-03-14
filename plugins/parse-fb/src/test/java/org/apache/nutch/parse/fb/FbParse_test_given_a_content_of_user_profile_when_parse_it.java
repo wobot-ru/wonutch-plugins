@@ -91,6 +91,18 @@ public class FbParse_test_given_a_content_of_user_profile_when_parse_it {
     }
 
     @Test
+    public void then_parseMeta_should_contains_reach() {
+        int reach = 0;
+        if (parseMeta.get(ProfileProperties.FOLLOWER_COUNT) != null)
+            reach = Integer.parseInt(parseMeta.get(ProfileProperties.FOLLOWER_COUNT));
+
+        if (parseMeta.get(ProfileProperties.FRIEND_COUNT) != null)
+            reach += Integer.parseInt(parseMeta.get(ProfileProperties.FRIEND_COUNT));
+
+        assertThat(Integer.parseInt(parseMeta.get(ProfileProperties.REACH)), equalTo(reach));
+    }
+
+    @Test
     public void then_outlinks_should_contains_links() {
         List<String> actual = new ArrayList<>(outlinks.size());
         for (Outlink outlink : parse.getData().getOutlinks()) {

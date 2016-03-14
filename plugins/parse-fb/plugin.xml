@@ -9,6 +9,7 @@
         <library name="parse-fb.jar">
             <export name="*"/>
         </library>
+        <library name="jsoup-1.8.3.jar"/>
     </runtime>
 
     <requires>

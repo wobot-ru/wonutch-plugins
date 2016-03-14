@@ -80,7 +80,7 @@ public class TestFbFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100003349701954"));
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100003349701954&as_id=892133830908265"));
     }
 
     @Test
@@ -110,7 +110,7 @@ public class TestFbFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100004451677809"));
+        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100004451677809&as_id=548469171978134"));
     }
 
     @Test

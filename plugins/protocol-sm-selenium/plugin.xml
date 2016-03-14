@@ -36,8 +36,8 @@
               name="HttpProtocol"
               point="org.apache.nutch.protocol.Protocol">
 
-      <implementation id="org.apache.nutch.protocol.selenium.Http"
-                      class="org.apache.nutch.protocol.selenium.Http">
+      <implementation id="org.apache.nutch.protocol.selenium.Https"
+                      class="org.apache.nutch.protocol.selenium.Https">
         <parameter name="protocolName" value="https"/>
       </implementation>
    </extension>

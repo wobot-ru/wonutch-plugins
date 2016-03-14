@@ -71,8 +71,17 @@ public class ProfileParser {
     }
 
     public ParseResult getParseResult() {
-        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, null, outlinks.toArray(new Outlink[outlinks.size()]), contentMetadata, parseMetadata);
-        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(null), parseData));
+        Metadata contentMetadata = content.getMetadata();
+        parseMetadata.add(ProfileProperties.SM_PROFILE_ID, contentMetadata.get("app.scoped.user.id"));
+        String followers = parseMetadata.get(ProfileProperties.FOLLOWER_COUNT);
+        String friends = parseMetadata.get(ProfileProperties.FRIEND_COUNT);
+        parseMetadata.add(ProfileProperties.REACH, String.valueOf(
+                (followers == null ? 0 : Integer.parseInt(followers)) +
+                (friends == null ? 0 : Integer.parseInt(friends))
+        ));
+
+        ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, document.title(), outlinks.toArray(new Outlink[outlinks.size()]), contentMetadata, parseMetadata);
+        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(document.title()), parseData));
         return parseResult;
     }
 }

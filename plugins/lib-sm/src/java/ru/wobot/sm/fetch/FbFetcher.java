@@ -119,7 +119,7 @@ public class FbFetcher {
                         String[] paramValues = params.get(1).getValue().split("\\.");
                         String factUserId = paramValues[paramValues.length - 1];
                         if (!factUserId.equals("499829591"))  // I don't know who is this (his name is Will Chengberg), but his profile has default pictures
-                            return new Redirect(FACEBOOK_URI + "/profile.php?id=" + factUserId, metaData);
+                            return new Redirect(FACEBOOK_URI + "/profile.php?id=" + factUserId + "&as_id=" + userId, metaData);
                     }
                 }
             } catch (Exception e) {
@@ -149,7 +149,8 @@ public class FbFetcher {
         ResponseEntity<String> response = restOperations.exchange(FACEBOOK_URI + "/app_scoped_user_id/" + userId,
                 HttpMethod.HEAD, request, String.class);
 
-        return new Redirect(response.getHeaders().getLocation().toString(), metaData);
+        String location = response.getHeaders().getLocation().toString();
+        return new Redirect(location + (location.contains("?id=")? "&":"?") + "as_id=" + userId, metaData);
     }
 
     // fb://1704938049732711/friends

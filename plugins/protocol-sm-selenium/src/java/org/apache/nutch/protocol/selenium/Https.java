@@ -35,9 +35,10 @@ import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.fetch.HttpWebFetcher;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
-public class Http implements Protocol {
-    public static final Logger LOG = LoggerFactory.getLogger(Http.class);
+public class Https implements Protocol {
+    public static final Logger LOG = LoggerFactory.getLogger(Https.class);
     private HttpWebFetcher webClient;
     private Configuration conf;
 
@@ -57,8 +58,12 @@ public class Http implements Protocol {
     public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
         String urlString = url.toString();
         FetchResponse fetchResponse = webClient.getHtmlPage(urlString);
+        //TODO: Code duplication with SMProtocol
         Metadata metadata = new Metadata();
         metadata.add("nutch.fetch.time", String.valueOf(fetchResponse.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
+        for (Map.Entry<String, Object> entry : fetchResponse.getMetadata().entrySet()) {
+            metadata.add(entry.getKey(), String.valueOf(entry.getValue()));
+        }
         Content c = new Content(urlString, urlString, fetchResponse.getData().getBytes(StandardCharsets.UTF_8),
                 String.valueOf(fetchResponse.getMetadata().get(ContentMetaConstants.MIME_TYPE)), metadata, this.conf);
 

@@ -33,7 +33,7 @@ public class TestHttpWebFetcher {
     @Test
     public void shouldGetFullPageDataForIdWithNoUsernameAndNoPhoto() {
         // given
-        String url = "https://www.facebook.com/profile.php?id=100004451677809";
+        String url = "https://www.facebook.com/profile.php?id=100004451677809&as_id=548469171978134";
 
         // when
 
