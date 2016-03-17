@@ -36,9 +36,9 @@
     </publications>
 
     <dependencies>
-        <dependency org="org.elasticsearch" name="elasticsearch" rev="2.1.0"
-                    conf="*->default"/>
-        <dependency org="ru.wobot" name="multipage" rev="0.2.0-SNAPSHOT"/>
+        <dependency org="com.google.code.gson" name="gson" rev="2.4" conf="*->default"/>
+        <dependency org="org.apache.hbase" name="hbase-client" rev="1.2.0" conf="*->default"/>
+        <dependency org="ru.wobot" name="sm-core" rev="0.2.0-SNAPSHOT" conf="*->default"/>
     </dependencies>
 
 </ivy-module>

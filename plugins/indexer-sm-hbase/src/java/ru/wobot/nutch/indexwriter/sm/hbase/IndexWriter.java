@@ -1,9 +1,15 @@
 package ru.wobot.nutch.indexwriter.sm.hbase;
 
 import com.google.gson.GsonBuilder;
+import com.google.protobuf.ServiceException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.ZooKeeperConnectionException;
+import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.nutch.indexer.NutchDocument;
 import org.slf4j.Logger;
@@ -14,6 +20,7 @@ import ru.wobot.sm.core.parse.ParseResult;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,23 +29,21 @@ import static com.sun.tools.corba.se.idl.toJavaPortable.Arguments.Client;
 
 
 @SuppressWarnings("Duplicates")
-public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
+public class IndexWriter implements org.apache.nutch.indexer.IndexWriter {
     private static final int DEFAULT_MAX_BULK_DOCS = 250;
     private static final int DEFAULT_MAX_BULK_LENGTH = 2500500;
     public static Logger LOG = LoggerFactory.getLogger(IndexWriter.class);
-    private String defaultIndex;
 
     private Configuration config;
 
-    private int port = -1;
-    private String host = null;
-    private String clusterName = null;
     private int maxBulkDocs;
     private int maxBulkLength;
     private long indexedDocs = 0;
     private int bulkDocs = 0;
     private int bulkLength = 0;
-    private boolean createNewBulk = false;
+    private Connection connection;
+    private HashMap<String, BufferedMutator> mutators = new HashMap<>();
+    private Configuration conf;
 
     private static <T> T fromJson(String json, Class<T> classOfT) {
         return new GsonBuilder()
@@ -46,61 +51,27 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
                 .fromJson(json, classOfT);
     }
 
-    public static IOException makeIOException(ElasticsearchException e) {
-        final IOException ioe = new IOException();
-        ioe.initCause(e);
-        return ioe;
-    }
 
     @Override
     public void open(JobConf job, String name) throws IOException {
-        Configuration conf = HBaseConfiguration.create();
-
-        clusterName = job.get(ElasticConstants.CLUSTER);
-
-        host = job.get(ElasticConstants.HOST);
-        port = job.getInt(ElasticConstants.PORT, 9300);
-
-        Settings.Builder settingsBuilder = Settings.settingsBuilder();
-
-        BufferedReader reader = new BufferedReader(
-                job.getConfResourceAsReader("elasticsearch.conf"));
-        String line;
-        String parts[];
-
-        while ((line = reader.readLine()) != null) {
-            if (StringUtils.isNotBlank(line) && !line.startsWith("#")) {
-                line.trim();
-                parts = line.split("=");
-
-                if (parts.length == 2) {
-                    settingsBuilder.put(parts[0].trim(), parts[1].trim());
-                }
-            }
-        }
-
-        if (StringUtils.isNotBlank(clusterName))
-            settingsBuilder.put("cluster.name", clusterName);
-
-        // Set the cluster name and build the settings
-        Settings settings = settingsBuilder.build();
-
-        // Prefer TransportClient
-        if (host != null && port > 1) {
-            TransportAddress transportAddress = new InetSocketTransportAddress(InetAddress.getByName(host), port);
-            TransportClient.Builder transportClientBuilder = TransportClient.builder().settings(settings);
-            client = transportClientBuilder.build().addTransportAddresses(transportAddress);
-        } else if (clusterName != null) {
-            node = nodeBuilder().settings(settings).client(true).node();
-            client = node.client();
-        }
-
-        bulk = client.prepareBulk();
-        defaultIndex = job.get(ElasticConstants.INDEX, "nutch");
         maxBulkDocs = job.getInt(ElasticConstants.MAX_BULK_DOCS,
                 DEFAULT_MAX_BULK_DOCS);
         maxBulkLength = job.getInt(ElasticConstants.MAX_BULK_LENGTH,
                 DEFAULT_MAX_BULK_LENGTH);
+
+        conf = HBaseConfiguration.create();
+        try {
+            HBaseAdmin.checkHBaseAvailable(conf);
+        } catch (MasterNotRunningException e) {
+            LOG.error("Unable to find a running HBase instance", e);
+        } catch (ZooKeeperConnectionException e) {
+            LOG.error("Unable to connect to ZooKeeper", e);
+        } catch (ServiceException e) {
+            LOG.error("HBase service unavailable", e);
+        } catch (IOException e) {
+            LOG.error("Error when trying to get HBase status", e);
+        }
+        connection = ConnectionFactory.createConnection(conf);
     }
 
     @Override
@@ -108,35 +79,28 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
         final boolean isSingleDoc = !"true".equals(doc.getDocumentMeta().get(ContentMetaConstants.MULTIPLE_PARSE_RESULT));
         String id = (String) doc.getFieldValue("id");
         String type = doc.getDocumentMeta().get(ContentMetaConstants.TYPE);
-        if (type == null)
-            type = "doc";
 
-        IndexRequestBuilder request;
-        Map<String, Object> source;
+        if (type == null && isSingleDoc) {
+            LOG.info("Type not defined skipped document from the index: " + id);
+            return;
+        }
+
         if (isSingleDoc) {
-            source = new HashMap<>();
-            request = client.prepareIndex(defaultIndex, type, id);
+            Put put = new Put(Bytes.toBytes(id));
+
             // Loop through all fields of this doc
             for (String fieldName : doc.getFieldNames()) {
                 if (doc.getField(fieldName).getValues().size() > 1) {
-                    source.put(fieldName, doc.getFieldValue(fieldName));
-                    // Loop through the values to keep track of the size of this document
-                    for (Object value : doc.getField(fieldName).getValues()) {
-                        bulkLength += value.toString().length();
-                    }
+                    throw new RuntimeException("The HBase import does not support multi-value field.");
                 } else {
-                    source.put(fieldName, doc.getFieldValue(fieldName));
+                    Object value = doc.getFieldValue(fieldName);
+                    put.addColumn(Bytes.toBytes("p"), Bytes.toBytes(fieldName), toByte(value));
                     bulkLength += doc.getFieldValue(fieldName).toString().length();
                 }
             }
 
-            request.setSource(source);
-            String parent = doc.getDocumentMeta().get(ContentMetaConstants.PARENT);
-            if (parent != null) {
-                request.setParent(parent);
-            }
-            // Add this indexing request to a bulk request
-            bulk.add(request);
+            BufferedMutator mutator = getMutator(type);
+            mutator.mutate(put);
             indexedDocs++;
             bulkDocs++;
 
@@ -151,29 +115,26 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
             if (parseResults != null) {
                 for (ParseResult parseResult : parseResults) {
                     id = parseResult.getUrl();
-                    source = new HashMap<>();
-                    source.put("segment", segment);
-                    source.put("boost", Float.parseFloat(boost));
-                    source.put("score", score);
-                    for (Map.Entry<String, Object> p : parseResult.getParseMeta().entrySet()) {
-                        source.put(p.getKey(), p.getValue());
-                    }
+                    Put put = new Put(Bytes.toBytes(id));
+                    put.addColumn(Bytes.toBytes("p"), Bytes.toBytes("segment"), toByte(segment));
+                    bulkLength += segment.toString().length();
+                    put.addColumn(Bytes.toBytes("p"), Bytes.toBytes("boost"), toByte(Float.parseFloat(boost)));
+                    bulkLength += boost.length();
+                    put.addColumn(Bytes.toBytes("p"), Bytes.toBytes("score"), toByte(score));
+                    bulkLength += score.toString().length();
 
-                    for (Map.Entry<String, Object> field : source.entrySet()) {
-                        bulkLength += field.getValue().toString().length();
+                    for (Map.Entry<String, Object> p : parseResult.getParseMeta().entrySet()) {
+                        put.addColumn(Bytes.toBytes("p"), Bytes.toBytes(p.getKey()), toByte(p.getValue()));
+                        bulkLength += p.getValue().toString().length();
                     }
                     String subType = (String) parseResult.getContentMeta().get(ContentMetaConstants.TYPE);
                     if (subType == null) {
                         subType = type;
                     }
-                    request = client.prepareIndex(defaultIndex, subType, id);
-                    request.setSource(source);
-                    String parent = (String) parseResult.getContentMeta().get(ContentMetaConstants.PARENT);
-                    if (parent != null) {
-                        request.setParent(parent);
-                    }
-                    // Add this indexing request to a bulk request
-                    bulk.add(request);
+
+                    BufferedMutator mutator = getMutator(subType);
+                    mutator.mutate(put);
+
                     indexedDocs++;
                     bulkDocs++;
 
@@ -183,13 +144,43 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
         }
     }
 
+    private BufferedMutator getMutator(String type) throws IOException {
+        BufferedMutator mutator = mutators.get(type);
+        if (mutator == null) {
+            mutator = connection.getBufferedMutator(TableName.valueOf(type));
+            mutators.put(type, mutator);
+        }
+        return mutator;
+    }
+
+    private byte[] toByte(Object value) {
+        if (value instanceof String)
+            return Bytes.toBytes((String) value);
+        if (value instanceof Boolean)
+            return Bytes.toBytes((Boolean) value);
+        if (value instanceof Byte)
+            return Bytes.toBytes((Byte) value);
+        if (value instanceof Short)
+            return Bytes.toBytes((Short) value);
+        if (value instanceof Integer)
+            return Bytes.toBytes((Integer) value);
+        if (value instanceof Long)
+            return Bytes.toBytes((Long) value);
+        if (value instanceof Character)
+            return Bytes.toBytes((Character) value);
+        if (value instanceof Float)
+            return Bytes.toBytes((Float) value);
+        if (value instanceof Double)
+            return Bytes.toBytes((Double) value);
+        throw new RuntimeException("Type not supporting");
+    }
+
     private void flushIfNecessary(String id) throws IOException {
         if (bulkDocs >= maxBulkDocs || bulkLength >= maxBulkLength) {
             LOG.info("Processing bulk request [docs = " + bulkDocs + ", length = "
                     + bulkLength + ", total docs = " + indexedDocs
                     + ", last doc in bulk = '" + id + "']");
             // Flush the bulk of indexing requests
-            createNewBulk = true;
             commit();
         }
     }
@@ -216,35 +207,8 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
 
     @Override
     public void commit() throws IOException {
-        if (execute != null) {
-            // wait for previous to finish
-            long beforeWait = System.currentTimeMillis();
-            BulkResponse actionGet = execute.actionGet();
-            if (actionGet.hasFailures()) {
-                for (BulkItemResponse item : actionGet) {
-                    if (item.isFailed()) {
-                        throw new RuntimeException("First failure in bulk: "
-                                + item.getFailureMessage());
-                    }
-                }
-            }
-            long msWaited = System.currentTimeMillis() - beforeWait;
-            LOG.info("Previous took in ms " + actionGet.getTookInMillis()
-                    + ", including wait " + msWaited);
-            execute = null;
-        }
-        if (bulk != null) {
-            if (bulkDocs > 0) {
-                // start a flush, note that this is an asynchronous call
-                execute = bulk.execute();
-            }
-            bulk = null;
-        }
-        if (createNewBulk) {
-            // Prepare a new bulk request
-            bulk = client.prepareBulk();
-            bulkDocs = 0;
-            bulkLength = 0;
+        for (Map.Entry<String, BufferedMutator> mutator : mutators.entrySet()) {
+            mutator.getValue().flush();
         }
     }
 
@@ -253,23 +217,26 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
         // Flush pending requests
         LOG.info("Processing remaining requests [docs = " + bulkDocs
                 + ", length = " + bulkLength + ", total docs = " + indexedDocs + "]");
-        createNewBulk = false;
         commit();
-        // flush one more time to finalize the last bulk
         LOG.info("Processing to finalize last execute");
-        createNewBulk = false;
-        commit();
-
-        // Close
-        client.close();
-        if (node != null) {
-            node.close();
+        try {
+            // Close
+            for (Map.Entry<String, BufferedMutator> mutator : mutators.entrySet()) {
+                mutator.getValue().close();
+            }
+            connection.close();
+        } catch (MasterNotRunningException e) {
+            LOG.error("Unable to find a running HBase instance", e);
+        } catch (ZooKeeperConnectionException e) {
+            LOG.error("Unable to connect to ZooKeeper", e);
+        } catch (IOException e) {
+            LOG.error("Error when trying to get HBase status", e);
         }
     }
 
     @Override
     public String describe() {
-        StringBuffer sb = new StringBuffer("SMIndexWriter for Elasticsearch 2.x\n");
+        StringBuffer sb = new StringBuffer("SMIndexWriter for HBase\n");
         sb.append("\t").append(ElasticConstants.CLUSTER)
                 .append(" : elastic prefix cluster\n");
         sb.append("\t").append(ElasticConstants.HOST).append(" : hostname\n");
@@ -291,14 +258,5 @@ public class IndexWriter implements  org.apache.nutch.indexer.IndexWriter {
     @Override
     public void setConf(Configuration conf) {
         config = conf;
-        String cluster = conf.get(ElasticConstants.CLUSTER);
-        String host = conf.get(ElasticConstants.HOST);
-
-        if (StringUtils.isBlank(cluster) && StringUtils.isBlank(host)) {
-            String message = "Missing elastic.cluster and elastic.host. At least one of them should be set in nutch-site.xml ";
-            message += "\n" + describe();
-            LOG.error(message);
-            throw new RuntimeException(message);
-        }
     }
 }
