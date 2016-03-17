@@ -74,6 +74,7 @@ public class TestFbService {
     }
 
     @Test
+    @Ignore
     public void check_that_request_and_parse_is_success_for_fb_user_profile_auth() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://profile/auth/1153183591398867", FbApiTypes.PROFILE, API_VERSION);
 

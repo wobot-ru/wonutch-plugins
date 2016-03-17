@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.hadoop.conf.Configuration;
 import org.hamcrest.Matchers;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
@@ -104,6 +105,7 @@ public class TestFbFetcher {
     }
 
     @Test
+    @Ignore
     public void shouldRedirectToRealUrlForAppScopedUrl() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getUserProfileDataAuth("548469171978134");
