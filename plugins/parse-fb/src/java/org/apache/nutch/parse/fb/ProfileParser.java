@@ -13,6 +13,9 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import ru.wobot.sm.core.mapping.ProfileProperties;
+import ru.wobot.sm.core.mapping.Sources;
+import ru.wobot.sm.core.mapping.Types;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -72,16 +75,22 @@ public class ProfileParser {
 
     public ParseResult getParseResult() {
         Metadata contentMetadata = content.getMetadata();
-        parseMetadata.add(ProfileProperties.SM_PROFILE_ID, contentMetadata.get("app.scoped.user.id"));
+        contentMetadata.add(ContentMetaConstants.TYPE, Types.PROFILE);
         String followers = parseMetadata.get(ProfileProperties.FOLLOWER_COUNT);
         String friends = parseMetadata.get(ProfileProperties.FRIEND_COUNT);
         parseMetadata.add(ProfileProperties.REACH, String.valueOf(
                 (followers == null ? 0 : Integer.parseInt(followers)) +
                 (friends == null ? 0 : Integer.parseInt(friends))
         ));
+        parseMetadata.add(ProfileProperties.SM_PROFILE_ID, contentMetadata.get("app.scoped.user.id"));
+        parseMetadata.add(ProfileProperties.SOURCE, Sources.FACEBOOK);
+        parseMetadata.add(ProfileProperties.NAME, document.title());
+        String url = content.getUrl();
+        if (url.contains("as_id"))
+            url = url.substring(0, url.lastIndexOf("as_id") - 1);
+        parseMetadata.add(ProfileProperties.HREF, url);
 
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, document.title(), outlinks.toArray(new Outlink[outlinks.size()]), contentMetadata, parseMetadata);
-        ParseResult parseResult = ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(document.title()), parseData));
-        return parseResult;
+        return ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(document.title()), parseData));
     }
 }

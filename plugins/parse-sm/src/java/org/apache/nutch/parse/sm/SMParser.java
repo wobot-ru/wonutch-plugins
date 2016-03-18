@@ -55,7 +55,7 @@ public final class SMParser implements org.apache.nutch.parse.Parser {
             final String apiType = metadata.get(ContentMetaConstants.API_TYPE);
             final String apiVersion = metadata.get(ContentMetaConstants.API_VER);
             ru.wobot.sm.core.parse.Parser parser = parsers.get(url.getScheme());
-            final String data = new String(content.getContent(),StandardCharsets.UTF_8);
+            final String data = new String(content.getContent(), StandardCharsets.UTF_8);
             ru.wobot.sm.core.parse.ParseResult parseResult = parser.parse(url, data, apiType, apiVersion);
             return convert(parseResult, metadata, new Metadata());
 

@@ -9,6 +9,7 @@ import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.Credential;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
 import ru.wobot.sm.fetch.FbFetcher;
 import ru.wobot.sm.parse.FbParser;
@@ -18,11 +19,16 @@ import ru.wobot.uri.impl.ParsedUri;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -49,7 +55,13 @@ public class TestFbService {
     private ParseResult getParseResult(String uri, String apiType, String apiVersion) throws URISyntaxException {
         FetchResponse response = translator.translate(ParsedUri.parse(uri));
         String content = response.getData();
-        return new FbParser().parse(new URI(uri), content, apiType, apiVersion);
+        String mimeType = response.getMetadata().get(ContentMetaConstants.MIME_TYPE).toString();
+        if (mimeType.equals("application/json"))
+            return new FbParser().parse(new URI(uri), content, apiType, apiVersion);
+        else {
+            return new ParseResult(uri, new HashMap<String, String>(), new HashMap<String, Object>(), new HashMap<String, Object>());
+        }
+
     }
 
     @Test
@@ -68,7 +80,7 @@ public class TestFbService {
 
     @Test
     public void check_that_request_and_parse_is_success_for_fb_user_profile() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://profile/892133830908265", FbApiTypes.PROFILE, API_VERSION);
+        ParseResult parse = getParseResult("fb://892133830908265/profile/app_scoped", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
     }
@@ -76,9 +88,23 @@ public class TestFbService {
     @Test
     @Ignore
     public void check_that_request_and_parse_is_success_for_fb_user_profile_auth() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://profile/auth/1153183591398867", FbApiTypes.PROFILE, API_VERSION);
+        ParseResult parse = getParseResult("fb://1153183591398867/profile/app_scoped/auth", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
+    }
+
+    @Test
+    public void check_that_request_is_success_for_user_profile_id() throws IOException, URISyntaxException {
+        ParseResult parse = getParseResult("fb://100004451677809/profile?as_id=548469171978134", null, null);
+
+        assertThat(parse.getContent(), is(not(nullValue())));
+    }
+
+    @Test
+    public void check_that_request_is_success_for_user_profile_screen_name() throws IOException, URISyntaxException {
+        ParseResult parse = getParseResult("fb://titokate/profile?as_id=211734279170201&screen_name", null, null);
+
+        assertThat(parse.getContent(), is(not(nullValue())));
     }
 
     @Test
@@ -94,7 +120,7 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://191234802505/index-posts/x100/00000000", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(101));
+        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(100)));
     }
 
     @Test
@@ -102,7 +128,7 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://96814974590/index-posts/x100/1453725511", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(greaterThan(101)));
+        assertThat(parse.getLinks().size(), is(equalTo(101)));
     }
 
     @Test

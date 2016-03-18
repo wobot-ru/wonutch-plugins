@@ -12,6 +12,8 @@ import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Parse;
 import org.apache.nutch.util.StringUtil;
+import ru.wobot.sm.core.mapping.ProfileProperties;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.net.URI;
@@ -63,9 +65,10 @@ public class SMIndexingFilter implements IndexingFilter {
             doc.add("score", crawlDatum.getScore());
 
         String id = (String) doc.getFieldValue("id");
-        if (id.contains("?scope=user&comment_id")) {
+        if (id.contains("https://www.facebook.com/")) {
             doc.removeField("id");
-            doc.add("id", id.substring(0, id.indexOf("?")));
+            String profileId = parse.getData().getParseMeta().get(ProfileProperties.SM_PROFILE_ID);
+            doc.add("id", Sources.FACEBOOK + "://" + profileId);
         }
         return doc;
     }

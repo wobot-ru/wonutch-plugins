@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -49,7 +50,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFullPageDataForUsername() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("mastercardrussia");
+        FetchResponse response = fbFetcher.getPageData("mastercardrussia");
 
         // then
         assertThat(response.getData(), containsString("MasterCard"));
@@ -58,7 +59,7 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFullPageDataForId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("1704938049732711");
+        FetchResponse response = fbFetcher.getPageData("1704938049732711");
 
         // then
         assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
@@ -67,52 +68,79 @@ public class TestFbFetcher {
     @Test
     public void shouldRedirectForUserId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("892133830908265");
+        FetchResponse response = fbFetcher.getPageData("892133830908265");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://profile/892133830908265"));
+        assertThat(response.getMessage().toString(), is("fb://892133830908265/profile/app_scoped"));
     }
 
     @Test
-    public void shouldRedirectToRealUrlForUserWithPhoto() throws IOException {
+    public void shouldRedirectToRealIdForUserWithPhoto() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getUserProfileData("892133830908265");
+        FetchResponse response = fbFetcher.getProfileId("892133830908265");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100003349701954&as_id=892133830908265"));
+        assertThat(response.getMessage().toString(), is("fb://100003349701954/profile?as_id=892133830908265"));
     }
 
     @Test
     public void shouldRedirectToAppScopedUrlForUserWithNoPhoto() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getUserProfileData("1153183591398867");
+        FetchResponse response = fbFetcher.getProfileId("1153183591398867");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://profile/auth/1153183591398867"));
+        assertThat(response.getMessage().toString(), is("fb://1153183591398867/profile/app_scoped?auth"));
     }
 
     @Test
     public void shouldRedirectToAppScopedUrlForUserWithDefaultPhoto() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getUserProfileData("548469171978134");
+        FetchResponse response = fbFetcher.getProfileId("548469171978134");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://profile/auth/548469171978134"));
+        assertThat(response.getMessage().toString(), is("fb://548469171978134/profile/app_scoped?auth"));
     }
 
     @Test
     @Ignore
-    public void shouldRedirectToRealUrlForAppScopedUrl() throws IOException {
+    public void shouldRedirectToRealIdForAppScopedUrl() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getUserProfileDataAuth("548469171978134");
+        FetchResponse response = fbFetcher.getProfileIdAuth("548469171978134");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("https://www.facebook.com/profile.php?id=100004451677809&as_id=548469171978134"));
+        assertThat(response.getMessage().toString(), is("fb://100004451677809/profile?as_id=548469171978134"));
+    }
+
+    @Test
+    public void shouldGetProfileDataForUserWithNoScreenName() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileData("100004451677809", "548469171978134", null);
+
+        // then
+        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Наталья", "Санкт-Петербург")));
+    }
+
+    @Test
+    public void shouldGetProfileDataForUserWithScreenName() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileData("100003349701954", "892133830908265", null);
+
+        // then
+        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Мазурова", "Анжеро")));
+    }
+
+    @Test
+    public void shouldGetProfileDataForUserWithScreenNameOnly() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileData("tanja.vit", "892133830908265", "");
+
+        // then
+        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Таня", "Москва")));
     }
 
     @Test

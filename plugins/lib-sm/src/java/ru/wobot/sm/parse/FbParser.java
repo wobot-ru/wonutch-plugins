@@ -9,10 +9,10 @@ import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
-import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
+import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.mapping.Types;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.core.parse.ParseResult;
@@ -108,7 +108,6 @@ public class FbParser implements Parser {
         return new ParseResult(uri.toString(), userDomain + "-friends", content, links, parseMeta, contentMeta);
     }
 
-
     protected ParseResult parsePostsIndexPage(URI uri, String content) {
         String userDomain = uri.getHost();
         String urlPrefix = Sources.FACEBOOK + "://" + userDomain + "/posts/";
@@ -135,9 +134,9 @@ public class FbParser implements Parser {
         ParseResult[] parseResults = null;
         if (posts != null && posts.size() != 0) {
             parseResults = new ParseResult[posts.size()];
-            links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page
+            links = new HashMap<>(posts.size() + 1); //first comments page of each post and optional next page
             if (nextPage != null)
-                // generate link <a href='fb://{user}/index-posts/x100/{until}'>{user}-index-posts-x100-page-{until}</a>
+                // generate link <a href='fb://{userId}/index-posts/x100/{until}'>{userId}-index-posts-x100-page-{until}</a>
                 links.put(Sources.FACEBOOK + "://" + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
                         userDomain + "-index-posts-x100-page-" + nextPage.getUntil());
             for (int i = 0; i < posts.size(); i++) {
@@ -145,7 +144,7 @@ public class FbParser implements Parser {
                 String postId = post.getId();
                 JsonNode rawPost = dataNode.get(i);
 
-                // generate link <a href='fb://{user}/posts/{post}/x100/0'>{post}-comments-index-x100-page-0</a>
+                // generate link <a href='fb://{userId}/posts/{postId}/x100/0'>{postId}-comments-index-x100-page-0</a>
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
                 if (!post.getFrom().getId().equals(userDomain)) {
                     // generate link <a href='fb://{user}'>{user}</a>

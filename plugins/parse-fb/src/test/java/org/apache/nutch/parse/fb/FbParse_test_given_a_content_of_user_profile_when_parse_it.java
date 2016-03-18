@@ -48,10 +48,11 @@ public class FbParse_test_given_a_content_of_user_profile_when_parse_it {
     @Parameterized.Parameters(name = "{index}: parse({0})=friends={2}, followers={3}")
     public static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"https://www.facebook.com/nat.must", "nat.must.html", 371, 67, Arrays.asList("https://www.facebook.com/nat.must/about?section=contact-info")},
+                {"https://www.facebook.com/nat.must?as_id=987562", "nat.must.html", 371, 67, Arrays.asList("https://www.facebook.com/nat.must/about?section=contact-info")},
                 {"https://www.facebook.com/katerina.mikhalkova", "katerina.mikhalkova.html", 248, null, Arrays.asList("https://www.facebook.com/katerina.mikhalkova/about?section=contact-info")},
                 {"https://www.facebook.com/zurk", "zurk.html", null, 52_737_643, Arrays.asList("https://www.facebook.com/zurk/about?section=contact-info")},
-                {"https://www.facebook.com/profile.php?id=100000045509142", "100000045509142.html", 2_662, 333, Arrays.asList("https://www.facebook.com/profile.php?id=100000045509142&sk=about&section=contact-info")},
+                {"https://www.facebook.com/profile.php?id=100000045509142&as_id=9875621", "100000045509142.html", 2_662, 333, Arrays.asList("https://www.facebook.com/profile.php?id=100000045509142&sk=about&section=contact-info")},
+                {"https://www.facebook.com/tanja.vit", "vitkina.unauth.html", null, null, Arrays.asList("")}
         });
     }
 
@@ -108,7 +109,7 @@ public class FbParse_test_given_a_content_of_user_profile_when_parse_it {
         for (Outlink outlink : parse.getData().getOutlinks()) {
             actual.add(outlink.getToUrl());
         }
-        assertThat(actual, is(outlinks));
+        assertThat(actual, is(equalTo(outlinks)));
     }
 
     private byte[] fetchContentData(String resource) throws IOException, URISyntaxException {
