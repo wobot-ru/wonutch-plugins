@@ -1,6 +1,9 @@
 package ru.wobot.sm;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.nutch.metadata.Metadata;
+import org.apache.nutch.parse.fb.ProfileParser;
+import org.apache.nutch.protocol.Content;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,7 +22,9 @@ import ru.wobot.uri.impl.ParsedUri;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -59,9 +64,14 @@ public class TestFbService {
         if (mimeType.equals("application/json"))
             return new FbParser().parse(new URI(uri), content, apiType, apiVersion);
         else {
-            return new ParseResult(uri, new HashMap<String, String>(), new HashMap<String, Object>(), new HashMap<String, Object>());
+            Map<String, Object> parseMeta = new HashMap<>();
+            Metadata metadata = new ProfileParser(new Content(uri, uri, content.getBytes(StandardCharsets.UTF_8), "text/html",
+                     new Metadata(), new Configuration())).getParseResult().get(uri).getData().getParseMeta();
+            for (String name : metadata.names()) {
+                parseMeta.put(name, metadata.get(name));
+            }
+            return new ParseResult(uri, new HashMap<String, String>(), parseMeta, new HashMap<String, Object>());
         }
-
     }
 
     @Test
@@ -72,14 +82,14 @@ public class TestFbService {
     }
 
     @Test
-    public void check_that_request_and_parse_is_success_for_fb_user() throws IOException, URISyntaxException {
+    public void check_that_request_and_parse_is_success_for_page_id() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://892133830908265", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
     }
 
     @Test
-    public void check_that_request_and_parse_is_success_for_fb_user_profile() throws IOException, URISyntaxException {
+    public void check_that_request_is_success_for_profile_app_scoped_id() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://892133830908265/profile/app_scoped", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
@@ -87,24 +97,35 @@ public class TestFbService {
 
     @Test
     @Ignore
-    public void check_that_request_and_parse_is_success_for_fb_user_profile_auth() throws IOException, URISyntaxException {
+    public void check_that_request_is_success_for_profile_app_scoped_id_auth() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://1153183591398867/profile/app_scoped/auth", FbApiTypes.PROFILE, API_VERSION);
 
         assertThat(parse.getContent(), isEmptyString());
     }
 
     @Test
-    public void check_that_request_is_success_for_user_profile_id() throws IOException, URISyntaxException {
+    @Ignore
+    //TODO: Think of such integration tests
+    public void check_that_request_is_success_for_profile_real_id() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://100004451677809/profile?as_id=548469171978134", null, null);
 
         assertThat(parse.getContent(), is(not(nullValue())));
     }
 
     @Test
-    public void check_that_request_is_success_for_user_profile_screen_name() throws IOException, URISyntaxException {
+    @Ignore
+    public void check_that_request_is_success_for_profile_screen_name() throws IOException, URISyntaxException {
         ParseResult parse = getParseResult("fb://titokate/profile?as_id=211734279170201&screen_name", null, null);
 
-        assertThat(parse.getContent(), is(not(nullValue())));
+        assertThat(parse.getParseMeta(), is(not(nullValue())));
+    }
+
+    @Test
+    @Ignore
+    public void check_that_request_is_success_for_profile_with_name_in_comment() throws IOException, URISyntaxException {
+        ParseResult parse = getParseResult("fb://100003249378953/profile?as_id=884603914991246", null, null);
+
+        assertThat(parse.getParseMeta().get("name"), is(not(nullValue())));
     }
 
     @Test

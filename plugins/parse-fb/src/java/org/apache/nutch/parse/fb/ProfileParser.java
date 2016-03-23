@@ -24,21 +24,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProfileParser {
+    private static final String FACEBOOK_URI = "https://www.facebook.com";
+
     private final Content content;
     private final Metadata contentMetadata = new Metadata();
     private final Metadata parseMetadata = new Metadata();
     private final Document document;
     private final List<Outlink> outlinks = new ArrayList<>();
+    private final String url;
 
     public ProfileParser(Content content) {
         this.content = content;
+        this.url = content.getUrl();
         try {
-            document = Jsoup.parse(new ByteArrayInputStream(content.getContent()), "UTF-8", content.getUrl());
+            document = Jsoup.parse(new ByteArrayInputStream(content.getContent()), "UTF-8", this.url);
             parseFriends();
             parseFollowers();
-            addContactInfoLink(content.getUrl());
+            //addContactInfoLink(content.getUrl());
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Cannot parse content for URL [" + this.url + "]", e);
         }
     }
 
@@ -47,19 +51,19 @@ public class ProfileParser {
         if (tags != null) {
             Element first = tags.first();
             if (first != null) {
-                parseMetadata.add(ProfileProperties.FRIEND_COUNT, first.text().replace(",", ""));
+                parseMetadata.add(ProfileProperties.FRIEND_COUNT, first.text().replace(",", "").replace("\u00A0", ""));
             }
         }
     }
 
     private void parseFollowers() {
-        Elements tags = document.select("._42ef ._50f3 a");
+        Elements tags = document.select("._42ef ._50f3 a[href*=followers]");
         if (tags != null) {
             Element tag = tags.last();
             if (tag != null) {
                 String text = tag.text();
-                if (text.contains("people") && !text.contains("other people")) {
-                    text = text.replace(",", "");
+                if ((text.contains("people") && !text.contains("other people")) || text.contains("человек")) {
+                    text = text.replace(",", "").replace("\u00A0", "");
                     parseMetadata.add(ProfileProperties.FOLLOWER_COUNT, text.substring(0, text.indexOf(" ")));
                 }
             }
@@ -73,22 +77,81 @@ public class ProfileParser {
             outlinks.add(new Outlink(url + "/about?section=contact-info", null));
     }
 
+    private String getId() {
+        Elements tags = document.select("meta[property=al:android:url]");
+        if (tags != null) {
+            Element tag = tags.first();
+            if (tag != null) {
+                String url = tag.attr("content");
+                return url.substring(url.lastIndexOf("/") + 1);
+            }
+        }
+        return null;
+    }
+
+    private String getName() {
+        Element element = document.getElementById("fb-timeline-cover-name");
+        if (element != null)
+            return document.getElementById("fb-timeline-cover-name").text();
+        else {
+            String name = document.title();
+            if (name.indexOf("(") != -1)
+                name = name.substring(0, name.indexOf("("));
+            return name.trim();
+        }
+    }
+
+    private String getCity() {
+        Elements tags;
+        tags = document.select("._1zw6._md0._5vb9 ._50f3:matchesOwn(Lives|Живет) a");
+        if (tags == null || tags.size() == 0)
+            tags = document.select("#current_city a");
+
+        if (tags != null) {
+            Element city = tags.last();
+            if (city != null) {
+                String full = city.text();
+                return full.split(",")[0];
+            }
+        }
+        return null;
+    }
+
     public ParseResult getParseResult() {
         Metadata contentMetadata = content.getMetadata();
         contentMetadata.add(ContentMetaConstants.TYPE, Types.PROFILE);
+
         String followers = parseMetadata.get(ProfileProperties.FOLLOWER_COUNT);
         String friends = parseMetadata.get(ProfileProperties.FRIEND_COUNT);
         parseMetadata.add(ProfileProperties.REACH, String.valueOf(
                 (followers == null ? 0 : Integer.parseInt(followers)) +
-                (friends == null ? 0 : Integer.parseInt(friends))
+                        (friends == null ? 0 : Integer.parseInt(friends))
         ));
-        parseMetadata.add(ProfileProperties.SM_PROFILE_ID, contentMetadata.get("app.scoped.user.id"));
+        parseMetadata.add("app_scoped_user_id", contentMetadata.get("app.scoped.user.id"));
+        String userId = getId();
+        parseMetadata.add(ProfileProperties.SM_PROFILE_ID, userId);
         parseMetadata.add(ProfileProperties.SOURCE, Sources.FACEBOOK);
-        parseMetadata.add(ProfileProperties.NAME, document.title());
-        String url = content.getUrl();
-        if (url.contains("as_id"))
-            url = url.substring(0, url.lastIndexOf("as_id") - 1);
-        parseMetadata.add(ProfileProperties.HREF, url);
+        parseMetadata.add(ProfileProperties.NAME, getName());
+        String href;
+        /*String userId;
+        try {
+            userId = new URI(url).getHost();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Cannot parse URI [" + this.url + "]", e);
+        }
+        if (url.contains("screen_name"))
+            href = FACEBOOK_URI + "/" + userId;
+        else*/
+        href = FACEBOOK_URI + "/profile.php?id=" + userId;
+        parseMetadata.add(ProfileProperties.HREF, href);
+        parseMetadata.add(ProfileProperties.CITY, getCity());
+
+        /*if (!url.contains("auth"))
+            try {
+                outlinks.add(new Outlink(url + "&auth", null));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }*/
 
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, document.title(), outlinks.toArray(new Outlink[outlinks.size()]), contentMetadata, parseMetadata);
         return ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(document.title()), parseData));

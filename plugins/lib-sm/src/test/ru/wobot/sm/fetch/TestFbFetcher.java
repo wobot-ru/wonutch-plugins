@@ -59,10 +59,10 @@ public class TestFbFetcher {
     @Test
     public void shouldGetFullPageDataForId() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getPageData("1704938049732711");
+        FetchResponse response = fbFetcher.getPageData("24496278123");
 
         // then
-        assertThat(response.getData(), containsString("Alina's Lingerie Boutique"));
+        assertThat(response.getData(), containsString("Unilever"));
     }
 
     @Test
@@ -106,7 +106,6 @@ public class TestFbFetcher {
     }
 
     @Test
-    @Ignore
     public void shouldRedirectToRealIdForAppScopedUrl() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileIdAuth("548469171978134");
@@ -117,27 +116,30 @@ public class TestFbFetcher {
     }
 
     @Test
+    @Ignore
     public void shouldGetProfileDataForUserWithNoScreenName() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("100004451677809", "548469171978134", null);
+        FetchResponse response = fbFetcher.getProfileData("100004451677809", "548469171978134", null, null);
 
         // then
         assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Наталья", "Санкт-Петербург")));
     }
 
     @Test
+    @Ignore
     public void shouldGetProfileDataForUserWithScreenName() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("100003349701954", "892133830908265", null);
+        FetchResponse response = fbFetcher.getProfileData("100003349701954", "892133830908265", null, null);
 
         // then
-        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Мазурова", "Анжеро")));
+        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Мазурова", "МБОУ СОШ")));
     }
 
     @Test
+    @Ignore
     public void shouldGetProfileDataForUserWithScreenNameOnly() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("tanja.vit", "892133830908265", "");
+        FetchResponse response = fbFetcher.getProfileData("tanja.vit", "892133830908265", "", null);
 
         // then
         assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Таня", "Москва")));

@@ -5,34 +5,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
-import org.openqa.selenium.support.ui.ExpectedCondition;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import ru.wobot.sm.core.auth.CookieRepository;
-import ru.wobot.sm.core.fetch.FetchResponse;
-import ru.wobot.sm.core.fetch.SuccessResponse;
-import ru.wobot.sm.core.meta.ContentMetaConstants;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class HttpWebFetcher {
     public static final String SELENIUM_HUB_URL = "sm.selenium.hub";
+    private static final String FACEBOOK_URI = "https://www.facebook.com";
     private static final Log LOG = LogFactory.getLog(HttpWebFetcher.class.getName());
 
     private Configuration conf;
@@ -47,10 +37,11 @@ public class HttpWebFetcher {
             if (hubUrl != null && !hubUrl.isEmpty()) {
                 DesiredCapabilities caps = DesiredCapabilities.phantomjs();
                 caps.setJavascriptEnabled(true);
-                caps.setCapability("phantomjs.page.customHeaders." + "Accept-Language", "en-US");
+                caps.setCapability("phantomjs.page.customHeaders." + "Accept-Language", "ru-RU");
                 WebDriver driver;
                 try {
                     driver = new RemoteWebDriver(new URL(hubUrl), caps);
+                    driver.get(FACEBOOK_URI);
                 } catch (MalformedURLException e) {
                     throw new IllegalStateException("Malformed Selenium grid hub URL found in config.", e);
                 }
@@ -65,18 +56,19 @@ public class HttpWebFetcher {
         this.cookieRepository = cookieRepository;
     }
 
-    public FetchResponse getHtmlPage(String url) {
+    public String getHtmlPage(String url) {
         WebDriver driver = threadWebDriver.get();
+        if (driver.manage().getCookies().size() < 9) {
+            Collection<Cookie> cookies = getCookies();
+            if (cookies.isEmpty())
+                throw new IllegalStateException("No cookies found in cookies file. Can't authorize web driver.");
+
+            for (Cookie cookie : cookies)
+                driver.manage().addCookie(cookie);
+        }
+
         driver.get(url);
-
-        // TODO: Remove ASAP
-        (new WebDriverWait(driver, 10)).until(new ExpectedCondition<Boolean>() {
-            public Boolean apply(WebDriver d) {
-                return !d.getTitle().toLowerCase().contains("redirecting");
-            }
-        });
-
-        boolean needToLogIn = false;
+        /*boolean needToLogIn = false;
         driver.manage().timeouts().implicitlyWait(0, TimeUnit.SECONDS);
         try {
             driver.findElement(By.id("loginbutton"));
@@ -85,7 +77,7 @@ public class HttpWebFetcher {
             // Already logged in to FB
         }
 
-        String currentUrl = driver.getCurrentUrl();
+
         LOG.info("Thread: " + Thread.currentThread().getId() + "; needToLogin: " + needToLogIn + "; Current URL: " + currentUrl
                 + "; Title: " + driver.getTitle());
         if (needToLogIn || currentUrl.contains("login") || driver.getTitle().toLowerCase().contains("facebook")) { //TODO: AFAIK every SM contains 'login' substring in login URL
@@ -97,23 +89,19 @@ public class HttpWebFetcher {
                 driver.manage().addCookie(cookie);
             driver.navigate().refresh();
         }
-
+*/
+        String currentUrl = driver.getCurrentUrl();
         LOG.info("Thread: " + Thread.currentThread().getId() + "; Fetching URL: " + currentUrl + "; Original URL: " + url);
 
         // TODO: Consider other conditions for other SM
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(4, TimeUnit.SECONDS);
         try {
             driver.findElement(By.cssSelector("div._5vf._2pie._2pip.sectionHeader")); // wait for this facebook only element
         } catch (NoSuchElementException e) {
             LOG.error("Thread: " + Thread.currentThread().getId() + "; No desired element for URL: " + currentUrl + "; Original URL: " + url);
         }
 
-        final List<NameValuePair> params = URLEncodedUtils.parse(url, StandardCharsets.UTF_8);
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.MIME_TYPE, "text/html");
-            put("app.scoped.user.id", params.get(params.size() - 1).getValue());
-        }};
-        return new SuccessResponse(driver.findElement(By.tagName("html")).getAttribute("innerHTML"), metaData);
+        return driver.findElement(By.tagName("html")).getAttribute("innerHTML");
     }
 
     private Collection<Cookie> getCookies() {

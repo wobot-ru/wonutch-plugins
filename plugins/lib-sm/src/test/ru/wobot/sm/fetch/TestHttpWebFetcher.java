@@ -15,7 +15,6 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 
-@Ignore
 public class TestHttpWebFetcher {
     static {
         Logger rootLogger = Logger.getRootLogger();
@@ -28,19 +27,19 @@ public class TestHttpWebFetcher {
     private static CookieRepository cookieRepository = new CookieRepository(conf);
     private static HttpWebFetcher webFetcher = new HttpWebFetcher(conf, cookieRepository);
 
-    private FetchResponse response(String url) {
+    private String response(String url) {
         return webFetcher.getHtmlPage(url);
     }
 
     @Test
     public void shouldGetFullPageDataForIdWithNoUsernameAndNoPhoto() {
         // given
-        String url = "https://www.facebook.com/profile.php?id=100004451677809&as_id=548469171978134";
+        String url = "https://www.facebook.com/profile.php?id=100004451677809";
 
         // when
 
         // then
-        assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Friends", "Lives in", "From")));
+        assertThat(response(url), stringContainsInOrder(Arrays.asList("Наталья", "SPBGUKI", "Живет в городе")));
     }
 
     @Test
@@ -51,7 +50,7 @@ public class TestHttpWebFetcher {
         // when
 
         // then
-        assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Friends", "Lives in", "From")));
+        assertThat(response(url), stringContainsInOrder(Arrays.asList("Друзья", "Живет", "Из")));
     }
 
     @Test
@@ -62,6 +61,6 @@ public class TestHttpWebFetcher {
         // when
 
         // then
-        assertThat(response(url).getData(), stringContainsInOrder(Arrays.asList("Timeline", "About", "Friends")));
+        assertThat(response(url), stringContainsInOrder(Arrays.asList("Хроника", "Информация", "Друзья")));
     }
 }

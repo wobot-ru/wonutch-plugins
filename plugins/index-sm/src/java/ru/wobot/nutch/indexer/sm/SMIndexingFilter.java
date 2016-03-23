@@ -65,9 +65,9 @@ public class SMIndexingFilter implements IndexingFilter {
             doc.add("score", crawlDatum.getScore());
 
         String id = (String) doc.getFieldValue("id");
-        if (id.contains("https://www.facebook.com/")) {
+        if (id.contains("as_id=")) {
             doc.removeField("id");
-            String profileId = parse.getData().getParseMeta().get(ProfileProperties.SM_PROFILE_ID);
+            String profileId = parse.getData().getParseMeta().get("app_scoped_user_id");
             doc.add("id", Sources.FACEBOOK + "://" + profileId);
         }
         return doc;
