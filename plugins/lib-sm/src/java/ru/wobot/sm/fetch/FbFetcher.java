@@ -3,11 +3,14 @@ package ru.wobot.sm.fetch;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.ByteArrayHttpMessageConverter;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -38,6 +41,7 @@ import ru.wobot.uri.Scheme;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,34 +102,47 @@ public class FbFetcher {
         }
     }
 
-    // fb://1001830254956/profile?as_id=4664892664605
+    // fb://1001830254956/profile?as_id=4664892664605&screen_name
     @Path("{userId}/profile")
     public FetchResponse getProfileData(@PathParam("userId") String userId,
                                         @QueryParam("as_id") final String appScopedUserId,
-                                        @QueryParam("screen_name") String screenName
+                                        @QueryParam("screen_name") String screenName,
+                                        @QueryParam("auth") String auth
     ) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MIME_TYPE, "text/html");
             put("app.scoped.user.id", appScopedUserId);
         }};
 
-        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
-        emptyList.add(new ByteArrayHttpMessageConverter());
-        RestOperations restOperations = new RestTemplate(emptyList);
+        /*CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        HttpHost proxyHost = new HttpHost("41.77.139.98", 6060);
+        credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials("snt@wobot.co", "PfYZ7J(b<^<[rhm"));*/
+        CloseableHttpClient client = HttpClientBuilder.create().
+                disableRedirectHandling().
+                /*setProxy(proxyHost).
+                setDefaultCredentialsProvider(credentialsProvider).*/
+                        setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy()).build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client);
+        RestOperations restOperations = new RestTemplate(requestFactory);
 
         String url = FACEBOOK_URI + "/" + userId; // screen name
         if (screenName == null) {
-            url = restOperations.headForHeaders(FACEBOOK_URI + "/profile.php?id=" + userId).getFirst("Location");
-            byte[] b = new byte[url.length()];
-            for (int i = 0; i < b.length; i++) {
-                b[i] = (byte) url.charAt(i);
-            }
-            url = new String(b, StandardCharsets.UTF_8);
+            url = FACEBOOK_URI + "/profile.php?id=" + userId;
+            /*String redirectUrl = restOperations.headForHeaders(url).getFirst("Location");
+            if (redirectUrl != null) {
+                byte[] b = new byte[redirectUrl.length()];
+                for (int i = 0; i < b.length; i++) {
+                    b[i] = (byte) redirectUrl.charAt(i);
+                }
+                url = new String(b, StandardCharsets.UTF_8);
+            }*/
         }
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<String> request = new HttpEntity<>(headers);
-        ResponseEntity<byte[]> response = restOperations.exchange(url, HttpMethod.GET, request, byte[].class);
-        return new SuccessResponse(new String(response.getBody(), StandardCharsets.UTF_8), metaData);
+
+       /* HttpHeaders headers = new HttpHeaders();
+        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
+        headers.add("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4");
+        ResponseEntity<byte[]> response = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), byte[].class);*/
+        return new SuccessResponse(new HttpWebFetcher(null, cookieRepository).getHtmlPage(url), metaData);
     }
 
     // fb://1001830254956/profile/app_scoped

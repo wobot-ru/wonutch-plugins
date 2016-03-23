@@ -29,6 +29,7 @@ import org.apache.nutch.protocol.RobotRulesParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.auth.CookieRepository;
+import ru.wobot.sm.core.fetch.AccessDenied;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
@@ -57,7 +58,7 @@ public class Https implements Protocol {
     @Override
     public ProtocolOutput getProtocolOutput(Text url, CrawlDatum datum) {
         String urlString = url.toString();
-        FetchResponse fetchResponse = webClient.getHtmlPage(urlString);
+        FetchResponse fetchResponse = new AccessDenied(null, null);//webClient.getHtmlPage(urlString);
         //TODO: Code duplication with SMProtocol
         Metadata metadata = new Metadata();
         metadata.add("nutch.fetch.time", String.valueOf(fetchResponse.getMetadata().get(ContentMetaConstants.FETCH_TIME)));
