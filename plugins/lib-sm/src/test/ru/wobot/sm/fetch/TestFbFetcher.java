@@ -92,7 +92,7 @@ public class TestFbFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://1153183591398867/profile/app_scoped?auth"));
+        assertThat(response.getMessage().toString(), is("fb://1153183591398867/profile/app_scoped/auth"));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class TestFbFetcher {
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://548469171978134/profile/app_scoped?auth"));
+        assertThat(response.getMessage().toString(), is("fb://548469171978134/profile/app_scoped/auth"));
     }
 
     @Test
@@ -113,6 +113,16 @@ public class TestFbFetcher {
         // then
         assertThat(response.getData(), isEmptyString());
         assertThat(response.getMessage().toString(), is("fb://100004451677809/profile?as_id=548469171978134"));
+    }
+
+    @Test
+    public void shouldRedirectToRealScreenNameForAppScopedUrl() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileIdAuth("948085905239709");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("fb://renata.davidova.50/profile?as_id=948085905239709&screen_name"));
     }
 
     @Test

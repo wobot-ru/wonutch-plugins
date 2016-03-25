@@ -173,7 +173,7 @@ public class FbFetcher {
                 // Any way, return redirect to app scoped URL
             }
         }
-        return new Redirect(Sources.FACEBOOK + "://" + userId + "/profile/app_scoped?auth", metaData);
+        return new Redirect(Sources.FACEBOOK + "://" + userId + "/profile/app_scoped/auth", metaData);
     }
 
     // fb://1153183591398867/profile/app_scoped/auth
@@ -195,10 +195,10 @@ public class FbFetcher {
         String factId;
         boolean screenName = false;
         List<NameValuePair> params = URLEncodedUtils.parse(location, "UTF-8");
-        if (params.get(0).getName().equals("id"))
+        if (!params.isEmpty() && params.get(0).getName().equals("id"))
             factId = params.get(0).getValue();
         else {
-            factId = location.getPath(); // screen name (user name)
+            factId = location.getPath().substring(1); // screen name (user name) (w/o leading slash)
             screenName = true;
         }
         return new Redirect(Sources.FACEBOOK + "://" + factId + "/profile?as_id=" + userId + (screenName ? "&screen_name" : ""), new HashMap<String, Object>());
