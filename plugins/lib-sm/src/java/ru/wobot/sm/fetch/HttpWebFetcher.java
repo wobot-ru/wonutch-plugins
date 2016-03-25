@@ -68,7 +68,7 @@ public class HttpWebFetcher {
         protected WebDriver initialValue() {
             LOG.info("Thread: " + Thread.currentThread().getId() + "; Trying to get browser...");
             //String hubUrl = conf.get(SELENIUM_HUB_URL, "http://localhost:4444/wd/hub");
-            String hubUrl = "http://teamcity:4444/wd/hub"; //TODO: fix this workaround ASAP
+            String hubUrl = "http://localhost:4444/wd/hub"; //TODO: fix this workaround ASAP
             if (hubUrl != null && !hubUrl.isEmpty()) {
                 /*Proxy proxy = new Proxy();
                 proxy.setHttpProxy("http://snt%40wobot.co:PfYZ7J%28b%3c^%3c[rhm@46.182.28.173:6060");
