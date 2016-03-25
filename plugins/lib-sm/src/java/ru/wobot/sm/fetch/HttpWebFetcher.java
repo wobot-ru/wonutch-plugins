@@ -30,6 +30,7 @@ import java.lang.reflect.Modifier;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Locale;
@@ -43,7 +44,7 @@ public class HttpWebFetcher {
     private Configuration conf;
     private CookieRepository cookieRepository;
 
-    static {
+    /*static {
         try
         {
             Field field = ProxyUtils.class.getDeclaredField("SHOULD_NOT_PROXY_HOP_BY_HOP_HEADERS");
@@ -61,23 +62,24 @@ public class HttpWebFetcher {
             throw new RuntimeException(e);
         }
     }
-
+*/
     private static final ThreadLocal<WebDriver> threadWebDriver = new ThreadLocal<WebDriver>() {
         @Override
         protected WebDriver initialValue() {
             LOG.info("Thread: " + Thread.currentThread().getId() + "; Trying to get browser...");
             //String hubUrl = conf.get(SELENIUM_HUB_URL, "http://localhost:4444/wd/hub");
-            String hubUrl = "http://localhost:4444/wd/hub"; //TODO: fix this workaround ASAP
+            String hubUrl = "http://teamcity:4444/wd/hub"; //TODO: fix this workaround ASAP
             if (hubUrl != null && !hubUrl.isEmpty()) {
                 /*Proxy proxy = new Proxy();
                 proxy.setHttpProxy("http://snt%40wobot.co:PfYZ7J%28b%3c^%3c[rhm@46.182.28.173:6060");
                 proxy.setProxyType(Proxy.ProxyType.MANUAL);*/
                 // start the proxy
                 BrowserMobProxy proxy = new BrowserMobProxyServer();
-                proxy.setChainedProxy(new InetSocketAddress("46.182.28.173", 6060));
+                /*proxy.setChainedProxy(new InetSocketAddress("46.182.28.173", 6060));
                 String authParam = "snt@wobot.co:PfYZ7J(b<^<[rhm";
-                authParam = new String(Base64.encodeBase64(authParam.getBytes()));
-                proxy.addHeader("Proxy-Authorization", "Basic " + authParam);
+                //String authParam = "snt%40wobot.co:PfYZ7J%28b%3c^%3c[rhm";
+                authParam = new String(Base64.encodeBase64(authParam.getBytes(StandardCharsets.UTF_8)));
+                proxy.addHeader("Proxy-Authorization", "Basic " + authParam);*/
                 proxy.start(0);
 
                 // get the Selenium proxy object
