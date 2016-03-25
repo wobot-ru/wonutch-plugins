@@ -63,4 +63,15 @@ public class TestHttpWebFetcher {
         // then
         assertThat(response(url), stringContainsInOrder(Arrays.asList("Хроника", "Информация", "Друзья")));
     }
+
+    @Test
+    public void shouldGetFullPageDataForEmptyProfile_() {
+        // given
+        String url = "http://myip.ru/index_small.php";
+
+        // when
+
+        // then
+        assertThat(response(url), stringContainsInOrder(Arrays.asList("Хроника", "Информация", "Друзья")));
+    }
 }
