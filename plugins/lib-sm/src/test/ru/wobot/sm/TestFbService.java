@@ -53,7 +53,8 @@ public class TestFbService {
         Credential credential = mock(Credential.class);
         given(credential.getAccessToken()).willReturn("1673845006238395|FkqeRkmP1kT_Ae42i8IkZx8KxBM");
         given(repository.getInstance()).willReturn(credential);
-        CookieRepository cookieRepository = new CookieRepository(new Configuration());
+        CookieRepository cookieRepository = new CookieRepository();
+        cookieRepository.setConf(new Configuration());
         return new FbFetcher(repository, cookieRepository);
     }
 
