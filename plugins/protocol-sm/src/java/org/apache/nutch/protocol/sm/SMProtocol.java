@@ -27,10 +27,12 @@ import ru.wobot.uri.impl.ParsedUri;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.Properties;
 
 public class SMProtocol implements Protocol {
     private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
+    private static final CredentialRepository fbCredentialRepository = new Proxy("fb");
+    private static final CookieRepository fbCookieRepository = new CookieRepository();
+
     private Configuration conf;
     private UriTranslator translator;
 
@@ -72,7 +74,7 @@ public class SMProtocol implements Protocol {
         translator = createUriTranslator(createVkFetcher(), createFbFetcher());
     }
 
-    protected UriTranslator createUriTranslator(Object... objects) {
+    private UriTranslator createUriTranslator(Object... objects) {
         try {
             return new UriTranslator(objects);
         } catch (ClassNotFoundException e) {
@@ -80,14 +82,13 @@ public class SMProtocol implements Protocol {
         }
     }
 
-    protected FbFetcher createFbFetcher() {
-        CredentialRepository repository = new Proxy("fb");
-        repository.setConf(getConf());
-        CookieRepository cookieRepository = new CookieRepository(getConf());
-        return new FbFetcher(repository, cookieRepository);
+    private FbFetcher createFbFetcher() {
+        fbCredentialRepository.setConf(getConf());
+        fbCookieRepository.setConf(getConf());
+        return new FbFetcher(fbCredentialRepository, fbCookieRepository);
     }
 
-    protected VkFetcher createVkFetcher() {
+    private VkFetcher createVkFetcher() {
         CredentialRepository repository = new Proxy("vk");
         repository.setConf(getConf());
         return new VkFetcher(repository);

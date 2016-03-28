@@ -7,11 +7,11 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.junit.Test;
 
-import java.util.Collection;
+import java.net.HttpCookie;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
@@ -24,17 +24,21 @@ public class TestCookieRepository {
                 new PatternLayout("%d{ISO8601} %-5p %c{2} - %m%n")));
     }
 
-    private CookieRepository cookieRepository = new CookieRepository(new Configuration());
+    private CookieRepository cookieRepository = new CookieRepository();
+
+    {
+        cookieRepository.setConf(new Configuration());
+    }
 
     @Test
-    public void shouldReturnCookies() {
+    public void shouldReturnCookiesAndProxy() {
         // given
 
         //when
-        Collection<String> s = cookieRepository.getCookies();
+        LoginData loginData = cookieRepository.getLoginData();
 
         // then
-        assertThat(s, is(not(nullValue())));
+        assertThat(loginData, is(not(nullValue())));
     }
 
     @Test
@@ -42,10 +46,21 @@ public class TestCookieRepository {
         // given
 
         //when
-        List<String> cookies = (List<String>) cookieRepository.getCookies();
+        LoginData cookies = cookieRepository.getLoginData();
 
         // then
-        assertThat(cookies.get(2), containsString("6uDOVuoYfrMqczTtQGCgnjoE")); // 'datr' cookie value
+        assertThat(((List<HttpCookie>) cookies.getCookies()).get(2).getValue(), is(equalTo("6uDOVuoYfrMqczTtQGCgnjoE"))); // 'datr' cookie value
+    }
+
+    @Test
+    public void shouldReturnFirstProxy() {
+        // given
+
+        //when
+        LoginData loginData = cookieRepository.getLoginData();
+
+        // then
+        assertThat(loginData.getProxy(), is(equalTo("82.103.140.46:6060")));
     }
 
     @Test
@@ -53,12 +68,12 @@ public class TestCookieRepository {
         // given
 
         //when
-        cookieRepository.getCookies(); // first
-        cookieRepository.getCookies(); // second
-        List<String> cookies = (List<String>) cookieRepository.getCookies();
+        cookieRepository.getLoginData(); // first
+        cookieRepository.getLoginData(); // second
+        List<HttpCookie> cookies = (List<HttpCookie>) cookieRepository.getLoginData().getCookies();
 
         // then
-        assertThat(cookies.get(2), containsString("HOHOVu0kfz7KpQEqH9km1pZY")); // 'datr' cookie value
+        assertThat(cookies.get(2).getValue(), is(equalTo("HOHOVu0kfz7KpQEqH9km1pZY"))); // 'datr' cookie value
     }
 
     @Test
@@ -66,23 +81,13 @@ public class TestCookieRepository {
         // given
 
         //when
-        cookieRepository.getCookies(); // first
-        cookieRepository.getCookies(); // second
-        cookieRepository.getCookies(); // third
-        List<String> cookies = (List<String>) cookieRepository.getCookies(); // first again
+        cookieRepository.getLoginData(); // first
+        cookieRepository.getLoginData(); // second
+        cookieRepository.getLoginData(); // third
+        List<HttpCookie> cookies = (List<HttpCookie>) cookieRepository.getLoginData().getCookies(); // first again
 
         // then
-        assertThat(cookies.get(2), containsString("6uDOVuoYfrMqczTtQGCgnjoE")); // 'datr' cookie value
+        assertThat(cookies.get(2).getValue(), is(equalTo("6uDOVuoYfrMqczTtQGCgnjoE"))); // 'datr' cookie value
     }
 
-    @Test
-    public void shouldReturnFirstCookieSetAsNameValuePairs() {
-        // given
-
-        //when
-        List<String> cookies = (List<String>) cookieRepository.getCookiesAsNameValuePairs(); // first again
-
-        // then
-        assertThat(cookies.get(2), is("datr=6uDOVuoYfrMqczTtQGCgnjoE")); // 'datr' cookie
-    }
 }

@@ -1,8 +1,14 @@
 package ru.wobot.sm.fetch;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Iterators;
+import org.apache.http.HttpHost;
 import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.ProxyAuthenticationStrategy;
@@ -29,6 +35,7 @@ import org.springframework.web.client.RestTemplate;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.CredentialRepository;
+import ru.wobot.sm.core.auth.LoginData;
 import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.Redirect;
 import ru.wobot.sm.core.fetch.SuccessResponse;
@@ -40,11 +47,12 @@ import ru.wobot.uri.QueryParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.IOException;
+import java.net.HttpCookie;
 import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -66,22 +74,51 @@ public class FbFetcher {
     private static final String[] COMMENT_FIELDS = {"message", "from", "like_count", "likes", "created_time",
             "parent{id}", "object{id}"};
 
+    private static final String[] proxies = new String[]{"96.47.226.34:6060", "96.47.226.98:6060", "96.47.226.130:6060",
+            "96.47.226.138:6060", "96.44.147.34:6060"};
+
+    private static final Iterator<String> proxyIterator = Iterators.cycle(proxies);
+
     private static final String API_VERSION = "2.5";
     private static final String FACEBOOK_API_URI = "https://graph.facebook.com/v" + API_VERSION;
     private static final String FACEBOOK_URI = "https://www.facebook.com";
 
     private final CredentialRepository repository;
     private final CookieRepository cookieRepository;
+    private final RestOperations restOperations;
 
     public FbFetcher(CredentialRepository repository, CookieRepository cookieRepository) {
         this.repository = repository;
         this.cookieRepository = cookieRepository;
+        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
+        emptyList.add(new MappingJackson2HttpMessageConverter());
+        this.restOperations = new RestTemplate(emptyList);
     }
 
     private JsonNode getObject(MultiValueMap<String, String> queryParameters, String path) {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
         URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + path);
         return facebook.restOperations().getForObject(uriBuilder.queryParams(queryParameters).build(), JsonNode.class);
+    }
+
+    private String getProxy() {
+        synchronized (proxyIterator) {
+            return proxyIterator.next();
+        }
+    }
+
+    private RestOperations getRestOperations(String proxy) {
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        HttpHost proxyHost = new HttpHost(proxy.split(":")[0], Integer.valueOf(proxy.split(":")[1]));
+        credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials("snt@wobot.co", "PfYZ7J(b<^<[rhm"));
+        CloseableHttpClient client = HttpClientBuilder.create().
+                disableRedirectHandling().
+                setProxy(proxyHost).
+                setDefaultCredentialsProvider(credentialsProvider).
+                setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy()).build();
+        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client);
+        ((RestTemplate) restOperations).setRequestFactory(requestFactory);
+        return restOperations;
     }
 
     // fb://mastercardrussia
@@ -114,17 +151,6 @@ public class FbFetcher {
             put("app.scoped.user.id", appScopedUserId);
         }};
 
-        /*CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        HttpHost proxyHost = new HttpHost("41.77.139.98", 6060);
-        credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials("snt@wobot.co", "PfYZ7J(b<^<[rhm"));*/
-        CloseableHttpClient client = HttpClientBuilder.create().
-                disableRedirectHandling().
-                /*setProxy(proxyHost).
-                setDefaultCredentialsProvider(credentialsProvider).*/
-                        setProxyAuthenticationStrategy(new ProxyAuthenticationStrategy()).build();
-        HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory(client);
-        RestOperations restOperations = new RestTemplate(requestFactory);
-
         String url = FACEBOOK_URI + "/" + userId; // screen name
         if (screenName == null) {
             url = FACEBOOK_URI + "/profile.php?id=" + userId;
@@ -142,7 +168,7 @@ public class FbFetcher {
         headers.add("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
         headers.add("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4");
         ResponseEntity<byte[]> response = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), byte[].class);*/
-        return new SuccessResponse(new HttpWebFetcher(null, cookieRepository).getHtmlPage(url), metaData);
+        return new SuccessResponse(new HttpWebFetcher(cookieRepository).getHtmlPage(url), metaData);
     }
 
     // fb://1001830254956/profile/app_scoped
@@ -150,10 +176,7 @@ public class FbFetcher {
     public FetchResponse getProfileId(@PathParam("userId") String userId) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>();
 
-        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
-        emptyList.add(new MappingJackson2HttpMessageConverter());
-        RestOperations restOperations = new RestTemplate(emptyList);
-
+        RestOperations restOperations = getRestOperations(getProxy());
         URI pictureLocation = restOperations.headForHeaders(FACEBOOK_API_URI + "/" + userId + "/picture").getLocation();
         String part = pictureLocation.getPath();
         String[] parts = part.substring(part.lastIndexOf("/") + 1).split("_");
@@ -179,13 +202,13 @@ public class FbFetcher {
     // fb://1153183591398867/profile/app_scoped/auth
     @Path("{userId}/profile/app_scoped/auth")
     public FetchResponse getProfileIdAuth(@PathParam("userId") String userId) throws IOException {
-        List<HttpMessageConverter<?>> emptyList = new ArrayList<>();
-        emptyList.add(new StringHttpMessageConverter());
-        RestOperations restOperations = new RestTemplate(emptyList);
+        LoginData loginData = cookieRepository.getLoginData();
+        RestOperations restOperations = getRestOperations(loginData.getProxy());
 
-        String cookies = StringUtils.collectionToDelimitedString(cookieRepository.getCookiesAsNameValuePairs(), "; ");
+        Collection<HttpCookie> cookies = loginData.getCookies();
+        String cookieString = StringUtils.collectionToDelimitedString(cookies, "; ");
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Cookie", cookies);
+        headers.add("Cookie", cookieString);
 
         HttpEntity<String> request = new HttpEntity<>(null, headers);
         ResponseEntity<String> response = restOperations.exchange(FACEBOOK_URI + "/app_scoped_user_id/" + userId,

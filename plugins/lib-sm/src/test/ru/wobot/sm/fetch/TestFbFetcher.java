@@ -37,10 +37,11 @@ import static org.mockito.Mockito.mock;
 public class TestFbFetcher {
     private ObjectMapper objectMapper = new ObjectMapper();
     private CredentialRepository repository = mock(CredentialRepository.class);
-    private CookieRepository cookieRepository = new CookieRepository(new Configuration());
+    private CookieRepository cookieRepository = new CookieRepository();
     private FbFetcher fbFetcher = new FbFetcher(repository, cookieRepository);
 
     {
+        cookieRepository.setConf(new Configuration());
         Credential credential = mock(Credential.class);
         given(credential.getAccessToken()).willReturn("717502605052808|vJSXEhRP-HhsrDcY-6qj4Q2vTYU");
         given(repository.getInstance()).willReturn(credential);
