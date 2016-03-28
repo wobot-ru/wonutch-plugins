@@ -69,7 +69,7 @@ public class CookieRepository {
         synchronized (iterator) {
             next = iterator.next();
             // for debug only
-            LOG.info("Thread: " + Thread.currentThread().getId() + "; Cookie used: " + next.get("cookies").get(2).asText()
+            LOG.info("Thread: " + Thread.currentThread().getId() + "; Cookie used: " + next.get("cookies").get(2).get("value").asText()
                     + "; Proxy used: " + next.get("proxy").get("address").asText());
         }
         return next;
