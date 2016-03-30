@@ -87,7 +87,8 @@ public class TestFbParser {
             "      \"message\": \"Если постараться не ездить в метро.не заходить в арабские кварталы.то по-прежнему Париж - город-сказка.Это Монмартр.Нотр-Дам.Елисейские поля,уютные кафе.сад Тюильри...Но есть опасения,что мигранты - это начало конца Европы.\",\n" +
             "      \"from\": {\n" +
             "        \"name\": \"Lidia  Mazurova\",\n" +
-            "        \"id\": \"884167345038247\"\n" +
+            "        \"id\": \"884167345038247\",\n" +
+            "        \"link\": \"https://www.facebook.com/app_scoped_user_id/893594680762180/\"" +
             "      },\n" +
             "      \"object\": {\n" +
             "        \"id\": \"1081856348515485\"\n" +
@@ -105,7 +106,8 @@ public class TestFbParser {
             "      \"message\": \"А вы что супермодель? Я много раз была в арабских районах и не заметила особого отношения к собственной персоне! С арабами или без - Париж это праздник!\",\n" +
             "      \"from\": {\n" +
             "        \"name\": \"Evgenia Zinovjeva\",\n" +
-            "        \"id\": \"1117812631564394\"\n" +
+            "        \"id\": \"1117812631564394\",\n" +
+            "        \"link\": \"https://www.facebook.com/app_scoped_user_id/1117812631564394/\"" +
             "      },\n" +
             "      \"like_count\": 4,\n" +
             "      \"parent\": {\n" +
@@ -125,7 +127,7 @@ public class TestFbParser {
     @Test
     public void shouldParseProfileContent() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseProfile(new URI("fb://mastercardrussia"),
+        ParseResult result = fbParser.parsePage(new URI("fb://mastercardrussia"),
                 RAW_PROFILE);
 
         // then
@@ -135,7 +137,7 @@ public class TestFbParser {
     @Test
     public void shouldCreateProfileOutLinks() throws IOException, URISyntaxException {
         // given when
-        ParseResult result = fbParser.parseProfile(new URI("fb://mastercardrussia"),
+        ParseResult result = fbParser.parsePage(new URI("fb://mastercardrussia"),
                 RAW_PROFILE);
 
         // then
@@ -219,7 +221,24 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldFormCommentsHrefIfParentIsPost() throws IOException, URISyntaxException {
+    public void shouldContainCommentAndProfileInParseResult() throws IOException, URISyntaxException {
+        // given
+        ParseResult result = fbParser.parseCommentPage(new URI
+                ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        JsonNode authorProfile = node.get(1);
+
+        // then
+        assertThat(node.size(), is(2));
+        assertThat(authorProfile.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/app_scoped_user_id/893594680762180/"));
+        assertThat(authorProfile.get("parseMeta").get("name").asText(), is("Lidia  Mazurova"));
+    }
+
+    @Test
+    public void shouldCreateCommentsHrefIfParentIsPost() throws IOException, URISyntaxException {
         // given
         ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);

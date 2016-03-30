@@ -33,6 +33,7 @@ public class HttpWebFetcher {
             cliArgsCap.add("--proxy=96.44.147.34:6060");
             cliArgsCap.add("--proxy-auth=snt@wobot.co:PfYZ7J(b<^<[rhm");
             cliArgsCap.add("--proxy-type=http");
+            cliArgsCap.add("--load-images=false");
             DesiredCapabilities caps = DesiredCapabilities.phantomjs();
             caps.setJavascriptEnabled(true);
             caps.setCapability("phantomjs.page.customHeaders." + "Accept-Language", "ru-RU");

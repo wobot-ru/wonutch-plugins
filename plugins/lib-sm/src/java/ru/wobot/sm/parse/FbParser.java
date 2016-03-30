@@ -22,6 +22,7 @@ import ru.wobot.sm.serialize.Serializer;
 import java.io.IOException;
 import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -39,7 +40,7 @@ public class FbParser implements Parser {
     public ParseResult parse(URI uri, String content, String apiType, String apiVersion) {
         switch (apiType) {
             case FbApiTypes.PROFILE:
-                return parseProfile(uri, content);
+                return parsePage(uri, content);
             case FbApiTypes.FRIEND_LIST_OF_ID:
                 return parseFriends(uri, content);
             case FbApiTypes.POST_BULK:
@@ -50,7 +51,7 @@ public class FbParser implements Parser {
         throw new UnsupportedOperationException("Parser for this content not found.");
     }
 
-    public ParseResult parseProfile(URI uri, String content) {
+    public ParseResult parsePage(URI uri, String content) {
         String urlString = uri.toString();
         String userDomain = uri.getHost();
         Map<String, Object> parseMeta = new HashMap<>();
@@ -207,11 +208,11 @@ public class FbParser implements Parser {
         }
         Map<String, String> links = new IdentityHashMap<>(comments.size() * 2 + 1); // link for each commentor, replies and maybe next page
         if (after != null)
-            // generate link <a href='fb://{user}/posts/{post}/x100/0?after={after}'>{post}-comments-index-x100-page-{after}</a>
+            // generate link <a href='fb://{userId}/posts/{postId}/x100/{after}'>{postId}-comments-index-x100-page-{after}</a>
             links.put(Sources.FACEBOOK + "://" + userDomain + "/posts/" + parentMessageId + "/x100/" + after,
                     parentMessageId + "comments-index-x100-page-" + after);
 
-        ParseResult[] parseResults = new ParseResult[comments.size()];
+        List<ParseResult> parseResults = new ArrayList<>(comments.size() * 2);
         for (int i = 0; i < comments.size(); i++) {
             final JsonNode comment = comments.get(i);
             final String id = comment.get("id").asText();
@@ -252,10 +253,23 @@ public class FbParser implements Parser {
                 put(ContentMetaConstants.PARENT, commentOwnerProfile);
                 put(ContentMetaConstants.TYPE, Types.POST);
             }};
-            parseResults[i] = new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta);
+            parseResults.add(new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta));
+            parseResults.add(new ParseResult(commentOwnerProfile, new HashMap<String, String>(), getProfileParse(comment.get("from")), new HashMap<String, Object>() {{
+                put(ContentMetaConstants.TYPE, Types.PROFILE);
+            }}));
         }
 
         return new ParseResult(uri.toString(), userDomain + "|post=" + parentMessageId + "|page=" + after, Serializer.getInstance()
-                .toJson(parseResults), links, parseMeta, contentMeta);
+                .toJson(parseResults.toArray()), links, parseMeta, contentMeta);
+    }
+
+    private Map<String, Object> getProfileParse(final JsonNode profile) {
+        return new HashMap<String, Object>() {{
+            put(PostProperties.SOURCE, Sources.FACEBOOK);
+            put(PostProperties.HREF, profile.get("link").asText());
+            put(ProfileProperties.NAME, profile.get("name").asText());
+            put(ProfileProperties.SM_PROFILE_ID, profile.get("id").asText());
+            put(ProfileProperties.REACH, 0);
+        }};
     }
 }

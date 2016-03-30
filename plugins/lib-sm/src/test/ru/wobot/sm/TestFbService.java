@@ -67,7 +67,7 @@ public class TestFbService {
         else {
             Map<String, Object> parseMeta = new HashMap<>();
             Metadata metadata = new ProfileParser(new Content(uri, uri, content.getBytes(StandardCharsets.UTF_8), "text/html",
-                     new Metadata(), new Configuration())).getParseResult().get(uri).getData().getParseMeta();
+                    new Metadata(), new Configuration())).getParseResult().get(uri).getData().getParseMeta();
             for (String name : metadata.names()) {
                 parseMeta.put(name, metadata.get(name));
             }
@@ -189,11 +189,4 @@ public class TestFbService {
         Assert.assertNotNull(parse);
     }
 
-    @Test
-    @Ignore
-    public void check_that_request_get_and_parse_fb_comments_page_for_old_comments() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://162280197182417/posts/233436326701158:265932876784836:10102644640331371_10100522591459358/x100/0", FbApiTypes.COMMENT_BULK, API_VERSION);
-
-        Assert.assertNotNull(parse);
-    }
 }

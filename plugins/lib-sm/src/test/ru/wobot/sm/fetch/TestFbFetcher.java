@@ -107,6 +107,7 @@ public class TestFbFetcher {
     }
 
     @Test
+    @Ignore
     public void shouldRedirectToRealIdForAppScopedUrl() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileIdAuth("548469171978134");
@@ -117,6 +118,7 @@ public class TestFbFetcher {
     }
 
     @Test
+    @Ignore
     public void shouldRedirectToRealScreenNameForAppScopedUrl() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileIdAuth("948085905239709");
