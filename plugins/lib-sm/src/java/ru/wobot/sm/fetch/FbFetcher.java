@@ -18,7 +18,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.Facebook;
@@ -71,13 +70,13 @@ public class FbFetcher {
             "with_tags", "shares", "likes.summary(true).limit(0)", "comments.summary(true).limit(0)"
     };
 
-    private static final String[] COMMENT_FIELDS = {"message", "from", "like_count", "likes", "created_time",
+    private static final String[] COMMENT_FIELDS = {"message", "from{id,name,link}", "like_count", "likes", "created_time",
             "parent{id}", "object{id}"};
 
-    private static final String[] proxies = new String[]{"96.47.226.34:6060", "96.47.226.98:6060", "96.47.226.130:6060",
+    private static final String[] PROXIES = new String[]{"96.47.226.34:6060", "96.47.226.98:6060", "96.47.226.130:6060",
             "96.47.226.138:6060", "96.44.147.34:6060"};
 
-    private static final Iterator<String> proxyIterator = Iterators.cycle(proxies);
+    private static final Iterator<String> proxyIterator = Iterators.cycle(PROXIES);
 
     private static final String API_VERSION = "2.5";
     private static final String FACEBOOK_API_URI = "https://graph.facebook.com/v" + API_VERSION;
@@ -165,8 +164,6 @@ public class FbFetcher {
         }
 
        /* HttpHeaders headers = new HttpHeaders();
-        headers.add("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36");
-        headers.add("Accept-Language", "ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4");
         ResponseEntity<byte[]> response = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), byte[].class);*/
         return new SuccessResponse(new HttpWebFetcher(cookieRepository).getHtmlPage(url), metaData);
     }
