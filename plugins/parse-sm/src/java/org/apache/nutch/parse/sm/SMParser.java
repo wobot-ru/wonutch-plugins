@@ -1,7 +1,5 @@
 package org.apache.nutch.parse.sm;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Outlink;
@@ -10,6 +8,8 @@ import org.apache.nutch.parse.ParseImpl;
 import org.apache.nutch.parse.ParseResult;
 import org.apache.nutch.parse.ParseStatus;
 import org.apache.nutch.protocol.Content;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 import ru.wobot.sm.parse.FbParser;
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class SMParser implements org.apache.nutch.parse.Parser {
-    private static final Log LOG = LogFactory.getLog(SMParser.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SMParser.class.getName());
     private Configuration conf;
     private Map<String, ru.wobot.sm.core.parse.Parser> parsers = new HashMap<>();
 

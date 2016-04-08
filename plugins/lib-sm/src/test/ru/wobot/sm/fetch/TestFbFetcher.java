@@ -107,7 +107,6 @@ public class TestFbFetcher {
     }
 
     @Test
-    @Ignore
     public void shouldRedirectToRealIdForAppScopedUrl() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileIdAuth("548469171978134");
@@ -118,21 +117,30 @@ public class TestFbFetcher {
     }
 
     @Test
-    @Ignore
-    public void shouldRedirectToRealScreenNameForAppScopedUrl() throws IOException {
+    public void shouldRedirectToRealScreenNameForAppScoped() throws IOException {
+        // given when
+        FetchResponse response = fbFetcher.getProfileIdAuth("892133830908265");
+
+        // then
+        assertThat(response.getData(), isEmptyString());
+        assertThat(response.getMessage().toString(), is("fb://lidia.mazurova/profile?as_id=892133830908265&screen_name"));
+    }
+
+    @Test
+    public void shouldRedirectToRealScreenNameForAppScopedUrlWODots() throws IOException {
         // given when
         FetchResponse response = fbFetcher.getProfileIdAuth("948085905239709");
 
         // then
         assertThat(response.getData(), isEmptyString());
-        assertThat(response.getMessage().toString(), is("fb://renata.davidova.50/profile?as_id=948085905239709&screen_name"));
+        assertThat(response.getMessage().toString(), is("fb://renatadavidova50/profile?as_id=948085905239709&screen_name"));
     }
 
     @Test
     @Ignore
     public void shouldGetProfileDataForUserWithNoScreenName() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("100004451677809", "548469171978134", null, null);
+        FetchResponse response = fbFetcher.getProfileData("100004451677809", "548469171978134", null);
 
         // then
         assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Наталья", "Санкт-Петербург")));
@@ -142,20 +150,10 @@ public class TestFbFetcher {
     @Ignore
     public void shouldGetProfileDataForUserWithScreenName() throws IOException {
         // given when
-        FetchResponse response = fbFetcher.getProfileData("100003349701954", "892133830908265", null, null);
+        FetchResponse response = fbFetcher.getProfileData("100003349701954", "892133830908265", null);
 
         // then
         assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Мазурова", "МБОУ СОШ")));
-    }
-
-    @Test
-    @Ignore
-    public void shouldGetProfileDataForUserWithScreenNameOnly() throws IOException {
-        // given when
-        FetchResponse response = fbFetcher.getProfileData("tanja.vit", "892133830908265", "", null);
-
-        // then
-        assertThat(response.getData(), stringContainsInOrder(Arrays.asList("Таня", "Москва")));
     }
 
     @Test

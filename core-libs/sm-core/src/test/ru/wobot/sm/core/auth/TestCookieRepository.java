@@ -8,6 +8,7 @@ import org.apache.log4j.PatternLayout;
 import org.junit.Test;
 
 import java.net.HttpCookie;
+import java.util.Collection;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -42,14 +43,26 @@ public class TestCookieRepository {
     }
 
     @Test
-    public void shouldReturnFirstCookie() {
+    public void shouldReturnTwoCookieSets() {
         // given
 
         //when
-        LoginData cookies = cookieRepository.getLoginData();
+        LoginData loginData = cookieRepository.getLoginData();
 
         // then
-        assertThat(((List<HttpCookie>) cookies.getCookies()).get(2).getValue(), is(equalTo("6uDOVuoYfrMqczTtQGCgnjoE"))); // 'datr' cookie value
+        assertThat(loginData.getCookieSets().size(), is(2));
+    }
+
+    @Test
+    public void shouldReturnFirstCookieSets() {
+        // given
+
+        //when
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(0);
+
+        // then
+        assertThat(cookies.get(1).getValue(), is(equalTo("eUcFV7M8--hHjv_TObjjqn8L"))); // 'datr' cookie value
     }
 
     @Test
@@ -60,34 +73,33 @@ public class TestCookieRepository {
         LoginData loginData = cookieRepository.getLoginData();
 
         // then
-        assertThat(loginData.getProxy(), is(equalTo("82.103.140.46:6060")));
+        assertThat(loginData.getProxy(), is(equalTo("184.75.209.130:6060")));
     }
 
     @Test
-    public void shouldReturnThirdCookie() {
+    public void shouldReturnSecondCookieSets() {
+        // given
+
+        //when
+        cookieRepository.getLoginData(); // first
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(0); // first "cookie set"
+
+        // then
+        assertThat(cookies.get(1).getValue(), is(equalTo("jEcFV73mZnmKc0lwOAJMTU_v"))); // 'datr' cookie value
+    }
+
+    @Test
+    public void shouldReturnFirstCookieSetsAgain() {
         // given
 
         //when
         cookieRepository.getLoginData(); // first
         cookieRepository.getLoginData(); // second
-        List<HttpCookie> cookies = (List<HttpCookie>) cookieRepository.getLoginData().getCookies();
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(1); // second "cookie set"
 
         // then
-        assertThat(cookies.get(2).getValue(), is(equalTo("HOHOVu0kfz7KpQEqH9km1pZY"))); // 'datr' cookie value
+        assertThat(cookies.get(1).getValue(), is(equalTo("gkcFVzJWphU-HfSdwImvbq6F"))); // 'datr' cookie value
     }
-
-    @Test
-    public void shouldReturnFirstCookieAgain() {
-        // given
-
-        //when
-        cookieRepository.getLoginData(); // first
-        cookieRepository.getLoginData(); // second
-        cookieRepository.getLoginData(); // third
-        List<HttpCookie> cookies = (List<HttpCookie>) cookieRepository.getLoginData().getCookies(); // first again
-
-        // then
-        assertThat(cookies.get(2).getValue(), is(equalTo("6uDOVuoYfrMqczTtQGCgnjoE"))); // 'datr' cookie value
-    }
-
 }

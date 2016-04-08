@@ -1,5 +1,9 @@
 package ru.wobot.uri;
 
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.junit.Test;
 import ru.wobot.uri.impl.ParsedUri;
 
@@ -10,6 +14,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class UriTranslator_Primitive_Types_Test {
+    static {
+        Logger rootLogger = Logger.getRootLogger();
+        rootLogger.setLevel(Level.INFO);
+        rootLogger.addAppender(new ConsoleAppender(
+                new PatternLayout("%d{ISO8601} %-5p %c{2} - %m%n")));
+    }
+
     @Test
     public void test() throws Exception {
         // given

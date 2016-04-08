@@ -1,18 +1,33 @@
 package ru.wobot.uri;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.auth.TooManyRequestsException;
 import ru.wobot.sm.core.reflect.MethodInvoker;
-import ru.wobot.uri.impl.*;
+import ru.wobot.uri.impl.ConstSegment;
+import ru.wobot.uri.impl.ConvertResult;
+import ru.wobot.uri.impl.ParamSegment;
+import ru.wobot.uri.impl.ParsedPath;
+import ru.wobot.uri.impl.ParsedUri;
+import ru.wobot.uri.impl.PathParser;
+import ru.wobot.uri.impl.Segment;
+import ru.wobot.uri.impl.ValueConverter;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class UriTranslator {
-    private static final Log LOG = LogFactory.getLog(UriTranslator.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(UriTranslator.class.getName());
     final Map<String, Collection<ParsedPath>> schemas;
 
     public UriTranslator(Object... objs) throws ClassNotFoundException {
@@ -61,7 +76,8 @@ public class UriTranslator {
                     paths.add(PathParser.parse(new MethodInvoker(obj, m), path.value().trim(), converters, queryConverters));
                 }
             }
-            if (paths.isEmpty()) throw new IllegalArgumentException(obj.toString() + " can't find Path annotation");
+            if (paths.isEmpty())
+                throw new IllegalArgumentException(obj.toString() + " can't find Path annotation");
             else schemas.put(scheme.value(), paths);
         }
     }
@@ -107,11 +123,10 @@ public class UriTranslator {
         return null;
     }
 
-
     public <T> T translate(ParsedUri u) {
         final Collection<ParsedPath> paths = schemas.get(u.getScheme());
         if (paths == null)
-            throw new IllegalArgumentException(u.getScheme() + " is schema not supported");
+            throw new IllegalArgumentException("Schema [" + u.getScheme() + "] is  not supported");
         for (ParsedPath path : paths) {
             boolean canInvoke = true;
             List<Object> params = new ArrayList<>();
@@ -142,7 +157,7 @@ public class UriTranslator {
                         if (LOG.isErrorEnabled())
                             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
                         if (e.getCause() instanceof TooManyRequestsException)
-                            throw (TooManyRequestsException)e.getCause();
+                            throw (TooManyRequestsException) e.getCause();
                     }
             }
         }

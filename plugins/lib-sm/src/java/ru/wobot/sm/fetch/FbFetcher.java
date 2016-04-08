@@ -54,11 +54,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Scheme("fb")
 public class FbFetcher {
     //TODO: Add more fields
-    static final String[] PROFILE_FIELDS = {
+    private static final String[] PROFILE_FIELDS = {
             "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website",
             "link", "location"
     };
@@ -142,8 +143,7 @@ public class FbFetcher {
     @Path("{userId}/profile")
     public FetchResponse getProfileData(@PathParam("userId") String userId,
                                         @QueryParam("as_id") final String appScopedUserId,
-                                        @QueryParam("screen_name") String screenName,
-                                        @QueryParam("auth") String auth
+                                        @QueryParam("screen_name") String screenName
     ) throws IOException {
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.MIME_TYPE, "text/html");
@@ -153,25 +153,15 @@ public class FbFetcher {
         String url = FACEBOOK_URI + "/" + userId; // screen name
         if (screenName == null) {
             url = FACEBOOK_URI + "/profile.php?id=" + userId;
-            /*String redirectUrl = restOperations.headForHeaders(url).getFirst("Location");
-            if (redirectUrl != null) {
-                byte[] b = new byte[redirectUrl.length()];
-                for (int i = 0; i < b.length; i++) {
-                    b[i] = (byte) redirectUrl.charAt(i);
-                }
-                url = new String(b, StandardCharsets.UTF_8);
-            }*/
         }
 
-       /* HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<byte[]> response = restOperations.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), byte[].class);*/
         return new SuccessResponse(new HttpWebFetcher(cookieRepository).getHtmlPage(url), metaData);
     }
 
     // fb://1001830254956/profile/app_scoped
     @Path("{userId}/profile/app_scoped")
     public FetchResponse getProfileId(@PathParam("userId") String userId) throws IOException {
-        Map<String, Object> metaData = new HashMap<String, Object>();
+        Map<String, Object> metaData = new HashMap<>();
 
         RestOperations restOperations = getRestOperations(getProxy());
         URI pictureLocation = restOperations.headForHeaders(FACEBOOK_API_URI + "/" + userId + "/picture").getLocation();
@@ -202,7 +192,8 @@ public class FbFetcher {
         LoginData loginData = cookieRepository.getLoginData();
         RestOperations restOperations = getRestOperations(loginData.getProxy());
 
-        Collection<HttpCookie> cookies = loginData.getCookies();
+        //TODO rewrite ugly hack ASAP
+        Collection<HttpCookie> cookies = ((List<Collection<HttpCookie>>) loginData.getCookieSets()).get(ThreadLocalRandom.current().nextInt(0, 2));
         String cookieString = StringUtils.collectionToDelimitedString(cookies, "; ");
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookieString);
@@ -219,6 +210,8 @@ public class FbFetcher {
             factId = params.get(0).getValue();
         else {
             factId = location.getPath().substring(1); // screen name (user name) (w/o leading slash)
+            if (factId.matches(".*\\.\\d+$"))
+                factId = factId.replace(".", "");
             screenName = true;
         }
         return new Redirect(Sources.FACEBOOK + "://" + factId + "/profile?as_id=" + userId + (screenName ? "&screen_name" : ""), new HashMap<String, Object>());

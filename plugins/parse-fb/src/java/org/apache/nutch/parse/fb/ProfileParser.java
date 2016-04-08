@@ -95,7 +95,7 @@ public class ProfileParser {
             return document.getElementById("fb-timeline-cover-name").text();
         else {
             String name = document.title();
-            if (name.indexOf("(") != -1)
+            if (name.contains("("))
                 name = name.substring(0, name.indexOf("("));
             return name.trim();
         }
@@ -118,40 +118,26 @@ public class ProfileParser {
     }
 
     public ParseResult getParseResult() {
+        String userId = getId();
+        if (userId == null)
+            throw new IllegalStateException("Can't find user ID in html of [" + url + "]");
+
         Metadata contentMetadata = content.getMetadata();
         contentMetadata.add(ContentMetaConstants.TYPE, Types.PROFILE);
 
         String followers = parseMetadata.get(ProfileProperties.FOLLOWER_COUNT);
         String friends = parseMetadata.get(ProfileProperties.FRIEND_COUNT);
+
         parseMetadata.add(ProfileProperties.REACH, String.valueOf(
                 (followers == null ? 0 : Integer.parseInt(followers)) +
                         (friends == null ? 0 : Integer.parseInt(friends))
         ));
         parseMetadata.add("app_scoped_user_id", contentMetadata.get("app.scoped.user.id"));
-        String userId = getId();
         parseMetadata.add(ProfileProperties.SM_PROFILE_ID, userId);
         parseMetadata.add(ProfileProperties.SOURCE, Sources.FACEBOOK);
         parseMetadata.add(ProfileProperties.NAME, getName());
-        String href;
-        /*String userId;
-        try {
-            userId = new URI(url).getHost();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Cannot parse URI [" + this.url + "]", e);
-        }
-        if (url.contains("screen_name"))
-            href = FACEBOOK_URI + "/" + userId;
-        else*/
-        href = FACEBOOK_URI + "/profile.php?id=" + userId;
-        parseMetadata.add(ProfileProperties.HREF, href);
+        parseMetadata.add(ProfileProperties.HREF, FACEBOOK_URI + "/profile.php?id=" + userId);
         parseMetadata.add(ProfileProperties.CITY, getCity());
-
-        /*if (!url.contains("auth"))
-            try {
-                outlinks.add(new Outlink(url + "&auth", null));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }*/
 
         ParseData parseData = new ParseData(ParseStatus.STATUS_SUCCESS, document.title(), outlinks.toArray(new Outlink[outlinks.size()]), contentMetadata, parseMetadata);
         return ParseResult.createParseResult(content.getUrl(), new ParseImpl(new ParseText(document.title()), parseData));

@@ -1,8 +1,6 @@
 package org.apache.nutch.protocol.sm;
 
 import crawlercommons.robots.BaseRobotRules;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
@@ -12,6 +10,8 @@ import org.apache.nutch.protocol.Protocol;
 import org.apache.nutch.protocol.ProtocolOutput;
 import org.apache.nutch.protocol.ProtocolStatus;
 import org.apache.nutch.protocol.RobotRulesParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.auth.CookieRepository;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.auth.Proxy;
@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class SMProtocol implements Protocol {
-    private static final Log LOG = LogFactory.getLog(SMProtocol.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SMProtocol.class.getName());
     private static final CredentialRepository fbCredentialRepository = new Proxy("fb");
     private static final CookieRepository fbCookieRepository = new CookieRepository();
 

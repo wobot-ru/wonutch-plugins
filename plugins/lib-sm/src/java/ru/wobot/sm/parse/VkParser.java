@@ -66,7 +66,7 @@ public class VkParser implements Parser {
         };
         String facebook = profile.getFacebook();
         if (facebook != null) {
-            //hack: user http://vk.com/id16812401
+            // hack: user http://vk.com/id16812401
             // contains facebook link to http://facebook.com/app_scoped_user_id/100008451725336
             // when VK API return json property facebook: '+100008451725336' then we trim it
             if (facebook.startsWith("+"))

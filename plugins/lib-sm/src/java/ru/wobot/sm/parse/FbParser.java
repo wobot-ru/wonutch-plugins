@@ -165,9 +165,11 @@ public class FbParser implements Parser {
                 postParse.put(PostProperties.POST_DATE, dateFormat.format(post.getCreatedTime()));
                 // this nodes present not for all posts
                 int engagement = 0;
-                if (rawPost.get("likes") != null)
+                if (rawPost.get("likes") != null && rawPost.get("likes").get("summary") != null &&
+                        rawPost.get("likes").get("summary").get("total_count") != null)
                     engagement = rawPost.get("likes").get("summary").get("total_count").asInt();
-                if (rawPost.get("comments") != null)
+                if (rawPost.get("comments") != null && rawPost.get("comments").get("summary") != null &&
+                        rawPost.get("comments").get("summary").get("total_count") != null)
                     engagement += rawPost.get("comments").get("summary").get("total_count").asInt();
                 engagement += post.getShares();
                 postParse.put(PostProperties.ENGAGEMENT, engagement);
@@ -265,11 +267,13 @@ public class FbParser implements Parser {
 
     private Map<String, Object> getProfileParse(final JsonNode profile) {
         return new HashMap<String, Object>() {{
+            put(PostProperties.ID, Sources.FACEBOOK + "://" + profile.get("id").asText());
             put(PostProperties.SOURCE, Sources.FACEBOOK);
             put(PostProperties.HREF, profile.get("link").asText());
             put(ProfileProperties.NAME, profile.get("name").asText());
             put(ProfileProperties.SM_PROFILE_ID, profile.get("id").asText());
             put(ProfileProperties.REACH, 0);
+            put(DIGEST, DigestUtils.md5Hex(profile.toString()));
         }};
     }
 }

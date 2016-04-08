@@ -21,8 +21,8 @@ public class UriTranslator_Translate_Test {
     @Test
     public void add_when_translate_with_unknown_schema_should_throw_exception() throws URISyntaxException, ClassNotFoundException, InvocationTargetException, IllegalAccessException {
         this.thrown.expect(IllegalArgumentException.class);
-        this.thrown.expectMessage("is schema not supported");
-        new UriTranslator(new HttpsScheme()).translate(ParsedUri.parse(new URI("mailto:abc@abc.com")));
+        this.thrown.expectMessage("Schema [fb] is  not supported");
+        new UriTranslator(new HttpsScheme()).translate(ParsedUri.parse(new URI("fb://123456")));
     }
 
     @Test

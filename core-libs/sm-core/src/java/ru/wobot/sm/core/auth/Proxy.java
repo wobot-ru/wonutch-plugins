@@ -1,8 +1,8 @@
 package ru.wobot.sm.core.auth;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.concurrent.DelayQueue;
 import java.util.concurrent.TimeUnit;
 
 public class Proxy implements CredentialRepository {
-    private static final Log LOG = LogFactory.getLog(Proxy.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(Proxy.class.getName());
     private final String REQUESTS_PERSECOND;
     private final String ACCOUNTS_FILE;
     private final BlockingQueue<DelayedCredential> credentials = new DelayQueue<>();

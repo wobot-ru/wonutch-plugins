@@ -1,7 +1,5 @@
 package ru.wobot.nutch.indexer.sm;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.nutch.crawl.CrawlDatum;
@@ -12,7 +10,8 @@ import org.apache.nutch.indexer.NutchDocument;
 import org.apache.nutch.metadata.Metadata;
 import org.apache.nutch.parse.Parse;
 import org.apache.nutch.util.StringUtil;
-import ru.wobot.sm.core.mapping.ProfileProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
@@ -20,21 +19,21 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 public class SMIndexingFilter implements IndexingFilter {
-    private static final Log LOG = LogFactory.getLog(SMIndexingFilter.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(SMIndexingFilter.class.getName());
 
     private Configuration conf;
 
     @Override
     public NutchDocument filter(NutchDocument doc, Parse parse, Text textUrl, CrawlDatum crawlDatum, Inlinks inlinks) throws IndexingException {
-        URI url;
+        //TODO: I think, there is no need for this
         try {
-            url = new URI(textUrl.toString());
+            new URI(textUrl.toString());
         } catch (URISyntaxException e) {
             LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
             return null;
         }
 
-        if (url == null || parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
+        if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
             return doc;
 
         LOG.info("SMIndexingFilter: filter(\"" + textUrl.toString() + "\")");

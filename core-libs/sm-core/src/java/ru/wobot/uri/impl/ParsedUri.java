@@ -26,7 +26,10 @@ public class ParsedUri {
 
     public static ParsedUri parse(final URI uri) {
         final Collection<String> segments = new ArrayList<String>() {{
-            add(uri.getHost());
+            String host = uri.getHost();
+            if (host == null)
+                throw new NullPointerException("Host is null for URI [" + uri + "]");
+            add(host);
         }};
         if (uri.getPath() != null && uri.getPath().contains("/")) {
             Collections.addAll(segments, uri.getPath().substring(1).split("/"));

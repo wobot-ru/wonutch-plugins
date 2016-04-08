@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterators;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.HttpCookie;
@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 public class CookieRepository {
     public static final String COOKIES_FILE = "sm.cookies.file";
-    private static final Log LOG = LogFactory.getLog(CookieRepository.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(CookieRepository.class.getName());
 
     private Iterator<JsonNode> iterator;
 
@@ -27,39 +27,36 @@ public class CookieRepository {
             if (cookiesFile == null || cookiesFile.isEmpty())
                 throw new IllegalStateException("No cookies file found in config.");
 
-            Collection<JsonNode> cookies;
+            Collection<JsonNode> logins;
             try {
-                cookies = objectMapper.readValue(conf.getConfResourceAsReader(cookiesFile), new TypeReference<Collection<JsonNode>>() {
+                logins = objectMapper.readValue(conf.getConfResourceAsReader(cookiesFile), new TypeReference<Collection<JsonNode>>() {
                 });
             } catch (IOException e) {
                 throw new IllegalStateException("Couldn't deserialize cookies from file provided in config.", e);
             }
 
-            iterator = Iterators.cycle(cookies);
+            iterator = Iterators.cycle(logins);
         }
     }
 
     public LoginData getLoginData() {
         JsonNode node = getNext();
         String proxy = node.get("proxy").get("address").asText();
-        Collection<HttpCookie> cookies = new ArrayList<>();
+        Collection<Collection<HttpCookie>> cookieSet = new ArrayList<>();
+
         for (JsonNode n : node.get("cookies")) {
-            HttpCookie cookie = new HttpCookie(n.get("name").asText(), n.get("value").asText());
-            cookie.setDomain(n.get("domain").asText());
-            cookie.setVersion(0); // for toString to generate only name value pairs
-            cookies.add(cookie);
+            Collection<HttpCookie> cookies = new ArrayList<>();
+            for (JsonNode cookieNode : n) {
+                HttpCookie cookie = new HttpCookie(cookieNode.get("name").asText(), cookieNode.get("value").asText());
+                cookie.setDomain(cookieNode.get("domain").asText());
+                cookie.setVersion(0); // for toString to generate only name value pairs
+                cookies.add(cookie);
+            }
+            cookieSet.add(cookies);
         }
 
-        return new LoginData(cookies, proxy);
+        return new LoginData(cookieSet, proxy);
     }
-
-    /*public Collection<String> getCookiesAsNameValuePairs() {
-        Collection<String> result = new ArrayList<>();
-        for (JsonNode n : getNext())
-            result.add(n.get("name").asText() + "=" + n.get("value").asText());
-
-        return result;
-    }*/
 
     private JsonNode getNext() {
         if (iterator == null)
@@ -69,9 +66,11 @@ public class CookieRepository {
         synchronized (iterator) {
             next = iterator.next();
             // for debug only
-            LOG.info("Thread: " + Thread.currentThread().getId() + "; Cookie used: " + next.get("cookies").get(2).get("value").asText()
-                    + "; Proxy used: " + next.get("proxy").get("address").asText());
+            LOG.info("Thread: " + Thread.currentThread().getId() + /*"; " +*/
+                    //"Cookie used: " + next.get("cookies").get(0).get(1).get("value").asText() +
+                    "; Proxy used: " + next.get("proxy").get("address").asText());
         }
+
         return next;
     }
 }

@@ -1,12 +1,12 @@
 package org.apache.nutch.parse.fb;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.nutch.protocol.Content;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class FbParser implements org.apache.nutch.parse.Parser {
-    private static final Log LOG = LogFactory.getLog(FbParser.class.getName());
+    private static final Logger LOG = LoggerFactory.getLogger(FbParser.class.getName());
     private Configuration conf;
 
     @Override

@@ -1,6 +1,7 @@
 package ru.wobot.sm.core.mapping;
 
 public interface PostProperties {
+    String ID = "id";
     String SOURCE = "source";
     String PROFILE_ID = "profile_id";
     String HREF = "href";
