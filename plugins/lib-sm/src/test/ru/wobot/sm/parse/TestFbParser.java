@@ -15,7 +15,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 public class TestFbParser {
-    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"about\":\"Бесценным опытом хочется делиться. Предлагаем вам делиться здесь тем, что для вас по-настоящему бесценно!\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
+    private static final String RAW_PROFILE = "{\"id\":\"165107853523677\",\"location\": {\n" +
+            "    \"city\": \"Moscow\",\n" +
+            "    \"country\": \"Russia\",\n" +
+            "    \"latitude\": 55.73469,\n" +
+            "    \"longitude\": 37.64582,\n" +
+            "    \"street\": \"Космодамианская набережная, 52/7\",\n" +
+            "    \"zip\": \"115054\"\n" +
+            "  },\"about\":\"Бесценным опытом хочется делиться.\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
 
     private static final String RAW_POSTS = "{\n" +
             "  \"data\": [\n" +
@@ -132,6 +139,16 @@ public class TestFbParser {
 
         // then
         assertThat(result.getContent(), containsString("165107853523677")); //ID
+    }
+
+    @Test
+    public void shouldGetPageCity() throws IOException, URISyntaxException {
+        // given when
+        ParseResult result = fbParser.parsePage(new URI("fb://165107853523677"),
+                RAW_PROFILE);
+
+        // then
+        assertThat(String.valueOf(result.getParseMeta().get("city")), is("Moscow"));
     }
 
     @Test

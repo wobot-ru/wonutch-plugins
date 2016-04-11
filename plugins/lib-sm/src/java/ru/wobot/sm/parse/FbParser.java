@@ -82,6 +82,8 @@ public class FbParser implements Parser {
         parseMeta.put(ProfileProperties.HREF, profile.get("link").asText());
         parseMeta.put(ProfileProperties.SM_PROFILE_ID, userId);
         parseMeta.put(ProfileProperties.REACH, profile.get("likes") == null ? 1 : profile.get("likes").asText());  //default reach is 1 IMHO
+        if (profile.get("location") != null && profile.get("location").get("city") != null)
+            parseMeta.put(ProfileProperties.CITY, profile.get("location").get("city").asText());
 
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.PROFILE);
