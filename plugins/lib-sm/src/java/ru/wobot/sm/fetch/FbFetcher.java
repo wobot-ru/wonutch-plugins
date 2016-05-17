@@ -75,7 +75,7 @@ public class FbFetcher {
             "parent{id}", "object{id}"};
 
     private static final String[] PROXIES = new String[]{"96.47.226.34:6060", "96.47.226.98:6060", "96.47.226.130:6060",
-            "96.47.226.138:6060", "96.44.147.34:6060"};
+            "96.47.226.138:6060", "96.44.147.34:6060", "96.44.147.122:6060", "96.44.147.138:6060"};
 
     private static final Iterator<String> proxyIterator = Iterators.cycle(PROXIES);
 
@@ -193,7 +193,8 @@ public class FbFetcher {
         RestOperations restOperations = getRestOperations(loginData.getProxy());
 
         //TODO rewrite ugly hack ASAP
-        Collection<HttpCookie> cookies = ((List<Collection<HttpCookie>>) loginData.getCookieSets()).get(ThreadLocalRandom.current().nextInt(0, 2));
+        int numAccounts = loginData.getCookieSets().size();
+        Collection<HttpCookie> cookies = ((List<Collection<HttpCookie>>) loginData.getCookieSets()).get(ThreadLocalRandom.current().nextInt(0, numAccounts));
         String cookieString = StringUtils.collectionToDelimitedString(cookies, "; ");
         HttpHeaders headers = new HttpHeaders();
         headers.add("Cookie", cookieString);

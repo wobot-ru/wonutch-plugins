@@ -61,7 +61,7 @@ public class Proxy implements CredentialRepository {
         int num = accounts / partitions;
         int reminder = accounts % partitions;
         int startIndex; // 1 based index
-        if (partitionNum + 1 <= reminder) {
+        if (partitionNum + 1 <= reminder) { // spread reminder among all partitions
             startIndex = (partitionNum * (num + 1)) + 1;
             num++;
         } else if (num == 0)

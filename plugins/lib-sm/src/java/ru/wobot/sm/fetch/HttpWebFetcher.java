@@ -86,11 +86,13 @@ public class HttpWebFetcher {
 
     public String getHtmlPage(String url) {
         WebDriver driver = threadWebDriver.get();
+        driver.manage().deleteAllCookies();
+
         Collection<Cookie> cookies = getCookies();
         if (cookies.isEmpty())
             throw new IllegalStateException("No cookies found. Can't authorize web driver.");
 
-        driver.manage().deleteAllCookies();
+
         for (Cookie cookie : cookies)
             driver.manage().addCookie(cookie);
 

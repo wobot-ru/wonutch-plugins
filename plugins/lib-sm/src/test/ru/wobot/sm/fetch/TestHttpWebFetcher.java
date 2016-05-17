@@ -40,7 +40,7 @@ public class TestHttpWebFetcher {
         // when
 
         // then
-        assertThat(response(url), stringContainsInOrder(Arrays.asList("Наталья", "SPBGUKI", "Живет в городе")));
+        assertThat(response(url), stringContainsInOrder(Arrays.asList("Наталья", "SPBGUKI", "Живет")));
     }
 
     @Test
