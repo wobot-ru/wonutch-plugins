@@ -74,8 +74,9 @@ public class FbFetcher {
     private static final String[] COMMENT_FIELDS = {"message", "from{id,name,link}", "like_count", "likes", "created_time",
             "parent{id}", "object{id}"};
 
-    private static final String[] PROXIES = new String[]{"96.47.226.34:6060", "96.47.226.98:6060", "96.47.226.130:6060",
-            "96.47.226.138:6060", "96.44.147.34:6060", "96.44.147.122:6060", "96.44.147.138:6060"};
+    private static final String[] PROXIES = new String[]{"184.75.209.130:6060", "184.75.208.10:6060", "96.47.226.138:6060",
+            "82.103.140.46:6060", "149.3.131.122:6060", "88.150.199.82:6060", "109.200.12.234:6060", "188.227.173.218:6060",
+            "31.192.111.189:6060"};
 
     private static final Iterator<String> proxyIterator = Iterators.cycle(PROXIES);
 

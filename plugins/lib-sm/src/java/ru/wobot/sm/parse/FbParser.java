@@ -176,11 +176,11 @@ public class FbParser implements Parser {
                 engagement += post.getShares();
                 postParse.put(PostProperties.ENGAGEMENT, engagement);
                 postParse.put(PostProperties.IS_COMMENT, false);
+                postParse.put(DIGEST, DigestUtils.md5Hex(post.toString()));
 
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
                 postContent.put(ContentMetaConstants.PARENT, Sources.FACEBOOK + "://" + post.getFrom().getId());
-                postContent.put(DIGEST, DigestUtils.md5Hex(post.toString()));
                 parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
             }
         }
@@ -269,9 +269,9 @@ public class FbParser implements Parser {
 
     private Map<String, Object> getProfileParse(final JsonNode profile) {
         return new HashMap<String, Object>() {{
-            put(PostProperties.ID, Sources.FACEBOOK + "://" + profile.get("id").asText());
-            put(PostProperties.SOURCE, Sources.FACEBOOK);
-            put(PostProperties.HREF, profile.get("link").asText());
+            //put(PostProperties.ID, Sources.FACEBOOK + "://" + profile.get("id").asText());
+            put(ProfileProperties.SOURCE, Sources.FACEBOOK);
+            put(ProfileProperties.HREF, profile.get("link").asText());
             put(ProfileProperties.NAME, profile.get("name").asText());
             put(ProfileProperties.SM_PROFILE_ID, profile.get("id").asText());
             put(ProfileProperties.REACH, 0);

@@ -221,11 +221,11 @@ public class VkParser implements Parser {
         int engagement = post.getLikes().getCount() + post.getReposts().getCount() + post.getComments().getCount();
         parseMeta.put(PostProperties.ENGAGEMENT, engagement);
         parseMeta.put(PostProperties.IS_COMMENT, false);
+        parseMeta.put(DIGEST, DigestUtils.md5Hex(post.toString()));
 
         // fill content metadata
         contentMeta.put(ContentMetaConstants.TYPE, Types.POST);
         contentMeta.put(ContentMetaConstants.PARENT, ownerProfile);
-        contentMeta.put(DIGEST, DigestUtils.md5Hex(post.toString()));
         return new ParseResult(urlString, links, parseMeta, contentMeta);
     }
 

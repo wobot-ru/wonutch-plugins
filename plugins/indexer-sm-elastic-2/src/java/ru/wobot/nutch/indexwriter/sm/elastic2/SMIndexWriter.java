@@ -159,15 +159,18 @@ public class SMIndexWriter implements IndexWriter {
             String content = (String) doc.getFieldValue("content");
             String segment = (String) doc.getFieldValue("segment");
             String boost = (String) doc.getFieldValue("boost");
+            String fetchTime = (String) doc.getFieldValue("fetch_time");
             Float score = (Float) doc.getFieldValue("score");
             ParseResult[] parseResults = fromJson(content, ParseResult[].class);
             if (parseResults != null) {
                 for (ParseResult parseResult : parseResults) {
                     id = parseResult.getUrl();
                     source = new HashMap<>();
+                    source.put("id", id);
                     source.put("segment", segment);
                     source.put("boost", Float.parseFloat(boost));
                     source.put("score", score);
+                    source.put("fetch_time", fetchTime);
                     for (Map.Entry<String, Object> p : parseResult.getParseMeta().entrySet()) {
                         source.put(p.getKey(), p.getValue());
                     }

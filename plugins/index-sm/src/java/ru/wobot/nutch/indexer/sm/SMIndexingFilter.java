@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import ru.wobot.sm.core.mapping.Sources;
 import ru.wobot.sm.core.meta.ContentMetaConstants;
 
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SMIndexingFilter implements IndexingFilter {
     private static final Logger LOG = LoggerFactory.getLogger(SMIndexingFilter.class.getName());
@@ -25,14 +25,6 @@ public class SMIndexingFilter implements IndexingFilter {
 
     @Override
     public NutchDocument filter(NutchDocument doc, Parse parse, Text textUrl, CrawlDatum crawlDatum, Inlinks inlinks) throws IndexingException {
-        //TODO: I think, there is no need for this
-        try {
-            new URI(textUrl.toString());
-        } catch (URISyntaxException e) {
-            LOG.error(org.apache.hadoop.util.StringUtils.stringifyException(e));
-            return null;
-        }
-
         if (parse == null || parse.getData() == null || parse.getData().getParseMeta() == null)
             return doc;
 
@@ -62,6 +54,9 @@ public class SMIndexingFilter implements IndexingFilter {
 
         if (doc.getFieldValue("score") == null)
             doc.add("score", crawlDatum.getScore());
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
+        doc.add("fetch_time", dateFormat.format(new Date(crawlDatum.getFetchTime())));
 
         String id = (String) doc.getFieldValue("id");
         if (id.contains("as_id=")) {
