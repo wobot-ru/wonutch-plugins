@@ -13,8 +13,6 @@ import java.net.HttpCookie;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
 
 public class CookieRepository {
     public static final String COOKIES_FILE = "sm.cookies.file";
@@ -29,25 +27,15 @@ public class CookieRepository {
             if (cookiesFile == null || cookiesFile.isEmpty())
                 throw new IllegalStateException("No cookies file found in config.");
 
-            List<JsonNode> logins;
+            Collection<JsonNode> logins;
             try {
-                logins = objectMapper.readValue(conf.getConfResourceAsReader(cookiesFile), new TypeReference<List<JsonNode>>() {
+                logins = objectMapper.readValue(conf.getConfResourceAsReader(cookiesFile), new TypeReference<Collection<JsonNode>>() {
                 });
             } catch (IOException e) {
                 throw new IllegalStateException("Couldn't deserialize cookies from file provided in config.", e);
             }
 
-            /* simple (ugly) workaround for not to use same logins every fetch */
-            int numThreads = conf.getInt("fetcher.threads.fetch", 1);
-            int numPartitions = logins.size() / numThreads;
-            int startIndex = 0;
-            if (numPartitions != 0)
-                startIndex = numThreads * new Random().nextInt(numPartitions);
-            // for debug only
-            LOG.info("Thread: " + Thread.currentThread().getId() + "; Start index for cookie repo: " + startIndex);
-            List<JsonNode> partOfLogins = logins.subList(startIndex, startIndex + numThreads);
-
-            iterator = Iterators.cycle(partOfLogins);
+            iterator = Iterators.cycle(logins);
         }
     }
 

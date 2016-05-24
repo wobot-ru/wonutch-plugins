@@ -262,7 +262,7 @@ public class FbFetcher {
             queryParameters.set("limit", String.valueOf(limit));
         queryParameters.set("order", "reverse_chronological");
 
-        JsonNode responseNode = getObject(queryParameters, userId + "/posts");
+        JsonNode responseNode = getObject(queryParameters, userId + "/feed");
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
             put(ContentMetaConstants.API_TYPE, FbApiTypes.POST_BULK);

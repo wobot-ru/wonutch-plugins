@@ -229,12 +229,12 @@ public class TestFbFetcher {
     @Test
     public void shouldGetCommentsPagesForPost() throws IOException {
         // given
-        SuccessResponse response = fbFetcher.getPostCommentsData(null, "165107853523677_1081856348515485", 3, "0");
+        SuccessResponse response = fbFetcher.getPostCommentsData(null, "165107853523677_1170176776350108", 3, "0");
 
         // when
         JsonNode comments = getRawData(response.getData());
         PagingParameters nextPage = parseNext(response.getData());
-        response = fbFetcher.getPostCommentsData(null, "165107853523677_1081856348515485", 3, nextPage.getAfter());
+        response = fbFetcher.getPostCommentsData(null, "165107853523677_1170176776350108", 3, nextPage.getAfter());
         JsonNode nextComments = getRawData(response.getData());
 
         // then

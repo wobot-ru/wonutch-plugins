@@ -150,12 +150,12 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://96814974590/index-posts/x100/1453725511", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(equalTo(101)));
+        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(101)));
     }
 
     @Test
     public void check_that_request_get_and_parse_fb_comments_page() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0", FbApiTypes.COMMENT_BULK, API_VERSION);
+        ParseResult parse = getParseResult("fb://165107853523677/posts/165107853523677_1170176776350108/x100/0", FbApiTypes.COMMENT_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
     }

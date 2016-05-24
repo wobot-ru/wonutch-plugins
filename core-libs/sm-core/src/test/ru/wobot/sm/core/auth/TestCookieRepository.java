@@ -5,7 +5,6 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.net.HttpCookie;
@@ -55,20 +54,18 @@ public class TestCookieRepository {
     }
 
     @Test
-    @Ignore // due to ugly workaround
     public void shouldReturnFirstCookieSets() {
         // given
 
         //when
-        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
-        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(0);
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>) cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>) cookieSets.get(0);
 
         // then
         assertThat(cookies.get(1).getValue(), is(equalTo("eUcFV7M8--hHjv_TObjjqn8L"))); // 'datr' cookie value
     }
 
     @Test
-    @Ignore // due to ugly workaround
     public void shouldReturnFirstProxy() {
         // given
 
@@ -80,29 +77,27 @@ public class TestCookieRepository {
     }
 
     @Test
-    @Ignore // due to ugly workaround
     public void shouldReturnSecondCookieSets() {
         // given
 
         //when
         cookieRepository.getLoginData(); // first
-        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
-        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(0); // first "cookie set"
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>) cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>) cookieSets.get(0); // first "cookie set"
 
         // then
         assertThat(cookies.get(1).getValue(), is(equalTo("jEcFV73mZnmKc0lwOAJMTU_v"))); // 'datr' cookie value
     }
 
     @Test
-    @Ignore // due to ugly workaround
     public void shouldReturnFirstCookieSetsAgain() {
         // given
 
         //when
         cookieRepository.getLoginData(); // first
         cookieRepository.getLoginData(); // second
-        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>)cookieRepository.getLoginData().getCookieSets();
-        List<HttpCookie> cookies = (List<HttpCookie>)cookieSets.get(1); // second "cookie set"
+        List<Collection<HttpCookie>> cookieSets = (List<Collection<HttpCookie>>) cookieRepository.getLoginData().getCookieSets();
+        List<HttpCookie> cookies = (List<HttpCookie>) cookieSets.get(1); // second "cookie set"
 
         // then
         assertThat(cookies.get(1).getValue(), is(equalTo("gkcFVzJWphU-HfSdwImvbq6F"))); // 'datr' cookie value
