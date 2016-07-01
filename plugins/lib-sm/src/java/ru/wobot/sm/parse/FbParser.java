@@ -134,10 +134,10 @@ public class FbParser implements Parser {
         }
 
         Map<String, String> links = null;
-        ParseResult[] parseResults = null;
+        List<ParseResult> parseResults = null;
         if (posts != null && posts.size() != 0) {
-            parseResults = new ParseResult[posts.size()];
-            links = new HashMap<>(posts.size() + 1); //first comments page of each post and optional next page
+            parseResults = new ArrayList<>();
+            links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page
             if (nextPage != null)
                 // generate link <a href='fb://{userId}/index-posts/x100/{until}'>{userId}-index-posts-x100-page-{until}</a>
                 links.put(Sources.FACEBOOK + "://" + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
@@ -149,9 +149,12 @@ public class FbParser implements Parser {
 
                 // generate link <a href='fb://{userId}/posts/{postId}/x100/0'>{postId}-comments-index-x100-page-0</a>
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
+
+                String commentOwnerProfile = null;
                 if (!post.getFrom().getId().equals(userDomain)) {
                     // generate link <a href='fb://{user}'>{user}</a>
-                    links.put(Sources.FACEBOOK + "://" + post.getFrom().getId(), "");
+                    commentOwnerProfile = Sources.FACEBOOK + "://" + post.getFrom().getId();
+                    links.put(commentOwnerProfile, "");
                 }
 
                 Map<String, Object> postParse = new HashMap<>();
@@ -181,7 +184,11 @@ public class FbParser implements Parser {
                 // fill content metadata
                 postContent.put(ContentMetaConstants.TYPE, Types.POST);
                 postContent.put(ContentMetaConstants.PARENT, Sources.FACEBOOK + "://" + post.getFrom().getId());
-                parseResults[i] = new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent);
+                parseResults.add(new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent));
+                if (commentOwnerProfile != null)
+                    parseResults.add(new ParseResult(commentOwnerProfile, new HashMap<String, String>(), getProfileParse(rawPost.get("from")), new HashMap<String, Object>() {{
+                        put(ContentMetaConstants.TYPE, Types.PROFILE);
+                    }}));
             }
         }
         return new ParseResult(uri.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links

@@ -32,7 +32,6 @@ public class TestFbParser {
             "      \"from\": {\n" +
             "        \"id\": \"165107853523677\",\n" +
             "        \"name\": \"MasterCard\",\n" +
-            "        \"link\": \"https://www.facebook.com/mastercardrussia/\",\n" +
             "        \"likes\": 13519446\n" +
             "      },\n" +
             "      \"is_hidden\": false,\n" +
@@ -71,7 +70,8 @@ public class TestFbParser {
             "      \"created_time\": \"2016-01-28T17:25:41+0000\",\n" +
             "      \"from\": {" +
             "           \"name\": \"Ольга Миленина\"," +
-            "           \"id\": \"900662163382117\"" +
+            "           \"id\": \"900662163382117\"," +
+            "           \"link\": \"https://www.facebook.com/app_scoped_user_id/900662163382117/\"" +
             "      }," +
             "      \"is_hidden\": false,\n" +
             "      \"is_published\": true,\n" +
@@ -94,7 +94,7 @@ public class TestFbParser {
             "      \"message\": \"Если постараться не ездить в метро.не заходить в арабские кварталы.то по-прежнему Париж - город-сказка.Это Монмартр.Нотр-Дам.Елисейские поля,уютные кафе.сад Тюильри...Но есть опасения,что мигранты - это начало конца Европы.\",\n" +
             "      \"from\": {\n" +
             "        \"name\": \"Lidia  Mazurova\",\n" +
-            "        \"id\": \"884167345038247\",\n" +
+            "        \"id\": \"893594680762180\",\n" +
             "        \"link\": \"https://www.facebook.com/app_scoped_user_id/893594680762180/\"" +
             "      },\n" +
             "      \"object\": {\n" +
@@ -180,6 +180,7 @@ public class TestFbParser {
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         // then
+        // comments to each of two posts and one profile (second post posted not by this page)
         assertThat(result.getLinks().size(), is(3));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/165107853523677_1095411087160011/x100/0",
@@ -234,7 +235,26 @@ public class TestFbParser {
 
         // then
         assertThat(firstPost.get("parseMeta").get("profile_id").asText(), is("fb://165107853523677"));
+        //(second post posted not by this page)
         assertThat(secondPost.get("parseMeta").get("profile_id").asText(), is("fb://900662163382117"));
+    }
+
+    @Test
+    public void shouldContainPostsAndProfileInParseResults() throws IOException, URISyntaxException {
+        // given
+        ParseResult result = fbParser.parsePostsIndexPage(new URI
+                ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
+
+        //when
+        JsonNode node = getJsonContent(result);
+        //second post posted not by this page, so we include short author info in parse results
+        JsonNode authorProfile = node.get(2);
+
+        // then
+        assertThat(node.size(), is(3));
+        assertThat(authorProfile.get("parseMeta").get("href").asText(),
+                is("https://www.facebook.com/app_scoped_user_id/900662163382117/"));
+        assertThat(authorProfile.get("parseMeta").get("name").asText(), is("Ольга Миленина"));
     }
 
     @Test
@@ -294,7 +314,7 @@ public class TestFbParser {
         assertThat(result.getLinks().size(), is(2));
         assertThat(result.getLinks().keySet(), hasItems
                 ("fb://165107853523677/posts/1081856348515485_1082735698427550/x100/0",
-                        "fb://884167345038247"));
+                        "fb://893594680762180"));
     }
 
     @Test
@@ -309,7 +329,7 @@ public class TestFbParser {
 
         // then
         assertThat(firstComment.get("parseMeta").get("profile_id").asText(),
-                is("fb://884167345038247"));
+                is("fb://893594680762180"));
     }
 
     @Test

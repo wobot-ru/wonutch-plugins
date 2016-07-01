@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.isEmptyString;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.BDDMockito.given;
@@ -158,15 +159,28 @@ public class TestFbFetcher {
 
     @Test
     // get friends realisation for FB pages
-    public void shouldGetWhoLikedPageForId() throws IOException {
+    public void shouldGetWhoLikedByPageWithLessThanHundred() throws IOException {
         // given when
-        SuccessResponse response = fbFetcher.getFriendIds("24496278123");
+        SuccessResponse response = fbFetcher.getFriendIds("335007141807");
 
         List<String> friendIds = Arrays.asList(objectMapper.readValue(response.getData(), String[].class));
 
         // then
-        assertThat(friendIds.size(), is(greaterThan(0)));
-        assertThat(friendIds, hasItems("431891506856669", "21435141328"));
+        assertThat(friendIds.size(), is(lessThan(100)));
+        assertThat(friendIds, hasItems("184917701541356", "121540094614638"));
+    }
+
+    @Test
+    // get friends realisation for FB pages
+    public void shouldGetWhoLikedByPageForId() throws IOException {
+        // given when
+        SuccessResponse response = fbFetcher.getFriendIds("52002342961");
+
+        List<String> friendIds = Arrays.asList(objectMapper.readValue(response.getData(), String[].class));
+
+        // then
+        assertThat(friendIds.size(), is(greaterThan(100)));
+        assertThat(friendIds, hasItems("501585936532055", "206717679359538"));
     }
 
     @Test

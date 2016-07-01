@@ -14,6 +14,7 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 
+@Ignore
 public class TestHttpWebFetcher {
     private static Configuration conf = new Configuration();
     private static CookieRepository cookieRepository = new CookieRepository();

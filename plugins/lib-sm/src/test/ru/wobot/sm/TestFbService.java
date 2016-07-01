@@ -142,7 +142,7 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://191234802505/index-posts/x100/00000000", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(100)));
+        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(101)));
     }
 
     @Test

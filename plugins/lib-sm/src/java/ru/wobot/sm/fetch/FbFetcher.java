@@ -22,9 +22,9 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.Page;
-import org.springframework.social.facebook.api.PagedList;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
+import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.support.URIBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -65,7 +65,7 @@ public class FbFetcher {
     };
 
     private static final String[] POST_FIELDS = {
-            "id", "actions", "admin_creator", "application", "caption", "created_time", "description", "from{id,name}", "icon",
+            "id", "actions", "admin_creator", "application", "caption", "created_time", "description", "from{id,name,link}", "icon",
             "is_hidden", "is_published", "link", "message", "message_tags", "name", "object_id", "picture", "place",
             "privacy", "properties", "source", "status_type", "story", "to", "type", "updated_time",
             "with_tags", "shares", "likes.summary(true).limit(0)", "comments.summary(true).limit(0)"
@@ -227,17 +227,20 @@ public class FbFetcher {
 
         MultiValueMap<String, String> queryParameters = new LinkedMultiValueMap<>();
         queryParameters.set("limit", "100");
-        PagedList<Page> pages = facebook.fetchConnections(userId, "likes", Page.class, queryParameters);
-        for (Page p : pages)
-            result.add(p.getId());
+        //PagedList<Page> pages = facebook.fetchConnections(userId, "likes", Page.class, queryParameters);
+        JsonNode pages = getObject(queryParameters, userId + "/likes");
+        for (JsonNode p : pages.get("data"))
+            result.add(p.get("id").asText());
 
-        PagingParameters params = pages.getNextPage();
+        PagingParameters params = PagedListUtils.getPagedListParameters(pages.get("paging"), "next");
         while (params != null) {
-            pages = facebook.likeOperations().getPagesLiked(userId, params);
-            for (Page p : pages)
-                result.add(p.getId());
-            params = pages.getNextPage();
+            queryParameters.set("after", params.getAfter());
+            pages = getObject(queryParameters, userId + "/likes");
+            for (JsonNode p : pages.get("data"))
+                result.add(p.get("id").asText());
+            params = PagedListUtils.getPagedListParameters(pages.get("paging"), "next");
         }
+
         Map<String, Object> metaData = new HashMap<String, Object>() {{
             put(ContentMetaConstants.API_VER, API_VERSION);
             put(ContentMetaConstants.API_TYPE, FbApiTypes.FRIEND_LIST_OF_ID);
