@@ -4,8 +4,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 import ru.wobot.sm.core.auth.CredentialRepository;
 import ru.wobot.sm.core.domain.SMProfile;
-import ru.wobot.sm.core.fetch.SuccessResponse;
 import ru.wobot.sm.core.fetch.FetchResponse;
+import ru.wobot.sm.core.fetch.SuccessResponse;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -38,6 +38,12 @@ public class VkFetcher_Integration_Test {
     }
 
     @Test
+    public void is_getUsers_return_group_profile() throws IOException {
+        FetchResponse r = vkFetcher.getGroupData("1"); //vk dev
+        assertThat(r, is(not(nullValue())));
+    }
+
+    @Test
     public void is_getFriends_return_users_friends() throws IOException {
         FetchResponse response = vkFetcher.getFriendIds("1");
         assertThat(response, is(not(nullValue())));
@@ -56,8 +62,26 @@ public class VkFetcher_Integration_Test {
     }
 
     @Test
+    public void is_getPostsForGroup_return_posts() throws IOException {
+        SuccessResponse r = (SuccessResponse) vkFetcher.getGroupTopicsData("18496184", 0, 100);
+        assertThat(r.getData(), is(not(nullValue())));
+    }
+
+    @Test
     public void is_getComments_return_comments() throws IOException {
         SuccessResponse r = (SuccessResponse) vkFetcher.getPostCommentsData("1", "593585", 100, 0, null);
+        assertThat(r.getData(), is(not(nullValue())));
+    }
+
+    @Test
+    public void is_getTopicComments_return_comments() throws IOException {
+        SuccessResponse r = (SuccessResponse) vkFetcher.getTopicCommentsData("18496184", "33524500", 5, 5);
+        assertThat(r.getData(), is(not(nullValue())));
+    }
+
+    @Test
+    public void tender() throws IOException {
+        SuccessResponse r = (SuccessResponse) vkFetcher.tender();
         assertThat(r.getData(), is(not(nullValue())));
     }
 }

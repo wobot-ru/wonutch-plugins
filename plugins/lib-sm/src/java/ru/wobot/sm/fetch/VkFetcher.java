@@ -36,13 +36,16 @@ import ru.wobot.uri.QueryParam;
 import ru.wobot.uri.Scheme;
 
 import java.io.BufferedReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,6 +174,34 @@ public class VkFetcher {
         return new SuccessResponse(toJson(posts), metaData);
     }
 
+    @Path("{groupId}/group/index-posts/x{pageSize}/{page}")
+    public FetchResponse getGroupTopicsData(@PathParam("groupId") String groupId,
+                                            @PathParam("pageSize") long pageSize,
+                                            @PathParam("page") int page) throws IOException {
+        URIBuilder uriBuilder = new URIBuilder();
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/board.getTopics")
+                .setParameter("group_id", groupId)
+                .setParameter("order", "1")
+                .setParameter("v", API_v5_40);
+       /* if (auth != null) {
+            preProcessURI(uriBuilder);
+        }*/
+        if (page > 0) {
+            uriBuilder.setParameter("offset", String.valueOf(pageSize * page));
+        }
+        if (pageSize > 0) {
+            uriBuilder.setParameter("count", String.valueOf(pageSize));
+        }
+
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.TOPIC_BULK);
+        }};
+
+        return new SuccessResponse(vkResponse.getResponse().toString(), metaData);
+    }
+
     @Path("{userId}")
     public FetchResponse getProfileData(@PathParam("userId") String userId) throws IOException {
         String responseStr = getVKProfiles(Collections.singletonList(userId));
@@ -186,6 +217,25 @@ public class VkFetcher {
         }
 
         String json = toJson(profile);
+        return new SuccessResponse(json, metaData);
+    }
+
+    @Path("{groupId}/group")
+    public FetchResponse getGroupData(@PathParam("groupId") String groupId) throws IOException {
+        URIBuilder uriBuilder = new URIBuilder();
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/groups.getById")
+                .setParameter("group_ids", groupId)
+                .setParameter("fields", "city,country,counters,description,wiki_page,members_count,start_date,finish_date,status,site")
+                .setParameter("v", API_v5_40);
+
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+        Group group = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Group.class);
+
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.GROUP);
+        }};
+        String json = toJson(group);
         return new SuccessResponse(json, metaData);
     }
 
@@ -205,6 +255,47 @@ public class VkFetcher {
         }};
         String json = toJson(post);
         return new SuccessResponse(json, metaData);
+    }
+
+    public FetchResponse tender() throws IOException {
+        URIBuilder uriBuilder = new URIBuilder();
+
+        FileWriter writer = new FileWriter("34745.csv");
+        for (int i = 0; i <= 800; i += 200) {
+            uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/newsfeed.search")
+                    .setParameter("q", "фильм нерв")
+                    .setParameter("count", "200")
+                    .setParameter("extended", "1")
+                    .setParameter("offset", String.valueOf(i))
+                    .setParameter("v", "5.12");
+
+            VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            for (JsonNode node : vkResponse.getResponse().get("items")) {
+                writer.append(dateFormat.format(new Date(node.get("date").asLong() * 1000)));
+                writer.append(',');
+                String text = node.get("text").asText();
+                JsonNode att = node.get("attachments");
+                if (att != null) {
+                    String type = att.get(0).get("type").asText();
+                    if (type.equals("video"))
+                        text += att.get(0).get("video").get("title").asText() + " " + att.get(0).get("video").get("description").asText();
+                    else if (type.equals("photo"))
+                        text += att.get(0).get("photo").get("text").asText();
+                    else if (type.equals("link"))
+                        text += att.get(0).get("link").get("title").asText() + " " + att.get(0).get("link").get("description").asText();
+                }
+
+                writer.append("\"" + text.replace('\n', ' ') + "\"");
+                writer.append(',');
+                writer.append("http://vk.com/wall" + node.get("from_id").asText() + "_" + node.get("id").asText());
+                writer.append('\n');
+            }
+
+        }
+        writer.flush();
+        writer.close();
+        return new SuccessResponse("", new HashMap<String, Object>());
     }
 
     @Path("id{userId}/posts/{postId}/x{pageSize}/{page}")
@@ -236,6 +327,38 @@ public class VkFetcher {
             else
                 throw e;
         }
+    }
+
+    @Path("{groupId}/topics/{topicId}/x{pageSize}/{page}")
+    public FetchResponse getTopicCommentsData(
+            @PathParam("groupId") String groupId,
+            @PathParam("topicId") String topicId,
+            @PathParam("pageSize") int pageSize,
+            @PathParam("page") int page) throws IOException {
+        Map<String, Object> metaData = new HashMap<String, Object>() {{
+            put(ContentMetaConstants.API_VER, API_v5_40);
+            put(ContentMetaConstants.API_TYPE, VkApiTypes.TOPIC_COMMENT_BULK);
+        }};
+
+        URIBuilder uriBuilder = new URIBuilder();
+        uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/board.getComments")
+                .setParameter("group_id", groupId)
+                .setParameter("topic_id", topicId)
+                .setParameter("sort", "desc")
+                .setParameter("need_likes", "1")
+                .setParameter("extended", "1")
+                .setParameter("v", String.valueOf(ApiVersion.VERSION_5_33));
+
+        if (page > 0) {
+            uriBuilder.setParameter("offset", String.valueOf(pageSize * page));
+        }
+        if (pageSize > 0) {
+            uriBuilder.setParameter("count", String.valueOf(pageSize));
+        }
+
+        VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
+
+        return new SuccessResponse(vkResponse.getResponse().toString(), metaData);
     }
 
     protected CommentsResponse getComments(CommentsQuery query, boolean needAuth) throws IOException {
@@ -381,4 +504,5 @@ public class VkFetcher {
                 throw new VKontakteErrorException(toCheck.getError());
         }
     }
+
 }
