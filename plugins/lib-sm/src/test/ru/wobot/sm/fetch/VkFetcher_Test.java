@@ -69,7 +69,17 @@ public class VkFetcher_Test {
     }
 
     @Test
-    public void when_translate_one_post_than_should_be_invoke_getFriendIds() throws Exception {
+    public void when_translate_batch_of_group_posts_than_should_be_invoke_getPostsData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id-10/index-posts/x99/0000000001"));
+
+        //then
+        verify(scheme).getPostsData("-10", 99, 1, null);
+    }
+
+    @Test
+    public void when_translate_one_post_than_should_be_invoke_getPostData() throws Exception {
         // given
         // when
         translator.translate(ParsedUri.parse("vk://id22/posts/99"));
@@ -82,14 +92,14 @@ public class VkFetcher_Test {
     public void when_translate_user_profile_than_should_be_invoke_getProfileData() throws Exception {
         // given
         // when
-        translator.translate(ParsedUri.parse("vk://user//"));
+        translator.translate(ParsedUri.parse("vk://user"));
 
         //then
         verify(scheme).getProfileData("user");
     }
 
     @Test
-    public void when_translate_comments_page_than_should_be_invoke_getProfileData() throws Exception {
+    public void when_translate_comments_page_than_should_be_invoke_getPostCommentsData() throws Exception {
         // given
         // when
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112"));
@@ -99,12 +109,42 @@ public class VkFetcher_Test {
     }
 
     @Test
-    public void when_translate_comments_page_with_auth_than_should_be_invoke_getProfileData() throws Exception {
+    public void when_translate_comments_page_with_auth_than_should_be_invoke_getPostCommentsData() throws Exception {
         // given
         // when
         translator.translate(ParsedUri.parse("vk://id1/posts/531296/x77/000112?auth"));
 
         //then
         verify(scheme).getPostCommentsData("1", "531296", 77, 112, "");
+    }
+
+    @Test
+    public void when_translate_comments_page_from_group_than_should_be_invoke_getPostCommentsData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://id-1/posts/531296/x77/000112"));
+
+        //then
+        verify(scheme).getPostCommentsData("-1", "531296", 77, 112, null);
+    }
+
+    @Test
+    public void when_translate_group_profile_than_should_be_invoke_getGroupData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://groupId/group"));
+
+        //then
+        verify(scheme).getGroupData("groupId");
+    }
+
+    @Test
+    public void when_translate_group_topics_than_should_be_invoke_getGroupTopicsData() throws Exception {
+        // given
+        // when
+        translator.translate(ParsedUri.parse("vk://groupId/topics/x100/0"));
+
+        //then
+        verify(scheme).getGroupTopicsData("groupId", 100, 0);
     }
 }

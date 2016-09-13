@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
  * Integration tests for API fetching and parsing
  */
 public class TestFbService {
-    private static final String API_VERSION = "2.5";
+    private static final String API_VERSION = "2.7";
     private UriTranslator translator;
 
     public TestFbService() throws ClassNotFoundException {
@@ -84,9 +84,9 @@ public class TestFbService {
 
     @Test
     public void check_that_request_and_parse_is_success_for_page_id() throws IOException, URISyntaxException {
-        ParseResult parse = getParseResult("fb://892133830908265", FbApiTypes.PROFILE, API_VERSION);
+        ParseResult parse = getParseResult("fb://1001403953269460", FbApiTypes.PROFILE, API_VERSION);
 
-        assertThat(parse.getContent(), isEmptyString());
+        assertThat((Integer)parse.getParseMeta().get("reach"), is(greaterThan(0)));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://191234802505/index-posts/x100/00000000", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(101)));
+        assertThat(parse.getLinks().size(), is(greaterThan(1)));
     }
 
     @Test
@@ -150,7 +150,7 @@ public class TestFbService {
         ParseResult parse = getParseResult("fb://96814974590/index-posts/x100/1453725511", FbApiTypes.POST_BULK, API_VERSION);
 
         Assert.assertNotNull(parse);
-        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(101)));
+        assertThat(parse.getLinks().size(), is(greaterThanOrEqualTo(1)));
     }
 
     @Test

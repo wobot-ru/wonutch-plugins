@@ -8,6 +8,7 @@ import ru.wobot.sm.core.fetch.FetchResponse;
 import ru.wobot.sm.core.fetch.SuccessResponse;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -63,13 +64,25 @@ public class VkFetcher_Integration_Test {
 
     @Test
     public void is_getPostsForGroup_return_posts() throws IOException {
-        SuccessResponse r = (SuccessResponse) vkFetcher.getGroupTopicsData("18496184", 0, 100);
+        SuccessResponse r = (SuccessResponse) vkFetcher.getPostsData("-18496184", 3, 0, null); // телеканал СТС
         assertThat(r.getData(), is(not(nullValue())));
     }
 
     @Test
-    public void is_getComments_return_comments() throws IOException {
+    public void is_getTopicsForGroup_return_topics() throws IOException {
+        SuccessResponse r = (SuccessResponse) vkFetcher.getGroupTopicsData("18496184", 3, 0);
+        assertThat(r.getData(), is(not(nullValue())));
+    }
+
+    @Test
+    public void is_getComments_returns_comments() throws IOException {
         SuccessResponse r = (SuccessResponse) vkFetcher.getPostCommentsData("1", "593585", 100, 0, null);
+        assertThat(r.getData(), is(not(nullValue())));
+    }
+
+    @Test
+    public void is_getComments_for_group_post_returns_comments() throws IOException {
+        SuccessResponse r = (SuccessResponse) vkFetcher.getPostCommentsData("-18496184", "1494235", 3, 0, null);
         assertThat(r.getData(), is(not(nullValue())));
     }
 
@@ -80,7 +93,7 @@ public class VkFetcher_Integration_Test {
     }
 
     @Test
-    public void tender() throws IOException {
+    public void tender() throws IOException, ParseException {
         SuccessResponse r = (SuccessResponse) vkFetcher.tender();
         assertThat(r.getData(), is(not(nullValue())));
     }

@@ -1,0 +1,149 @@
+{
+  "count": 13403,
+  "items": [
+    {
+      "id": 1494235,
+      "fromId": -18496184,
+      "ownerId": -18496184,
+      "replyOwnerId": 0,
+      "replyPostId": 0,
+      "date": "Aug 30, 2016 1:14:14 PM",
+      "text": "Добро пожаловать в реальность!\nНовый сезон комедийного сериала [club108860195|«Мамочки»] с 12 сентября в 20:00 на СТС",
+      "likes": {
+        "count": 1048,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      },
+      "reposts": {
+        "count": 56,
+        "userReposted": false
+      },
+      "comments": {
+        "count": 26
+      },
+      "attachments": [
+        {
+          "video": {
+            "videoId": 456239561,
+            "ownerId": -18496184,
+            "title": "Мамочки поймут",
+            "description": "Мамочки поймут...",
+            "photo130": "http://cs637617.vk.me/v637617086/89ac/o287dj-MpdY.jpg",
+            "photo320": "http://cs637617.vk.me/v637617086/89aa/98X4a21q7U8.jpg",
+            "duration": 30,
+            "date": "Aug 29, 2016 3:37:09 PM",
+            "views": 54828,
+            "comments": 34
+          },
+          "type": "VIDEO",
+          "CLASS_META_KEY": "org.springframework.social.vkontakte.api.attachment.VideoAttachment"
+        }
+      ]
+    },
+    {
+      "id": 1498418,
+      "fromId": -18496184,
+      "ownerId": -18496184,
+      "replyOwnerId": 0,
+      "replyPostId": 0,
+      "date": "Sep 7, 2016 2:02:53 PM",
+      "text": "Смотри финал сезона «[club48970332|Два отца и два сына]» сегодня в 20:30 на [club18496184|СТС]",
+      "likes": {
+        "count": 122,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      },
+      "reposts": {
+        "count": 6,
+        "userReposted": false
+      },
+      "comments": {
+        "count": 0
+      },
+      "copyHistory": [
+        {
+          "id": 3271,
+          "fromId": -48970332,
+          "ownerId": -48970332,
+          "replyOwnerId": 0,
+          "replyPostId": 0,
+          "date": "Sep 7, 2016 1:53:30 PM",
+          "text": "Совет на все времена! 👏",
+          "attachments": [
+            {
+              "photo": {
+                "photoId": 431616825,
+                "ownerId": -48970332,
+                "albumId": -7,
+                "photo75": "http://cs637330.vk.me/v637330807/b719/4gJHgOoOa6M.jpg",
+                "photo130": "http://cs637330.vk.me/v637330807/b71a/ja1V9G6sk6U.jpg",
+                "photo604": "http://cs637330.vk.me/v637330807/b71b/Cp_lcdMKtPA.jpg",
+                "photo807": "http://cs637330.vk.me/v637330807/b71c/HaUKX5LBNMo.jpg",
+                "text": "",
+                "width": 1200,
+                "height": 1200,
+                "date": "Sep 7, 2016 1:53:30 PM"
+              },
+              "type": "PHOTO",
+              "CLASS_META_KEY": "org.springframework.social.vkontakte.api.attachment.PhotoAttachment"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": 1498402,
+      "fromId": -18496184,
+      "ownerId": -18496184,
+      "replyOwnerId": 0,
+      "replyPostId": 0,
+      "date": "Sep 7, 2016 12:32:23 PM",
+      "text": "Проведи сегодняшний вечер в отличной компании! 😉",
+      "likes": {
+        "count": 231,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      },
+      "reposts": {
+        "count": 8,
+        "userReposted": false
+      },
+      "comments": {
+        "count": 7
+      },
+      "copyHistory": [
+        {
+          "id": 63408,
+          "fromId": -42233389,
+          "ownerId": -42233389,
+          "replyOwnerId": 0,
+          "replyPostId": 0,
+          "date": "Sep 7, 2016 12:27:56 PM",
+          "text": "Присоединяйся к Николаю Петровичу и смотри [club42233389|«Ворониных»] в 19:00 на [club18496184|СТС]",
+          "attachments": [
+            {
+              "photo": {
+                "photoId": 431413108,
+                "ownerId": -42233389,
+                "albumId": -7,
+                "photo75": "http://cs637330.vk.me/v637330807/b6ff/m7i1cw31oeU.jpg",
+                "photo130": "http://cs637330.vk.me/v637330807/b700/YXpOrEOMzco.jpg",
+                "photo604": "http://cs637330.vk.me/v637330807/b701/OzFlnze2VW4.jpg",
+                "photo807": "http://cs637330.vk.me/v637330807/b702/R2LpTfImcJs.jpg",
+                "text": "",
+                "width": 2560,
+                "height": 1707,
+                "date": "Sep 7, 2016 12:27:04 PM"
+              },
+              "type": "PHOTO",
+              "CLASS_META_KEY": "org.springframework.social.vkontakte.api.attachment.PhotoAttachment"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,14 +1,23 @@
 package ru.wobot.sm.parse;
 
+import com.cybozu.labs.langdetect.Detector;
+import com.cybozu.labs.langdetect.DetectorFactory;
+import com.cybozu.labs.langdetect.LangDetectException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
 import org.springframework.social.facebook.api.impl.json.FacebookModule;
+import org.springframework.util.StringUtils;
 import ru.wobot.sm.core.api.FbApiTypes;
 import ru.wobot.sm.core.mapping.PostProperties;
 import ru.wobot.sm.core.mapping.ProfileProperties;
@@ -30,6 +39,22 @@ import java.util.Map;
 
 public class FbParser implements Parser {
     private static final String DIGEST = "digest";
+    private static final int TEXTSIZE_UPPER_LIMIT = 10000;
+    private static final Logger LOG = LoggerFactory.getLogger(FbParser.class.getName());
+
+    static {
+        try {
+            List<String> jsonProfiles = new ArrayList<>();
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            for (Resource r : resolver.getResources("classpath*:profiles.sm/*"))
+                jsonProfiles.add(IOUtils.toString(r.getInputStream()));
+
+            DetectorFactory.loadProfile(jsonProfiles);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public FbParser() {
@@ -69,11 +94,24 @@ public class FbParser implements Parser {
         String userId = profile.get("id").asText();
         Map<String, String> links = new HashMap<>();
 
-        // generate link <a href='fb://{user}/friends'>user-friends</a>
-        links.put(Sources.FACEBOOK + "://" + userId + "/friends", userId + "-friends");
+        JsonNode desc = profile.get("description");
+        JsonNode about = profile.get("about");
+        StringBuilder pageDesc = new StringBuilder();
+        if (desc != null)
+            pageDesc.append(desc.asText());
+        if (about != null) {
+            pageDesc.append(" ");
+            pageDesc.append(about.asText());
+        }
 
-        // generate link <a href='fb://{user}/index-posts/x100/00000000'>user-index-posts-x100-page-0</a>
-        links.put(Sources.FACEBOOK + "://" + userId + "/index-posts/x100/00000000", userId + "-index-posts-x100-page-0");
+        if (checkLanguage(pageDesc.toString().trim())) {
+            // generate link <a href='fb://{user}/friends'>user-friends</a>
+            links.put(Sources.FACEBOOK + "://" + userId + "/friends", userId + "-friends");
+
+            // generate link <a href='fb://{user}/index-posts/x100/00000000'>user-index-posts-x100-page-0</a>
+            links.put(Sources.FACEBOOK + "://" + userId + "/index-posts/x50/00000000", userId + "-index-posts-x50-page-0");
+        } else
+            LOG.info("URL filtered by language filter: " + Sources.FACEBOOK + "://" + userId);
 
         // fill parse metadata
         final String fullName = profile.get("name").asText();
@@ -81,7 +119,7 @@ public class FbParser implements Parser {
         parseMeta.put(ProfileProperties.NAME, fullName);
         parseMeta.put(ProfileProperties.HREF, profile.get("link").asText());
         parseMeta.put(ProfileProperties.SM_PROFILE_ID, userId);
-        parseMeta.put(ProfileProperties.REACH, profile.get("likes") == null ? 1 : profile.get("likes").asText());  //default reach is 1 IMHO
+        parseMeta.put(ProfileProperties.REACH, profile.get("fan_count") == null ? 1 : profile.get("fan_count").asInt());  //default reach is 1 IMHO
         if (profile.get("location") != null && profile.get("location").get("city") != null)
             parseMeta.put(ProfileProperties.CITY, profile.get("location").get("city").asText());
 
@@ -133,11 +171,10 @@ public class FbParser implements Parser {
                     "]", e);
         }
 
-        Map<String, String> links = null;
+        Map<String, String> links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page;
         List<ParseResult> parseResults = null;
-        if (posts != null && posts.size() != 0) {
+        if (posts.size() != 0) {
             parseResults = new ArrayList<>();
-            links = new HashMap<>(posts.size() * 2 + 1); //first comments page and author of each post (if author not this page) and optional next page
             if (nextPage != null)
                 // generate link <a href='fb://{userId}/index-posts/x100/{until}'>{userId}-index-posts-x100-page-{until}</a>
                 links.put(Sources.FACEBOOK + "://" + userDomain + "/index-posts/x100/" + nextPage.getUntil(),
@@ -147,14 +184,25 @@ public class FbParser implements Parser {
                 String postId = post.getId();
                 JsonNode rawPost = dataNode.get(i);
 
+                StringBuilder body = new StringBuilder();
+                if (StringUtils.hasText(post.getMessage()))
+                    body.append(post.getMessage());
+                if (StringUtils.hasText(post.getDescription())) {
+                    body.append(" ");
+                    body.append(post.getDescription());
+                }
+
+                //if (checkLanguage(body.toString()))
                 // generate link <a href='fb://{userId}/posts/{postId}/x100/0'>{postId}-comments-index-x100-page-0</a>
                 links.put(urlPrefix + postId + "/x100/0", postId + "-comments-index-x100-page-0");
+                /*else
+                    LOG.info("URL filtered by language filter: " + urlPrefix + postId);*/
 
-                String commentOwnerProfile = null;
+                String postOwnerProfile = null;
                 if (!post.getFrom().getId().equals(userDomain)) {
                     // generate link <a href='fb://{user}'>{user}</a>
-                    commentOwnerProfile = Sources.FACEBOOK + "://" + post.getFrom().getId();
-                    links.put(commentOwnerProfile, "");
+                    postOwnerProfile = Sources.FACEBOOK + "://" + post.getFrom().getId();
+                    links.put(postOwnerProfile, "");
                 }
 
                 Map<String, Object> postParse = new HashMap<>();
@@ -165,7 +213,7 @@ public class FbParser implements Parser {
                 postParse.put(PostProperties.HREF, "https://www.facebook.com/" + userDomain + "/posts/" +
                         postId.substring(postId.lastIndexOf('_') + 1));
                 postParse.put(PostProperties.SM_POST_ID, postId);
-                postParse.put(PostProperties.BODY, post.getMessage() == null ? post.getDescription() : post.getMessage());
+                postParse.put(PostProperties.BODY, body.toString().trim());
                 SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
                 postParse.put(PostProperties.POST_DATE, dateFormat.format(post.getCreatedTime()));
                 // this nodes present not for all posts
@@ -180,19 +228,36 @@ public class FbParser implements Parser {
                 postParse.put(PostProperties.ENGAGEMENT, engagement);
                 postParse.put(PostProperties.IS_COMMENT, false);
                 postParse.put(DIGEST, DigestUtils.md5Hex(post.toString()));
-
+                if (postOwnerProfile != null) {
+                    postParse.put("profile_href", rawPost.get("from").get("link").asText());
+                    postParse.put("profile_name", post.getFrom().getName());
+                    postParse.put(ProfileProperties.SM_PROFILE_ID, post.getFrom().getId());
+                    postParse.put(ProfileProperties.REACH, 0);
+                }
                 // fill content metadata
-                postContent.put(ContentMetaConstants.TYPE, Types.POST);
+                postContent.put(ContentMetaConstants.TYPE, postOwnerProfile == null ? Types.POST : Types.DETAILED_POST);
                 postContent.put(ContentMetaConstants.PARENT, Sources.FACEBOOK + "://" + post.getFrom().getId());
+
                 parseResults.add(new ParseResult(urlPrefix + postId, new HashMap<String, String>(), postParse, postContent));
-                if (commentOwnerProfile != null)
-                    parseResults.add(new ParseResult(commentOwnerProfile, new HashMap<String, String>(), getProfileParse(rawPost.get("from")), new HashMap<String, Object>() {{
-                        put(ContentMetaConstants.TYPE, Types.PROFILE);
-                    }}));
             }
         }
-        return new ParseResult(uri.toString(), userDomain, Serializer.getInstance().toJson(parseResults), (links
-                == null ? new HashMap<String, String>() : links), new HashMap<String, Object>(), contentMeta);
+        return new ParseResult(uri.toString(), userDomain, Serializer.getInstance().toJson(parseResults), links,
+                new HashMap<String, Object>(), contentMeta);
+    }
+
+    private boolean checkLanguage(String text) {
+        if (!StringUtils.hasText(text))
+            return true;
+        Detector detector;
+        try {
+            detector = DetectorFactory.create();
+            detector.setMaxTextLength(TEXTSIZE_UPPER_LIMIT);
+            detector.append(text);
+            String lang = detector.detect();
+            return "ru".equals(lang) || "uk".equals(lang); // russian and ukraine for this time
+        } catch (LangDetectException e) {
+            return true; //in case of all errors return true - it's better to fetch irrelevant messages than miss relevant
+        }
     }
 
     protected ParseResult parseCommentPage(URI uri, String content) {
@@ -258,16 +323,17 @@ public class FbParser implements Parser {
                 put(PostProperties.ENGAGEMENT, comment.get("like_count").asText());
                 put(PostProperties.IS_COMMENT, true);
                 put(DIGEST, DigestUtils.md5Hex(comment.toString()));
+                put("profile_href", comment.get("from").get("link").asText());
+                put("profile_name", comment.get("from").get("name").asText());
+                put(ProfileProperties.SM_PROFILE_ID, comment.get("from").get("id").asText());
+                put(ProfileProperties.REACH, 0);
             }};
 
             Map<String, Object> commentContentMeta = new HashMap<String, Object>() {{
                 put(ContentMetaConstants.PARENT, commentOwnerProfile);
-                put(ContentMetaConstants.TYPE, Types.POST);
+                put(ContentMetaConstants.TYPE, Types.DETAILED_POST);
             }};
             parseResults.add(new ParseResult(commentUrl, new HashMap<String, String>(), commentParse, commentContentMeta));
-            parseResults.add(new ParseResult(commentOwnerProfile, new HashMap<String, String>(), getProfileParse(comment.get("from")), new HashMap<String, Object>() {{
-                put(ContentMetaConstants.TYPE, Types.PROFILE);
-            }}));
         }
 
         return new ParseResult(uri.toString(), userDomain + "|post=" + parentMessageId + "|page=" + after, Serializer.getInstance()

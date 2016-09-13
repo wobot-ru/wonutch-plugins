@@ -149,5 +149,11 @@
         <library name="phantomjsdriver-1.2.1.jar">
             <export name="*"/>
         </library>
+        <library name="langdetect-1.0.jar">
+            <export name="*"/>
+        </library>
+        <library name="jsonic-1.2.7.jar">
+            <export name="*"/>
+        </library>
     </runtime>
 </plugin>

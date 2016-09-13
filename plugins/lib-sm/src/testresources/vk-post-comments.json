@@ -1,0 +1,129 @@
+{
+  "count": 69,
+  "comments": [
+    {
+      "id": 1494236,
+      "fromId": 335248113,
+      "date": "Aug 30, 2016 1:14:27 PM",
+      "text": "😄😄😄",
+      "replyToUser": 0,
+      "replyToComment": 0,
+      "likes": {
+        "count": 0,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      }
+    },
+    {
+      "id": 1494240,
+      "fromId": 197785634,
+      "date": "Aug 30, 2016 1:15:46 PM",
+      "text": "",
+      "replyToUser": 0,
+      "replyToComment": 0,
+      "likes": {
+        "count": 2,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      },
+      "attachments": [
+        {
+          "sticker": {
+            "stickerId": 126,
+            "productId": 3,
+            "photo64": "http://vk.com/images/stickers/126/64.png",
+            "photo128": "http://vk.com/images/stickers/126/128.png",
+            "photo256": "http://vk.com/images/stickers/126/256.png",
+            "photo352": "http://vk.com/images/stickers/126/352.png",
+            "width": 240,
+            "height": 256
+          },
+          "type": "STICKER",
+          "CLASS_META_KEY": "org.springframework.social.vkontakte.api.attachment.StickerAttachment"
+        }
+      ]
+    },
+    {
+      "id": 1494255,
+      "fromId": 379844276,
+      "date": "Aug 30, 2016 1:26:55 PM",
+      "text": "Блин, заинтриговали",
+      "replyToUser": 0,
+      "replyToComment": 0,
+      "likes": {
+        "count": 8,
+        "userLikes": false,
+        "canLike": false,
+        "canPublish": false
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "id": 197785634,
+      "firstName": "Миша",
+      "lastName": "Мершеев",
+      "gender": "M",
+      "screenName": "id197785634",
+      "timeZone": 0,
+      "photo50": "http://cs628819.vk.me/v628819634/3a180/LhLM6xTdjEE.jpg",
+      "photo100": "http://cs628819.vk.me/v628819634/3a17f/H152KdXWnAU.jpg",
+      "hasMobile": false,
+      "online": false,
+      "canPost": false,
+      "canSeeAllPosts": false,
+      "canSeeAudio": false,
+      "canWritePrivateMessage": false,
+      "commonCount": 0,
+      "universityId": 0,
+      "facultyId": 0,
+      "graduation": 0,
+      "relation": 0
+    },
+    {
+      "id": 335248113,
+      "firstName": "Елизавета",
+      "lastName": "Шамеева",
+      "gender": "W",
+      "screenName": "idiw1234",
+      "timeZone": 0,
+      "photo50": "http://cs626719.vk.me/v626719113/32f6c/Hj4tfLw527I.jpg",
+      "photo100": "http://cs626719.vk.me/v626719113/32f6b/SBGkCf4sjv8.jpg",
+      "hasMobile": false,
+      "online": true,
+      "canPost": false,
+      "canSeeAllPosts": false,
+      "canSeeAudio": false,
+      "canWritePrivateMessage": false,
+      "commonCount": 0,
+      "universityId": 0,
+      "facultyId": 0,
+      "graduation": 0,
+      "relation": 0
+    },
+    {
+      "id": 379844276,
+      "firstName": "Алина",
+      "lastName": "Морозова",
+      "gender": "W",
+      "screenName": "id379844276",
+      "timeZone": 0,
+      "photo50": "http://cs626518.vk.me/v626518276/229de/ga0JayipUkE.jpg",
+      "photo100": "http://cs626518.vk.me/v626518276/229dd/obWEaMClR1U.jpg",
+      "hasMobile": false,
+      "online": true,
+      "canPost": false,
+      "canSeeAllPosts": false,
+      "canSeeAudio": false,
+      "canWritePrivateMessage": false,
+      "commonCount": 0,
+      "universityId": 0,
+      "facultyId": 0,
+      "graduation": 0,
+      "relation": 0
+    }
+  ],
+  "groups": []
+}

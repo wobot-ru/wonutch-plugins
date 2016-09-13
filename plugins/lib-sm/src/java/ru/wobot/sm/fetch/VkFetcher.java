@@ -42,6 +42,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -84,11 +85,7 @@ public class VkFetcher {
 
     @Path("id{userId}/friends")
     public FetchResponse getFriendIds(@PathParam("userId") String userId) throws IOException {
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.FRIEND_LIST_OF_ID);
-            put(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX, 1);
-        }};
+        Map<String, Object> metaData = getMetaData(VkApiTypes.FRIEND_LIST_OF_ID, true);
 
         URIBuilder uriBuilder = new URIBuilder()
                 .setScheme("http")
@@ -174,7 +171,7 @@ public class VkFetcher {
         return new SuccessResponse(toJson(posts), metaData);
     }
 
-    @Path("{groupId}/group/index-posts/x{pageSize}/{page}")
+    @Path("{groupId}/topics/x{pageSize}/{page}")
     public FetchResponse getGroupTopicsData(@PathParam("groupId") String groupId,
                                             @PathParam("pageSize") long pageSize,
                                             @PathParam("page") int page) throws IOException {
@@ -194,12 +191,7 @@ public class VkFetcher {
         }
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.TOPIC_BULK);
-        }};
-
-        return new SuccessResponse(vkResponse.getResponse().toString(), metaData);
+        return new SuccessResponse(vkResponse.getResponse().toString(), getMetaData(VkApiTypes.TOPIC_BULK, false));
     }
 
     @Path("{userId}")
@@ -208,10 +200,8 @@ public class VkFetcher {
         VKontakteProfiles profiles = objectMapper.readValue(responseStr, VKontakteProfiles.class);
         checkForError(profiles);
         final VKontakteProfile profile = profiles.getProfiles().get(0);
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.PROFILE);
-        }};
+        Map<String, Object> metaData = getMetaData(VkApiTypes.PROFILE, false);
+
         if (!userId.startsWith("id")) {
             return new Redirect("vk://id" + profile.getId(), metaData);
         }
@@ -231,12 +221,8 @@ public class VkFetcher {
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
         Group group = objectMapper.readValue(vkResponse.getResponse().get(0).toString(), Group.class);
 
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.GROUP);
-        }};
         String json = toJson(group);
-        return new SuccessResponse(json, metaData);
+        return new SuccessResponse(json, getMetaData(VkApiTypes.GROUP, false));
     }
 
     @Path("id{userId}/posts/{postId}")
@@ -257,41 +243,62 @@ public class VkFetcher {
         return new SuccessResponse(json, metaData);
     }
 
-    public FetchResponse tender() throws IOException {
+    public FetchResponse tender() throws IOException, ParseException {
         URIBuilder uriBuilder = new URIBuilder();
+        FileWriter writer = new FileWriter("d://tmp//csv_new//34759-s.csv");
 
-        FileWriter writer = new FileWriter("34745.csv");
-        for (int i = 0; i <= 800; i += 200) {
+        String startFrom = "";
+        while (startFrom != null) {
             uriBuilder.setScheme("https").setHost("api.vk.com").setPath("/method/newsfeed.search")
-                    .setParameter("q", "фильм нерв")
+                    .setParameter("q", "человек муравей")
                     .setParameter("count", "200")
-                    .setParameter("extended", "1")
-                    .setParameter("offset", String.valueOf(i))
-                    .setParameter("v", "5.12");
+                    .setParameter("start_time",
+                            String.valueOf(new SimpleDateFormat("yyyyMMddHHmm").parse("201501070000").getTime() / 1000))
+                    .setParameter("end_time",
+                            String.valueOf(new SimpleDateFormat("yyyyMMddHHmm").parse("201501090000").getTime() / 1000))
+                    //.setParameter("extended", "1")
+                    //.setParameter("offset", String.valueOf(i))
+                    .setParameter("access_token", "2ff5fff8d49ffa2da2875c99faf61399f5480ee10a2d70dde44027b9b248eae6a014d7689f7d0f216ab00")
+                    .setParameter("v", "5.52");
+            if (!startFrom.isEmpty())
+                uriBuilder.setParameter("start_from", startFrom);
 
             VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
             for (JsonNode node : vkResponse.getResponse().get("items")) {
-                writer.append(dateFormat.format(new Date(node.get("date").asLong() * 1000)));
+                writer.append(new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").
+                        format(new Date(node.get("date").asLong() * 1000)));
                 writer.append(',');
+
                 String text = node.get("text").asText();
                 JsonNode att = node.get("attachments");
                 if (att != null) {
                     String type = att.get(0).get("type").asText();
-                    if (type.equals("video"))
-                        text += att.get(0).get("video").get("title").asText() + " " + att.get(0).get("video").get("description").asText();
-                    else if (type.equals("photo"))
-                        text += att.get(0).get("photo").get("text").asText();
-                    else if (type.equals("link"))
-                        text += att.get(0).get("link").get("title").asText() + " " + att.get(0).get("link").get("description").asText();
+                    switch (type) {
+                        case "video":
+                            text += " " + att.get(0).get("video").get("title").asText() + " " + att.get(0).get("video").get("description").asText();
+                            break;
+                        case "photo":
+                            text += " " + att.get(0).get("photo").get("text").asText();
+                            break;
+                        case "link":
+                            text += " " + att.get(0).get("link").get("title").asText() + " " + att.get(0).get("link").get("description").asText();
+                            break;
+                    }
                 }
 
-                writer.append("\"" + text.replace('\n', ' ') + "\"");
+                if (text.trim().isEmpty())
+                    continue;
+
+                writer.append("\"" + text.replace('\n', ' ').trim() + "\"");
                 writer.append(',');
                 writer.append("http://vk.com/wall" + node.get("from_id").asText() + "_" + node.get("id").asText());
+                writer.append(',');
+                writer.append(node.get("from_id").asText());
                 writer.append('\n');
             }
 
+            startFrom = vkResponse.getResponse().get("next_from") != null
+                    ? vkResponse.getResponse().get("next_from").asText() : null;
         }
         writer.flush();
         writer.close();
@@ -308,6 +315,7 @@ public class VkFetcher {
         CommentsQuery query = new CommentsQuery
                 .Builder(new UserWall(Integer.parseInt(userId)), Integer.parseInt(postId))
                 .needLikes(true)
+                .extended(true)
                 .count(pageSize)
                 .offset(page * pageSize)
                 .build();
@@ -317,7 +325,6 @@ public class VkFetcher {
             put(ContentMetaConstants.API_TYPE, VkApiTypes.COMMENT_BULK);
         }};
 
-        VKontakteErrorException s;
         try {
             String json = toJson(getComments(query, auth != null));
             return new SuccessResponse(json, metaData);
@@ -335,11 +342,6 @@ public class VkFetcher {
             @PathParam("topicId") String topicId,
             @PathParam("pageSize") int pageSize,
             @PathParam("page") int page) throws IOException {
-        Map<String, Object> metaData = new HashMap<String, Object>() {{
-            put(ContentMetaConstants.API_VER, API_v5_40);
-            put(ContentMetaConstants.API_TYPE, VkApiTypes.TOPIC_COMMENT_BULK);
-        }};
-
         URIBuilder uriBuilder = new URIBuilder();
         uriBuilder.setScheme("http").setHost("api.vk.com").setPath("/method/board.getComments")
                 .setParameter("group_id", groupId)
@@ -357,8 +359,7 @@ public class VkFetcher {
         }
 
         VKGenericResponse vkResponse = getGenericResponse(uriBuilder.toString());
-
-        return new SuccessResponse(vkResponse.getResponse().toString(), metaData);
+        return new SuccessResponse(vkResponse.getResponse().toString(), getMetaData(VkApiTypes.TOPIC_COMMENT_BULK, false));
     }
 
     protected CommentsResponse getComments(CommentsQuery query, boolean needAuth) throws IOException {
@@ -440,6 +441,15 @@ public class VkFetcher {
         }
 
         return readUrlToString(uriBuilder.toString());
+    }
+
+    private Map<String, Object> getMetaData(final String apiType, boolean skipFromIndex) {
+        Map<String, Object> meta = new HashMap<>();
+        meta.put(ContentMetaConstants.API_VER, API_v5_40);
+        meta.put(ContentMetaConstants.API_TYPE, apiType);
+        if (skipFromIndex)
+            meta.put(ContentMetaConstants.SKIP_FROM_ELASTIC_INDEX, 1);
+        return meta;
     }
 
     protected <T> VKArray<T> deserializeVK50ItemsResponse(VKGenericResponse response, Class<T> itemClass) {

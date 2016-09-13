@@ -21,7 +21,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.facebook.api.Facebook;
-import org.springframework.social.facebook.api.Page;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.impl.FacebookTemplate;
 import org.springframework.social.facebook.api.impl.PagedListUtils;
@@ -60,8 +59,8 @@ import java.util.concurrent.ThreadLocalRandom;
 public class FbFetcher {
     //TODO: Add more fields
     private static final String[] PROFILE_FIELDS = {
-            "id", "name", "username", "likes", "talking_about_count", "about", "artists_we_like", "website",
-            "link", "location"
+            "id", "name", "username", "fan_count", "talking_about_count", "about", "artists_we_like", "website",
+            "link", "location", "description"
     };
 
     private static final String[] POST_FIELDS = {
@@ -80,7 +79,7 @@ public class FbFetcher {
 
     private static final Iterator<String> proxyIterator = Iterators.cycle(PROXIES);
 
-    private static final String API_VERSION = "2.5";
+    private static final String API_VERSION = "2.7";
     private static final String FACEBOOK_API_URI = "https://graph.facebook.com/v" + API_VERSION;
     private static final String FACEBOOK_URI = "https://www.facebook.com";
 
@@ -98,7 +97,7 @@ public class FbFetcher {
 
     private JsonNode getObject(MultiValueMap<String, String> queryParameters, String path) {
         Facebook facebook = new FacebookTemplate(repository.getInstance().getAccessToken());
-        URIBuilder uriBuilder = URIBuilder.fromUri(facebook.getBaseGraphApiUrl() + path);
+        URIBuilder uriBuilder = URIBuilder.fromUri(FACEBOOK_API_URI + "/" + path);
         return facebook.restOperations().getForObject(uriBuilder.queryParams(queryParameters).build(), JsonNode.class);
     }
 

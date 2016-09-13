@@ -22,7 +22,7 @@ public class TestFbParser {
             "    \"longitude\": 37.64582,\n" +
             "    \"street\": \"Космодамианская набережная, 52/7\",\n" +
             "    \"zip\": \"115054\"\n" +
-            "  },\"about\":\"Бесценным опытом хочется делиться.\",\"likes\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
+            "  },\"about\":\"Бесценным опытом хочется делиться.\",\"fan_count\":13517133,\"link\":\"https://www.facebook.com/mastercardrussia/\",\"name\":\"MasterCard\",\"talking_about_count\":1381,\"username\":\"mastercardrussia\",\"website\":\"http://www.mastercard.ru http://www.mastercardpremium.ru http://gift.mastercard.ru http://cyclesandseasons.mastercard.ru http://www.mastercard.com \"}";
 
     private static final String RAW_POSTS = "{\n" +
             "  \"data\": [\n" +
@@ -142,6 +142,16 @@ public class TestFbParser {
     }
 
     @Test
+    public void shouldGetPageReach() throws IOException, URISyntaxException {
+        // given when
+        ParseResult result = fbParser.parsePage(new URI("fb://mastercardrussia"),
+                RAW_PROFILE);
+
+        // then
+        assertThat(String.valueOf(result.getParseMeta().get("reach")), is("13517133")); //ID
+    }
+
+    @Test
     public void shouldGetPageCity() throws IOException, URISyntaxException {
         // given when
         ParseResult result = fbParser.parsePage(new URI("fb://165107853523677"),
@@ -159,7 +169,7 @@ public class TestFbParser {
 
         // then
         assertThat(result.getLinks().keySet(), hasItems("fb://165107853523677/friends",
-                "fb://165107853523677/index-posts/x100/00000000"));
+                "fb://165107853523677/index-posts/x50/00000000"));
     }
 
     @Test
@@ -240,38 +250,44 @@ public class TestFbParser {
     }
 
     @Test
-    public void shouldContainPostsAndProfileInParseResults() throws IOException, URISyntaxException {
+    public void shouldNotContainProfileInPostParseButContainDetailedPost() throws IOException, URISyntaxException {
         // given
         ParseResult result = fbParser.parsePostsIndexPage(new URI
                 ("fb://165107853523677/index-posts/x100/00000000"), RAW_POSTS);
 
         //when
         JsonNode node = getJsonContent(result);
-        //second post posted not by this page, so we include short author info in parse results
-        JsonNode authorProfile = node.get(2);
+        //second post posted not by this page, so we include short author info in post parse results
+        JsonNode secondPost = node.get(1);
 
         // then
-        assertThat(node.size(), is(3));
-        assertThat(authorProfile.get("parseMeta").get("href").asText(),
+        assertThat(node.size(), is(2));
+        assertThat(secondPost.get("parseMeta").get("sm_profile_id").asText(),
+                is("900662163382117"));
+        assertThat(secondPost.get("parseMeta").get("profile_href").asText(),
                 is("https://www.facebook.com/app_scoped_user_id/900662163382117/"));
-        assertThat(authorProfile.get("parseMeta").get("name").asText(), is("Ольга Миленина"));
+        assertThat(secondPost.get("parseMeta").get("profile_name").asText(), is("Ольга Миленина"));
+        assertThat(secondPost.get("contentMeta").get("nutch.content.type").asText(), is("detailed_post"));
     }
 
     @Test
-    public void shouldContainCommentAndProfileInParseResult() throws IOException, URISyntaxException {
+    public void shouldHaveDetailedCommentInParseResult() throws IOException, URISyntaxException {
         // given
         ParseResult result = fbParser.parseCommentPage(new URI
                 ("fb://165107853523677/posts/165107853523677_1081856348515485/x100/0"), RAW_COMMENT);
 
         //when
         JsonNode node = getJsonContent(result);
-        JsonNode authorProfile = node.get(1);
+        JsonNode comment = node.get(0);
 
         // then
-        assertThat(node.size(), is(2));
-        assertThat(authorProfile.get("parseMeta").get("href").asText(),
+        assertThat(node.size(), is(1));
+        assertThat(comment.get("parseMeta").get("sm_profile_id").asText(),
+                is("893594680762180"));
+        assertThat(comment.get("parseMeta").get("profile_href").asText(),
                 is("https://www.facebook.com/app_scoped_user_id/893594680762180/"));
-        assertThat(authorProfile.get("parseMeta").get("name").asText(), is("Lidia  Mazurova"));
+        assertThat(comment.get("parseMeta").get("profile_name").asText(), is("Lidia  Mazurova"));
+        assertThat(comment.get("contentMeta").get("nutch.content.type").asText(), is("detailed_post"));
     }
 
     @Test
